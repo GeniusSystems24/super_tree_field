@@ -1,0 +1,183 @@
+# super_tree
+
+A **GeniusLink design-system** Flutter package providing **`SuperTree`** — a recursive, generic, keyboard-first hierarchy component.
+
+The flagship instance is **`AccountTree`**: a five-level bilingual (English + Arabic) chart of accounts with **roll-up balances**, a financial-summary **KPI grid**, a live **A = L + E balance badge**, **type filters**, an ancestor-preserving **recursive search**, a **DR/CR nature column**, and per-account **share bars** — all under full keyboard control.
+
+The underlying engine (`SuperTree<T>` + `SuperTreeController<T>` + `TreeLogic`) is **generic over a node payload `T`**, so the same model reskins for files, org charts, categories — any nested data. The `example/` app ships all three.
+
+A faithful Dart port of the React `super-tree` tool. Light + dark themes, LTR + RTL.
+
+---
+
+## Install
+
+```yaml
+# pubspec.yaml
+dependencies:
+  super_tree:
+    path: ../super_tree   # or a git/hosted ref
+```
+
+```dart
+import 'package:super_tree/super_tree.dart';
+```
+
+### Register the theme extension
+
+`SuperTree` themes through a `ThemeExtension`. Register it once on your `ThemeData` so colors track light/dark:
+
+```dart
+MaterialApp(
+  theme:     ThemeData(brightness: Brightness.light, extensions: [SuperThemeData.light]),
+  darkTheme: ThemeData(brightness: Brightness.dark,  extensions: [SuperThemeData.dark]),
+);
+```
+
+> Fonts: the design system uses Manrope (display), Inter (body), JetBrains Mono (numerics) and Noto Naskh Arabic. Drop the `.ttf` files under `assets/fonts/` and uncomment the `fonts:` block in `pubspec.yaml` to match it exactly; otherwise platform defaults are used.
+
+---
+
+## Quick start — the flagship AccountTree
+
+```dart
+import 'package:super_tree/super_tree.dart';
+
+// uses the bundled sample chart of accounts (AccountTreeData.tree)
+AccountTree(
+  onOpenAccount: (node) => debugPrint('open ledger ${node.code}'),
+);
+
+// …or a full page, ready to route:
+Navigator.of(context).push(
+  MaterialPageRoute(builder: (_) => const AccountTreeDemo()),
+);
+```
+
+Pass your own data with `AccountTree(roots: myChartOfAccounts)`, where each node is a `TreeNode<AccountData>`.
+
+---
+
+## Quick start — the generic engine
+
+`SuperTree<T>` is generic over any payload. Give it a controller, a `searchText` accessor, and `leading` / `trailing` cell builders:
+
+```dart
+class FileMeta {
+  const FileMeta(this.kind, {this.size});
+  final String kind;
+  final String? size;
+}
+
+final controller = SuperTreeController<FileMeta>(
+  roots: myFileTree,                       // List<TreeNode<FileMeta>>
+  defaultExpandDepth: 0,                    // groups open to this depth initially
+  searchText: (n) => n.name,                // what the search matches against
+);
+
+SuperTree<FileMeta>(
+  controller: controller,
+  title: 'Project files',
+  subtitle: 'folders roll up a child count, files show size',
+  titleIcon: Icons.folder_open,
+  nameColumnLabel: 'Name',
+  trailingColumnLabel: 'Size',
+  placeholder: 'Search files…   ( / )',
+  samples: const ['.dart', 'docs', 'README'],
+  unit: 'files',
+  showArabic: false,
+  leadingBuilder: (context, node, info) =>
+      Icon(node.value!.kind == 'dir' ? Icons.folder : Icons.code, size: 15),
+  trailingBuilder: (context, node, info) =>
+      node.value!.kind == 'dir' ? null : Text(node.value!.size ?? ''),
+);
+```
+
+`TreeNode<T>` carries a stable `code` (id + cursor key), an English `name`, an optional Arabic `ar`, an optional typed `value`, and optional `children` (null/empty ⇒ a leaf).
+
+---
+
+## Keyboard model
+
+Click the tree to focus it, then:
+
+| Key | Action |
+|---|---|
+| `↑` / `↓` | move between visible rows |
+| `→` | expand a group · step into its first child (mirrored under RTL) |
+| `←` | collapse a group · step out to its parent (mirrored under RTL) |
+| `Home` / `End` | jump to the first / last visible row |
+| `Enter` / `Space` | open a leaf · toggle a group |
+| `/` | focus the search field |
+| `Esc` | clear the search |
+| `*` / `\` | expand all · collapse all |
+| `?` | open the keyboard cheatsheet |
+
+Arrow direction is resolved **visually** — under RTL, `→` and `←` swap so the key that steps *toward children* always points inward.
+
+---
+
+## Search
+
+The search is recursive and **ancestor-preserving**: a node is kept if it (or any descendant) matches, and a match keeps its whole subtree, so the path to every hit stays visible. A live match count shows in the field; matches are highlighted inline. While searching, every branch is forced open. Drive it programmatically:
+
+```dart
+controller.setQuery('Bank');   // filter
+controller.matchCount;          // → number of matching nodes
+controller.clearQuery();        // reset
+```
+
+---
+
+## Roll-up balances (AccountTree)
+
+Only **leaves** carry an explicit `balance`; every group total rolls up from its children via `TreeLogic.rollup`, so figures reconcile with no double-counting. The KPI grid totals each account type, and the badge verifies **Assets = Liabilities + Equity**. The per-row share bar shows each account's size relative to its root.
+
+---
+
+## Architecture
+
+Clean Architecture, MVC-aligned, split per feature:
+
+```
+lib/
+├── super_tree.dart                       # public barrel — import this
+└── src/
+    ├── core/                             # shared tokens, widgets, utils, extensions
+    └── features/
+        └── super_tree/
+            ├── data/
+            │   └── datasources/          # AccountTreeData (sample chart of accounts)
+            ├── domain/
+            │   ├── entities/             # TreeNode<T>, AccountData / AccountType
+            │   └── usecases/             # TreeLogic (flatten, filter, parentOf, rollup)
+            └── presentation/
+                ├── controllers/          # SuperTreeController<T>  (the Model/state)
+                ├── widgets/              # SuperTree, TreeRow, AccountTree, atoms (the View)
+                └── pages/                # AccountTreeDemo
+```
+
+- **Model** — `SuperTreeController<T>` is a `ChangeNotifier` holding all state (expansion set, query, focus cursor, selection) and the keyboard intent methods. It imports no widget.
+- **View** — `SuperTree<T>` / `TreeRow<T>` observe the controller and render; they forward intents back.
+- **Domain** — `TreeNode`, `AccountData` and `TreeLogic` are pure Dart with no Flutter UI.
+
+---
+
+## Example
+
+A runnable gallery lives in `example/` — it registers the theme extension, toggles light/dark and LTR/RTL, and links three demos that share **one** engine:
+
+```bash
+cd example
+flutter run
+```
+
+- **Account Tree** — the flagship `SuperTree<AccountData>` (KPIs · balance · DR/CR).
+- **File Explorer** — `SuperTree<FileMeta>`.
+- **Org Chart** — `SuperTree<Person>`.
+
+---
+
+## License
+
+Internal GeniusLink design-system package.
