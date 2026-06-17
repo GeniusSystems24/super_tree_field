@@ -61,6 +61,8 @@ class _FileTreeDemoState extends State<FileTreeDemo> {
     roots: _fileTree,
     defaultExpandDepth: 0,
     searchText: (n) => n.name,
+    newNodeBuilder: (code) => TreeNode<FileMeta>(
+        code: code, name: 'new_folder', value: const FileMeta('dir')),
   );
 
   @override
@@ -113,6 +115,7 @@ class _FileTreeDemoState extends State<FileTreeDemo> {
                 samples: const ['tree', '.dart', 'docs', 'README'],
                 unit: 'files',
                 showArabic: false,
+                enableEditing: true,
                 leadingBuilder: (context, node, info) {
                   final (icon, color) = _icon(context, node.value!, info.open);
                   return Icon(icon, size: 15, color: color);

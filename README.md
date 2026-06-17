@@ -111,9 +111,59 @@ Click the tree to focus it, then:
 | `/` | focus the search field |
 | `Esc` | clear the search |
 | `*` / `\` | expand all · collapse all |
+| right-click | open the node context menu |
 | `?` | open the keyboard cheatsheet |
 
 Arrow direction is resolved **visually** — under RTL, `→` and `←` swap so the key that steps *toward children* always points inward.
+
+---
+
+## Editing
+
+`SuperTree` has two modes (`SuperTreeMode.readable` / `.editable`). Opt into
+editing UI with `enableEditing: true` — that surfaces a **Read / Edit** toggle
+and an **Add node** button in the toolbar. The controller's `mode` is the source
+of truth; flip it programmatically with `controller.setMode(...)` /
+`toggleMode()`.
+
+**In editable mode each row gains:**
+
+- **Inline rename** — `Enter` or blur commits, `Esc` cancels.
+- **Add child / add sibling above / below** — via the context menu; new nodes
+  are minted by your `newNodeBuilder` and opened for rename.
+- **Drag-and-drop** — grab the drag handle; a live indicator shows whether the
+  drop lands **before**, **inside**, or **after** the target. Dropping a node
+  into its own subtree is rejected.
+- **Delete** — removes the node and its whole subtree.
+
+**Context menu** — right-click (or long-press, or the hover `⋮` button) opens a
+themed menu that adapts to the mode: Open / Expand / Collapse / Expand subtree in
+readable mode; Rename · Add child · Add sibling above / below · Delete in
+editable mode.
+
+```dart
+final controller = SuperTreeController<FileMeta>(
+  roots: myFileTree,
+  searchText: (n) => n.name,
+  mode: SuperTreeMode.editable,                 // start in edit mode (optional)
+  newNodeBuilder: (code) =>                      // payload for "add" actions
+      TreeNode<FileMeta>(code: code, name: 'new_folder', value: const FileMeta('dir')),
+  onTreeChanged: (roots) => persist(roots),      // called after every edit
+);
+
+SuperTree<FileMeta>(
+  controller: controller,
+  enableEditing: true,                           // show the Read/Edit toggle + Add node
+  // … builders as before …
+);
+```
+
+All edits are also available as controller methods (drive them from your own UI
+if you'd rather not use the built-in menu): `beginRename` / `commitRename` /
+`cancelRename`, `addChild`, `addSiblingBefore`, `addSiblingAfter`, `addRoot`,
+`deleteNode`, and `moveNode(dragCode, targetCode, DropPosition)`. Every mutation
+is an immutable transform under the hood (`TreeLogic.moveNode`, `insertChild`,
+`removeNode`, …), so the previous tree is never aliased.
 
 ---
 

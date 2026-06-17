@@ -39,12 +39,13 @@ class AccountTree extends StatefulWidget {
 class _AccountTreeState extends State<AccountTree> {
   static const _samples = ['1111', 'Bank', 'البنك', 'Cash', 'Loan', '5512'];
 
-  late final List<TreeNode<AccountData>> _all;
+  late List<TreeNode<AccountData>> _all;
   late final SuperTreeController<AccountData> _controller;
-  late final Map<String, double> _nodeTotal; // code → own roll-up total
-  late final Map<String, double> _rootTotal; // code → its root's total
+  Map<String, double> _nodeTotal = {}; // code → own roll-up total
+  Map<String, double> _rootTotal = {}; // code → its root's total
 
   AccountType? _typeFilter; // null = All
+  bool _lastEditable = false;
 
   static double _leafBal(TreeNode<AccountData> n) => n.value?.balance ?? 0.0;
 
@@ -52,37 +53,79 @@ class _AccountTreeState extends State<AccountTree> {
   void initState() {
     super.initState();
     _all = widget.roots ?? AccountTreeData.tree;
-    _nodeTotal = {};
-    _rootTotal = {};
-    for (final root in _all) {
-      final rt = TreeLogic.rollup(root, _leafBal);
-      void assign(TreeNode<AccountData> n) {
-        _nodeTotal[n.code] = TreeLogic.rollup(n, _leafBal);
-        _rootTotal[n.code] = rt;
-        n.children?.forEach(assign);
-      }
-
-      assign(root);
-    }
+    _recompute(_all);
     _controller = SuperTreeController<AccountData>(
       roots: _all,
       defaultExpandDepth: 1,
       searchText: (n) => '${n.code} ${n.name} ${n.ar ?? ''}',
       onOpenLeaf: (n) => widget.onOpenAccount?.call(n),
-    );
+      onTreeChanged: _onTreeChanged,
+      newNodeBuilder: (code) => TreeNode<AccountData>(
+        code: code,
+        name: 'New account',
+        ar: 'حساب جديد',
+        value: AccountData(type: _typeFilter ?? AccountType.asset),
+      ),
+    )..addListener(_onControllerTick);
+  }
+
+  // Roll-up totals are derived from whatever tree is currently loaded so they
+  // stay correct across edits (rename / add / delete / move).
+  void _recompute(List<TreeNode<AccountData>> roots) {
+    final nodeTotal = <String, double>{};
+    final rootTotal = <String, double>{};
+    for (final root in roots) {
+      final rt = TreeLogic.rollup(root, _leafBal);
+      void assign(TreeNode<AccountData> n) {
+        nodeTotal[n.code] = TreeLogic.rollup(n, _leafBal);
+        rootTotal[n.code] = rt;
+        n.children?.forEach(assign);
+      }
+
+      assign(root);
+    }
+    _nodeTotal = nodeTotal;
+    _rootTotal = rootTotal;
+  }
+
+  // After any structural edit, recompute totals + KPIs from the new tree.
+  // Edits only occur in edit mode (where the type filter is paused), so the
+  // incoming roots are always the full tree — keep `_all` in sync with them.
+  void _onTreeChanged(List<TreeNode<AccountData>> roots) {
+    setState(() {
+      _all = roots;
+      _recompute(roots);
+    });
+  }
+
+  // Editing operates on the controller's roots, so a type filter (which swaps
+  // those roots for a subset) must be cleared before editing. Reset to "All"
+  // whenever edit mode is entered, and rebuild so the toolbar swaps its row.
+  void _onControllerTick() {
+    if (_controller.isEditable == _lastEditable) return;
+    setState(() {
+      _lastEditable = _controller.isEditable;
+      if (_controller.isEditable && _typeFilter != null) {
+        _typeFilter = null;
+        _controller.setRoots(_all);
+        _recompute(_all);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onControllerTick);
     _controller.dispose();
     super.dispose();
   }
 
   void _applyFilter(AccountType? type) {
+    if (_controller.isEditable) return; // filtering disabled while editing
     setState(() => _typeFilter = type);
-    _controller.setRoots(
-      type == null ? _all : _all.where((n) => n.value?.type == type).toList(),
-    );
+    final roots = type == null ? _all : _all.where((n) => n.value?.type == type).toList();
+    _controller.setRoots(roots);
+    _recompute(roots);
   }
 
   double _typeTotal(AccountType type) => _all
@@ -101,17 +144,35 @@ class _AccountTreeState extends State<AccountTree> {
       controller: _controller,
       accent: SuperTokens.accent,
       title: 'Chart of Accounts Hierarchy',
-      subtitle: '5 levels · click or use ↑↓ ← → · Enter opens a leaf · press ? for shortcuts',
+      subtitle: '5 levels · click or use ↑↓ ← → · Enter opens a leaf · right-click to edit',
       nameColumnLabel: 'Account · الحساب',
       trailingColumnLabel: 'Nature · Balance (SAR)',
       placeholder: 'Search by code, English or Arabic name…   ( / )',
       samples: _samples,
       unit: 'accounts',
       selectionLabel: 'Opened ledger for account',
+      enableEditing: true,
       above: _kpiGrid(assets, liabilities, equity, income, expense),
-      toolbarExtra: _filterRow(assets, liabilities, equity),
+      toolbarExtra: _controller.isEditable ? _editHint(context) : _filterRow(assets, liabilities, equity),
       leadingBuilder: _leading,
       trailingBuilder: _trailing,
+    );
+  }
+
+  // Shown in place of the filter chips while editing.
+  Widget _editHint(BuildContext context) {
+    final t = context.superTheme;
+    return Row(
+      children: [
+        Icon(Icons.drag_indicator, size: 15, color: t.fg3),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            'Drag the handle to move · right-click (or ⋮) to rename, add or delete · type filter is paused while editing',
+            style: SuperText.caption.copyWith(fontSize: 12, color: t.fg3),
+          ),
+        ),
+      ],
     );
   }
 

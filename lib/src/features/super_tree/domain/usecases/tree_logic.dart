@@ -9,6 +9,11 @@
 
 import '../entities/tree_node.dart';
 
+/// Where a dragged node should land relative to a target during a move /
+/// insert. [before] / [after] make it a sibling; [inside] makes it the last
+/// child of the target group.
+enum DropPosition { before, inside, after }
+
 /// Derives the searchable haystack for a node (e.g. `'${n.code} ${n.name}'`).
 typedef SearchText<T> = String Function(TreeNode<T> node);
 
@@ -124,5 +129,116 @@ abstract final class TreeLogic {
       }
     }
     return null;
+  }
+
+  // ── editing (pure tree transforms — each returns a NEW forest) ───────────
+
+  /// Finds the node with [code] anywhere in the forest, or null.
+  static TreeNode<T>? findNode<T>(List<TreeNode<T>> nodes, String code) {
+    for (final n in nodes) {
+      if (n.code == code) return n;
+      if (n.hasChildren) {
+        final hit = findNode(n.children!, code);
+        if (hit != null) return hit;
+      }
+    }
+    return null;
+  }
+
+  /// True when [code] is [ancestorCode] itself or lives within its subtree.
+  /// Used to forbid dropping a node into its own descendants.
+  static bool isWithin<T>(List<TreeNode<T>> nodes, String ancestorCode, String code) {
+    if (ancestorCode == code) return true;
+    final anc = findNode(nodes, ancestorCode);
+    if (anc == null || !anc.hasChildren) return false;
+    return findNode(anc.children!, code) != null;
+  }
+
+  /// Returns a new forest with the node matching [code] passed through [f].
+  static List<TreeNode<T>> mapNode<T>(
+    List<TreeNode<T>> nodes,
+    String code,
+    TreeNode<T> Function(TreeNode<T> node) f,
+  ) {
+    return [
+      for (final n in nodes)
+        if (n.code == code)
+          f(n)
+        else if (n.hasChildren)
+          n.withChildren(mapNode(n.children!, code, f))
+        else
+          n,
+    ];
+  }
+
+  /// Returns a new forest with the node matching [code] (and its subtree)
+  /// removed.
+  static List<TreeNode<T>> removeNode<T>(List<TreeNode<T>> nodes, String code) {
+    final out = <TreeNode<T>>[];
+    for (final n in nodes) {
+      if (n.code == code) continue;
+      out.add(n.hasChildren ? n.withChildren(removeNode(n.children!, code)) : n);
+    }
+    return out;
+  }
+
+  /// Returns a new forest with [child] appended to (or inserted at [index] of)
+  /// the children of [parentCode]. A leaf becomes a group.
+  static List<TreeNode<T>> insertChild<T>(
+    List<TreeNode<T>> nodes,
+    String parentCode,
+    TreeNode<T> child, {
+    int? index,
+  }) {
+    return mapNode(nodes, parentCode, (parent) {
+      final kids = [...?parent.children];
+      final at = (index ?? kids.length).clamp(0, kids.length);
+      kids.insert(at, child);
+      return parent.withChildren(kids);
+    });
+  }
+
+  /// Returns a new forest with [node] inserted as a sibling [after] (or before)
+  /// [targetCode], at whatever depth the target lives.
+  static List<TreeNode<T>> insertSibling<T>(
+    List<TreeNode<T>> nodes,
+    String targetCode,
+    TreeNode<T> node, {
+    required bool after,
+  }) {
+    final i = nodes.indexWhere((n) => n.code == targetCode);
+    if (i >= 0) {
+      final out = [...nodes];
+      out.insert(after ? i + 1 : i, node);
+      return out;
+    }
+    return [
+      for (final n in nodes)
+        n.hasChildren ? n.withChildren(insertSibling(n.children!, targetCode, node, after: after)) : n,
+    ];
+  }
+
+  /// Moves [dragCode] to sit relative to [targetCode] per [pos]. Returns the
+  /// original forest unchanged when the move is illegal (onto itself, or into
+  /// its own subtree).
+  static List<TreeNode<T>> moveNode<T>(
+    List<TreeNode<T>> nodes,
+    String dragCode,
+    String targetCode,
+    DropPosition pos,
+  ) {
+    if (dragCode == targetCode) return nodes;
+    if (isWithin(nodes, dragCode, targetCode)) return nodes; // can't drop into own subtree
+    final moving = findNode(nodes, dragCode);
+    if (moving == null) return nodes;
+    final pruned = removeNode(nodes, dragCode);
+    switch (pos) {
+      case DropPosition.inside:
+        return insertChild(pruned, targetCode, moving);
+      case DropPosition.before:
+        return insertSibling(pruned, targetCode, moving, after: false);
+      case DropPosition.after:
+        return insertSibling(pruned, targetCode, moving, after: true);
+    }
   }
 }

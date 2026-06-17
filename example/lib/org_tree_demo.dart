@@ -65,6 +65,8 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
     roots: _orgTree,
     defaultExpandDepth: 1,
     searchText: (n) => '${n.name} ${n.value?.role ?? ''} ${n.value?.dept ?? ''}',
+    newNodeBuilder: (code) =>
+        TreeNode<Person>(code: code, name: 'New report', value: const Person('Role', 'Eng', 'NR')),
   );
 
   @override
@@ -104,6 +106,7 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
                 samples: const ['Lead', 'Eng', 'Sara', 'Finance'],
                 unit: 'people',
                 showArabic: false,
+                enableEditing: true,
                 leadingBuilder: (context, node, info) {
                   final p = node.value!;
                   final c = _deptColor[p.dept] ?? context.superTheme.fg3;

@@ -131,8 +131,33 @@ SuperTree<FileMeta>(
 The user clicks the tree to focus it, then: `↑ ↓` move · `→` expand / step-in ·
 `←` collapse / step-out (both **RTL-mirrored**) · `Home`/`End` first/last ·
 `Enter`/`Space` open-leaf / toggle-group · `/` focus search · `Esc` clear
-search · `*`/`\` expand-all / collapse-all · `?` cheatsheet. Don't reimplement
-this — it ships in `SuperTree`.
+search · `*`/`\` expand-all / collapse-all · right-click node menu · `?`
+cheatsheet. Don't reimplement this — it ships in `SuperTree`.
+
+## Editing (editable mode)
+
+`SuperTree` has two modes. Pass `enableEditing: true` to show a Read / Edit
+toggle + Add node button; the controller's `mode` (`SuperTreeMode.readable` /
+`.editable`) is the source of truth (`setMode` / `toggleMode`). The five
+requested capabilities map to:
+
+| Capability | How |
+|---|---|
+| Rename a node | inline field (double-purpose row), or `controller.beginRename(code)` → `commitRename` / `cancelRename` |
+| Add sibling before / after | context menu, or `controller.addSiblingBefore(code)` / `addSiblingAfter(code)` |
+| Add a child | context menu, or `controller.addChild(code)` (a leaf becomes a group) |
+| Move a node + its children (drag-and-drop) | drag the row handle onto a target's before / inside / after zone, or `controller.moveNode(dragCode, targetCode, DropPosition)` |
+| Delete a node + its children | context menu, or `controller.deleteNode(code)` |
+
+Readable mode still gets a right-click **context menu** (Open / Expand /
+Collapse / Expand subtree) and click-to-toggle — both built in.
+
+New nodes for the "add" actions come from an optional `newNodeBuilder: (code) =>
+TreeNode<T>(...)` on the controller — supply it so added nodes carry a sensible
+`value`. Persist edits via `onTreeChanged: (roots) { … }`. All mutations are
+pure immutable transforms in `TreeLogic` (`moveNode` / `insertChild` /
+`insertSibling` / `removeNode` / `mapNode`, guarded by `isWithin` so a node can
+never be dropped into its own subtree).
 
 ## Search
 
@@ -161,7 +186,12 @@ algorithms in `domain/usecases/tree_logic.dart`; keep the controller widget-free
 
 - Forgetting to register `SuperThemeData` → the tree looks unstyled.
 - Non-unique `TreeNode.code` → broken expansion and keyboard cursor; codes must
-  be globally unique.
+  be globally unique. (The `addRoot`/`addChild`/`addSibling*` helpers mint unique
+  codes for you.)
+- Editing without a `newNodeBuilder` → added nodes have a null `value`; your
+  leading/trailing builders must tolerate that, or supply the builder.
+- Expecting drag-and-drop while a search query is active → editing affordances
+  are intentionally hidden during search (the filtered tree is a projection).
 - Putting a balance on a group node → totals double-count. Only leaves carry a
   metric; groups roll up via `TreeLogic.rollup`.
 - Mutating the roots list in place instead of `controller.setRoots(...)` → no

@@ -30,6 +30,7 @@ export 'presentation/widgets/highlight_text.dart';
 export 'presentation/widgets/nature_pill.dart';
 export 'presentation/widgets/kpi_card.dart';
 export 'presentation/widgets/shortcuts_help.dart';
+export 'presentation/widgets/tree_context_menu.dart';
 export 'presentation/widgets/tree_row.dart';
 export 'presentation/widgets/super_tree.dart';
 export 'presentation/widgets/account_tree.dart';

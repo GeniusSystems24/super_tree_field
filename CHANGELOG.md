@@ -3,6 +3,40 @@
 All notable changes to **super_tree** are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/); versioning is [SemVer](https://semver.org/).
 
+## [0.2.0] — 2026-06-17
+
+### Added
+- **Editable mode** (`SuperTreeMode.editable`) — opt in with
+  `SuperTree(enableEditing: true)`, which adds a Read / Edit segmented toggle and
+  an "Add node" action to the toolbar. In edit mode every row gains:
+  - **Inline rename** — double-purpose edit field swaps in for the node name;
+    `Enter` / blur commits, `Esc` cancels. (`beginRename` / `commitRename` /
+    `cancelRename`.)
+  - **Add child** and **add sibling above / below** — fresh nodes are minted via
+    an optional `newNodeBuilder`, inserted, selected and opened for rename.
+    (`addChild` / `addSiblingBefore` / `addSiblingAfter` / `addRoot`.)
+  - **Drag-and-drop reordering** — a drag handle starts a `Draggable`; every row
+    is a drop target with a live **before / inside / after** indicator. Drops
+    into a node's own subtree are rejected. (`moveNode` / `canDrop`.)
+  - **Delete subtree** — removes a node and all descendants. (`deleteNode`.)
+  - An editable empty state that invites the first node.
+- **Node context menu** — right-click (or long-press) any row to open a themed
+  menu. In **readable** mode: Open / Expand / Collapse / Expand subtree. In
+  **editable** mode: Rename · Add child · Add sibling above / below · Delete. A
+  hover-revealed `⋮` button opens the same menu for touch / trackpad.
+  (`showTreeContextMenu`.)
+- **`TreeLogic`** edit algorithms (pure, immutable transforms): `findNode`,
+  `isWithin`, `mapNode`, `removeNode`, `insertChild`, `insertSibling`,
+  `moveNode`; plus the `DropPosition { before, inside, after }` enum.
+- **`TreeNode.copyWith` / `renamed`** for non-destructive edits.
+- `SuperTreeController` gains `mode` / `setMode` / `toggleMode`, an `editingId`
+  cursor, an `onTreeChanged` persistence hook, and `expandSubtree`.
+- The flagship **`AccountTree`** is now editable (right-click to rename / add /
+  delete, drag to move). Roll-up totals, KPIs and the `A = L + E` badge
+  recompute live after every edit; the type filter is paused while editing. The
+  File Explorer and Org Chart examples are editable too.
+- Cheatsheet adds a "Right-click → node menu" entry.
+
 ## [0.1.0] — 2026-06-16
 
 ### Added

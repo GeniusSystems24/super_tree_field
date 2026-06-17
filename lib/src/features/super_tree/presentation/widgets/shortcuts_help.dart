@@ -18,6 +18,7 @@ const List<(String, String)> _shortcuts = [
   ('/', 'Focus the search field'),
   ('Esc', 'Clear the search'),
   ('*  \\', 'Expand all · collapse all'),
+  ('Right-click', 'Open the node menu'),
   ('?', 'This cheatsheet'),
 ];
 

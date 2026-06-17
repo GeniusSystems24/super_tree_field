@@ -37,6 +37,7 @@ class SuperTree<T> extends StatefulWidget {
     this.showArabic = true,
     this.showLeafCount = true,
     this.selectionLabel = 'Selected',
+    this.enableEditing = false,
     this.above,
     this.toolbarExtra,
   });
@@ -60,6 +61,12 @@ class SuperTree<T> extends StatefulWidget {
 
   /// Verb in the selection footer ("Selected", "Opened ledger for").
   final String selectionLabel;
+
+  /// When true, the toolbar shows a Read / Edit mode toggle and an "Add node"
+  /// action; in edit mode rows gain drag handles, inline rename, a row menu and
+  /// drop targets. The controller's [SuperTreeController.mode] is the source of
+  /// truth — this only surfaces the toggle UI.
+  final bool enableEditing;
 
   /// Optional content rendered above the toolbar (e.g. a KPI grid).
   final Widget? above;
@@ -188,6 +195,12 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           children: [
             _searchField(context),
             for (final q in widget.samples) _sampleChip(context, q),
+            if (widget.enableEditing) ...[
+              if (_c.isEditable)
+                _toolAction(context,
+                    icon: Icons.add, label: 'Add node', onTap: _c.addRoot),
+              _modeToggle(context),
+            ],
             SuperIconButton(
               icon: Icons.keyboard_outlined,
               tooltip: 'Keyboard shortcuts  ·  ?',
@@ -202,6 +215,91 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           widget.toolbarExtra!,
         ],
       ],
+    );
+  }
+
+  // The Read / Edit segmented control.
+  Widget _modeToggle(BuildContext context) {
+    final t = context.superTheme;
+    Widget seg(String label, IconData icon, bool active, VoidCallback onTap) {
+      return GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: SuperTokens.durFast,
+          padding: const EdgeInsets.symmetric(horizontal: 11),
+          height: SuperTokens.controlHeight - 6,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: active
+                ? Color.alphaBlend(widget.accent.withOpacity(0.20), t.surface)
+                : const Color(0x00000000),
+            borderRadius: BorderRadius.circular(SuperTokens.radiusControl - 2),
+            border: Border.all(
+                color: active ? widget.accent : const Color(0x00000000)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 14, color: active ? widget.accent : t.fg3),
+              const SizedBox(width: 6),
+              Text(label,
+                  style: SuperText.body.copyWith(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: active ? widget.accent : t.fg3)),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      height: SuperTokens.controlHeight,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: t.inputBg,
+        borderRadius: BorderRadius.circular(SuperTokens.radiusControl),
+        border: Border.all(color: t.borderStrong),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          seg('Read', Icons.visibility_outlined, !_c.isEditable,
+              () => _c.setMode(SuperTreeMode.readable)),
+          const SizedBox(width: 3),
+          seg('Edit', Icons.edit_outlined, _c.isEditable,
+              () => _c.setMode(SuperTreeMode.editable)),
+        ],
+      ),
+    );
+  }
+
+  Widget _toolAction(BuildContext context,
+      {required IconData icon, required String label, required VoidCallback onTap}) {
+    final t = context.superTheme;
+    return _HoverButton(
+      onTap: onTap,
+      builder: (hover) => Container(
+        height: SuperTokens.controlHeight,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: hover
+              ? Color.alphaBlend(widget.accent.withOpacity(0.16), t.surface)
+              : Color.alphaBlend(widget.accent.withOpacity(0.10), t.surface),
+          borderRadius: BorderRadius.circular(SuperTokens.radiusControl),
+          border: Border.all(color: widget.accent.withOpacity(0.5)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: widget.accent),
+            const SizedBox(width: 7),
+            Text(label,
+                style: SuperText.body
+                    .copyWith(fontSize: 13, fontWeight: FontWeight.w600, color: widget.accent)),
+          ],
+        ),
+      ),
     );
   }
 
@@ -447,6 +545,25 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
 
   Widget _emptyState(BuildContext context) {
     final t = context.superTheme;
+    // Editable + empty (not searching): invite the first node.
+    if (widget.enableEditing && _c.isEditable && !_c.searching) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+        child: Column(
+          children: [
+            Icon(Icons.account_tree_outlined, size: 26, color: t.fg4),
+            const SizedBox(height: 12),
+            Text('This tree is empty',
+                style: SuperText.body.copyWith(fontWeight: FontWeight.w600, color: t.fg2)),
+            const SizedBox(height: 4),
+            Text('Add a node to get started.',
+                style: SuperText.caption.copyWith(color: t.fg3)),
+            const SizedBox(height: 16),
+            _toolAction(context, icon: Icons.add, label: 'Add node', onTap: _c.addRoot),
+          ],
+        ),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 44, horizontal: 16),
       child: Column(

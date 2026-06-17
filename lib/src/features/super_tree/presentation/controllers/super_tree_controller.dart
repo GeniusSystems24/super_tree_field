@@ -21,15 +21,28 @@ import 'package:flutter/foundation.dart';
 import '../../domain/entities/tree_node.dart';
 import '../../domain/usecases/tree_logic.dart';
 
+/// Interaction mode for a [SuperTree].
+///
+/// * [readable]  — navigate, search, expand/collapse, open leaves, right-click
+///                 context menu. The tree is immutable.
+/// * [editable]  — everything above plus inline rename, add child / sibling,
+///                 delete subtree and drag-and-drop reordering.
+enum SuperTreeMode { readable, editable }
+
 class SuperTreeController<T> extends ChangeNotifier {
   SuperTreeController({
     required List<TreeNode<T>> roots,
     required this.searchText,
     int defaultExpandDepth = 1,
     String query = '',
+    SuperTreeMode mode = SuperTreeMode.readable,
     this.onOpenLeaf,
+    this.onTreeChanged,
+    TreeNode<T> Function(String code)? newNodeBuilder,
   })  : _roots = roots,
-        _query = query {
+        _query = query,
+        _mode = mode,
+        _newNodeBuilder = newNodeBuilder {
     _expanded = TreeLogic.groupCodes(roots, maxDepth: defaultExpandDepth).toSet();
   }
 
@@ -40,17 +53,35 @@ class SuperTreeController<T> extends ChangeNotifier {
   /// regardless; this is the host's hook to open a ledger / file / profile.
   final void Function(TreeNode<T> node)? onOpenLeaf;
 
+  /// Called after every structural edit (rename / add / delete / move) with the
+  /// new roots — the host's hook to persist the mutated tree.
+  final void Function(List<TreeNode<T>> roots)? onTreeChanged;
+
+  /// Mints a fresh node for the "add" actions. Defaults to an untitled leaf.
+  final TreeNode<T> Function(String code)? _newNodeBuilder;
+
   List<TreeNode<T>> _roots;
   late Set<String> _expanded;
   String _query;
   String? _focusId;
   String? _selected;
+  SuperTreeMode _mode;
+  String? _editingId;
+  int _seq = 0;
 
   // ── reads ──
   List<TreeNode<T>> get roots => _roots;
   String get query => _query;
   String? get focusId => _focusId;
   String? get selected => _selected;
+
+  /// The current interaction mode.
+  SuperTreeMode get mode => _mode;
+  bool get isEditable => _mode == SuperTreeMode.editable;
+
+  /// The node currently being inline-renamed, or null.
+  String? get editingId => _editingId;
+  bool isEditing(String code) => _editingId == code;
 
   /// True while a search query is narrowing the tree (forces every branch open).
   bool get searching => _query.trim().isNotEmpty;
@@ -84,6 +115,17 @@ class SuperTreeController<T> extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ── mode ──
+  void setMode(SuperTreeMode mode) {
+    if (_mode == mode) return;
+    _mode = mode;
+    if (mode == SuperTreeMode.readable) _editingId = null;
+    notifyListeners();
+  }
+
+  void toggleMode() =>
+      setMode(_mode == SuperTreeMode.editable ? SuperTreeMode.readable : SuperTreeMode.editable);
+
   // ── expansion ──
   void toggle(String code) {
     if (_expanded.contains(code)) {
@@ -101,6 +143,15 @@ class SuperTreeController<T> extends ChangeNotifier {
 
   void collapseAll() {
     _expanded = <String>{};
+    notifyListeners();
+  }
+
+  /// Expand [code] and every group within its subtree (readable-mode menu).
+  void expandSubtree(String code) {
+    final node = TreeLogic.findNode(_roots, code);
+    if (node == null || !node.hasChildren) return;
+    _expanded.add(code);
+    _expanded.addAll(TreeLogic.groupCodes([node]));
     notifyListeners();
   }
 
@@ -211,4 +262,109 @@ class SuperTreeController<T> extends ChangeNotifier {
       openLeaf(cur);
     }
   }
+
+  // ── editing (editable mode) ───────────────────────────────────────
+  // Each mutation builds a NEW immutable forest via TreeLogic, swaps it in, and
+  // notifies the host through [onTreeChanged].
+
+  void _commit(List<TreeNode<T>> next) {
+    _roots = next;
+    notifyListeners();
+    onTreeChanged?.call(next);
+  }
+
+  TreeNode<T> _mint() {
+    final code = 'node-${DateTime.now().millisecondsSinceEpoch}-${_seq++}';
+    return _newNodeBuilder?.call(code) ?? TreeNode<T>(code: code, name: 'New node');
+  }
+
+  // — inline rename —
+  void beginRename(String code) {
+    if (!isEditable) return;
+    _editingId = code;
+    _focusId = code;
+    notifyListeners();
+  }
+
+  void cancelRename() {
+    if (_editingId == null) return;
+    _editingId = null;
+    notifyListeners();
+  }
+
+  /// Commit new labels for [code]. A blank [name] is ignored (rename cancelled).
+  void commitRename(String code, String name, {String? ar}) {
+    final trimmed = name.trim();
+    _editingId = null;
+    if (trimmed.isEmpty) {
+      notifyListeners();
+      return;
+    }
+    _commit(TreeLogic.mapNode(_roots, code, (n) => n.renamed(trimmed, ar: ar)));
+  }
+
+  // — add —
+  /// Append a fresh child under [parentCode], expand it, select + rename it.
+  TreeNode<T> addChild(String parentCode) {
+    final node = _mint();
+    _expanded.add(parentCode);
+    _commit(TreeLogic.insertChild(_roots, parentCode, node));
+    _selectAndRename(node.code);
+    return node;
+  }
+
+  /// Insert a fresh sibling before [code], then select + rename it.
+  TreeNode<T> addSiblingBefore(String code) {
+    final node = _mint();
+    _commit(TreeLogic.insertSibling(_roots, code, node, after: false));
+    _selectAndRename(node.code);
+    return node;
+  }
+
+  /// Insert a fresh sibling after [code], then select + rename it.
+  TreeNode<T> addSiblingAfter(String code) {
+    final node = _mint();
+    _commit(TreeLogic.insertSibling(_roots, code, node, after: true));
+    _selectAndRename(node.code);
+    return node;
+  }
+
+  void _selectAndRename(String code) {
+    _focusId = code;
+    _editingId = code;
+    notifyListeners();
+  }
+
+  /// Append a fresh top-level node, then select + rename it.
+  TreeNode<T> addRoot() {
+    final node = _mint();
+    _commit([..._roots, node]);
+    _selectAndRename(node.code);
+    return node;
+  }
+
+  // — delete —
+  /// Delete [code] and its whole subtree. Focus moves to the parent if any.
+  void deleteNode(String code) {
+    final parent = TreeLogic.parentOf(_roots, code);
+    if (_selected == code) _selected = null;
+    if (_editingId == code) _editingId = null;
+    if (_focusId == code) _focusId = parent?.code;
+    _expanded.remove(code);
+    _commit(TreeLogic.removeNode(_roots, code));
+  }
+
+  // — move (drag & drop) —
+  /// Move [dragCode] relative to [targetCode] per [pos]. No-op for illegal
+  /// drops (onto itself or into its own subtree). Opens the target on `inside`.
+  void moveNode(String dragCode, String targetCode, DropPosition pos) {
+    final next = TreeLogic.moveNode(_roots, dragCode, targetCode, pos);
+    if (identical(next, _roots)) return; // illegal move — unchanged
+    if (pos == DropPosition.inside) _expanded.add(targetCode);
+    _commit(next);
+  }
+
+  /// Whether dropping [dragCode] onto [targetCode] is permitted.
+  bool canDrop(String dragCode, String targetCode) =>
+      dragCode != targetCode && !TreeLogic.isWithin(_roots, dragCode, targetCode);
 }
