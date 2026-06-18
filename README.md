@@ -107,7 +107,7 @@ Click the tree to focus it, then:
 | `→` | expand a group · step into its first child (mirrored under RTL) |
 | `←` | collapse a group · step out to its parent (mirrored under RTL) |
 | `Home` / `End` | jump to the first / last visible row |
-| `Enter` / `Space` | open a leaf · toggle a group |
+| `Enter` / `Space` | open a leaf · toggle a group (`Space` toggles the checkbox in selection mode) |
 | `/` | focus the search field |
 | `Esc` | clear the search |
 | `*` / `\` | expand all · collapse all |
@@ -115,6 +115,49 @@ Click the tree to focus it, then:
 | `?` | open the keyboard cheatsheet |
 
 Arrow direction is resolved **visually** — under RTL, `→` and `←` swap so the key that steps *toward children* always points inward.
+
+---
+
+## Selection (checkboxes)
+
+`SuperTree` can render a checkbox on every row. Set `selectionMode` on the
+controller:
+
+```dart
+final controller = SuperTreeController<Permission>(
+  roots: myTree,
+  searchText: (n) => n.name,
+  selectionMode: SuperTreeSelectionMode.multi,   // none (default) · single · multi
+  initialChecked: const {'acc.view', 'acc.create'},
+  onSelectionChanged: (checked) => save(checked), // fires with the checked leaf codes
+);
+```
+
+- **`single`** — radio-like: at most one checkbox is on at a time (any node),
+  still drawn as a checkbox.
+- **`multi`** — many checkboxes. Checking a **group** cascades to every
+  descendant leaf, and each group row shows a **tristate** — checked, a dash for
+  **partial**, or unchecked — derived from its leaves. The column header gains a
+  master **select-all** checkbox.
+- **`none`** (default) — no checkboxes.
+
+Leaves are the single source of truth, so a group's state always agrees with its
+children. In selection mode `Space` toggles the focused row's checkbox; tapping a
+checkbox never opens/expands the row beneath it.
+
+Read and drive selection from the controller:
+
+```dart
+controller.checkState(code);   // TreeCheckState.checked / partial / unchecked
+controller.isChecked(code);    // fully checked?
+controller.checked;            // Set<String> of checked leaf codes
+controller.checkedCount;       // how many
+controller.checkedNodes;       // resolved TreeNode<T>s
+controller.toggleChecked(node);
+controller.checkAll();         // multi only
+controller.clearChecked();
+controller.setChecked(codes);  // host-driven
+```
 
 ---
 
@@ -225,6 +268,7 @@ flutter run
 - **Account Tree** — the flagship `SuperTree<AccountData>` (KPIs · balance · DR/CR).
 - **File Explorer** — `SuperTree<FileMeta>`.
 - **Org Chart** — `SuperTree<Person>`.
+- **Permission Settings** — `SuperTree<Permission>` with single + multi checkbox selection.
 
 ---
 

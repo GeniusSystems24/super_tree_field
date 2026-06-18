@@ -27,6 +27,23 @@ abstract final class TreeLogic {
       ? node.children!.fold(0, (s, c) => s + leafCount(c))
       : 1;
 
+  /// Every leaf code under [node] (just `[node.code]` when it is itself a
+  /// leaf). The selection model uses leaves as the source of truth, deriving
+  /// each group's tristate from them.
+  static List<String> leafCodes<T>(TreeNode<T> node) {
+    final out = <String>[];
+    void walk(TreeNode<T> n) {
+      if (n.hasChildren) {
+        n.children!.forEach(walk);
+      } else {
+        out.add(n.code);
+      }
+    }
+
+    walk(node);
+    return out;
+  }
+
   /// Sums [node] over its leaves via [leafValue]; groups roll up their children
   /// so every figure reconciles with no double-counting.
   static double rollup<T>(TreeNode<T> node, LeafValue<T> leafValue) =>

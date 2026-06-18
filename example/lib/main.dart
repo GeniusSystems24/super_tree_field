@@ -14,6 +14,7 @@ import 'package:super_tree/super_tree.dart';
 
 import 'file_tree_demo.dart';
 import 'org_tree_demo.dart';
+import 'permission_tree_demo.dart';
 
 void main() => runApp(const ExampleApp());
 
@@ -86,6 +87,8 @@ class _Launcher extends StatelessWidget {
         Icons.folder_open_outlined, (_) => const FileTreeDemo()),
     _Demo('Org Chart', 'SuperTree<Person> · headcount roll-up · role + dept',
         Icons.people_outline, (_) => const OrgTreeDemo()),
+    _Demo('Permission Settings', 'SuperTree<Permission> · single + multi checkbox selection',
+        Icons.shield_outlined, (_) => const PermissionTreeDemo()),
   ];
 
   @override

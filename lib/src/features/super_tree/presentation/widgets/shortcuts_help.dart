@@ -15,6 +15,7 @@ const List<(String, String)> _shortcuts = [
   ('←  →', 'Collapse / step out · expand / step in'),
   ('Home  End', 'Jump to first / last row'),
   ('Enter  Space', 'Open a leaf · toggle a group'),
+  ('Space', 'Toggle the checkbox (in selection mode)'),
   ('/', 'Focus the search field'),
   ('Esc', 'Clear the search'),
   ('*  \\', 'Expand all · collapse all'),

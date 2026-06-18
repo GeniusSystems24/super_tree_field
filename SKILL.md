@@ -134,6 +134,35 @@ The user clicks the tree to focus it, then: `↑ ↓` move · `→` expand / ste
 search · `*`/`\` expand-all / collapse-all · right-click node menu · `?`
 cheatsheet. Don't reimplement this — it ships in `SuperTree`.
 
+## Selection (checkbox)
+
+Render a checkbox on every row by setting `selectionMode` on the controller:
+
+```dart
+final controller = SuperTreeController<Permission>(
+  roots: myTree,
+  searchText: (n) => n.name,
+  selectionMode: SuperTreeSelectionMode.multi,   // none (default) · single · multi
+  initialChecked: const {'acc.view'},            // seed the checked set
+  onSelectionChanged: (checked) => save(checked), // fires with checked leaf codes
+);
+```
+
+| Mode | Behaviour |
+|---|---|
+| `none` | No checkboxes (default) — existing trees are unaffected. |
+| `single` | Radio-like: at most one checkbox on at a time (any node), drawn as a checkbox. |
+| `multi` | Many checkboxes; checking a group cascades to its leaves; group rows show a **tristate** (`TreeCheckState.checked / partial / unchecked`); the header gets a master select-all. |
+
+Leaves are the source of truth — a group's state is always derived, never stored,
+so parent and children can't disagree. Read / drive it from the controller:
+`checkState(code)`, `isChecked(code)`, `rootCheckState`, `checked`,
+`checkedCount`, `checkedNodes`, `toggleChecked(node)`, `toggleCheckedFocused()`,
+`checkAll()` (multi), `clearChecked()`, `toggleCheckAll()`, `setChecked(codes)`.
+In selection mode `Space` toggles the focused row's checkbox; tapping a checkbox
+never activates the row beneath it. See the **Permission Settings** example
+(`PermissionTreeDemo`) for both modes over one tree.
+
 ## Editing (editable mode)
 
 `SuperTree` has two modes. Pass `enableEditing: true` to show a Read / Edit
@@ -196,5 +225,8 @@ algorithms in `domain/usecases/tree_logic.dart`; keep the controller widget-free
   metric; groups roll up via `TreeLogic.rollup`.
 - Mutating the roots list in place instead of `controller.setRoots(...)` → no
   rebuild.
+- Expecting a group's checkbox in **multi** mode to be storable on its own — it
+  isn't; group tristate is derived from leaf codes, so `checked` returns leaf
+  codes only. (Single mode stores the one selected code, which may be a group.)
 - Expecting keyboard nav before the tree has focus — the user (or a row tap)
   must focus the tree body first; `SuperTree` focuses it on row tap for you.

@@ -18,40 +18,27 @@ class FileMeta {
   final String? modified;
 }
 
-TreeNode<FileMeta> _dir(
-        String code, String name, List<TreeNode<FileMeta>> children) =>
-    TreeNode<FileMeta>(
-        code: code,
-        name: name,
-        value: const FileMeta('dir'),
-        children: children);
+TreeNode<FileMeta> _dir(String code, String name, List<TreeNode<FileMeta>> children) =>
+    TreeNode<FileMeta>(code: code, name: name, value: const FileMeta('dir'), children: children);
 
-TreeNode<FileMeta> _file(
-        String code, String name, String kind, String size, String modified) =>
+TreeNode<FileMeta> _file(String code, String name, String kind, String size, String modified) =>
     TreeNode<FileMeta>(
-        code: code,
-        name: name,
-        value: FileMeta(kind, size: size, modified: modified));
+        code: code, name: name, value: FileMeta(kind, size: size, modified: modified));
 
 final List<TreeNode<FileMeta>> _fileTree = [
   _dir('lib', 'lib', [
     _dir('lib/ds', 'design_system', [
       _file('lib/ds/tree.dart', 'tree.dart', 'code', '33 KB', 'today'),
-      _file('lib/ds/tree_controller.dart', 'tree_controller.dart', 'code',
-          '14 KB', 'today'),
-      _file('lib/ds/tree_models.dart', 'tree_models.dart', 'code', '8.8 KB',
-          'today'),
-      _file(
-          'lib/ds/tree_theme.dart', 'tree_theme.dart', 'code', '5.5 KB', '2 d'),
+      _file('lib/ds/tree_controller.dart', 'tree_controller.dart', 'code', '14 KB', 'today'),
+      _file('lib/ds/tree_models.dart', 'tree_models.dart', 'code', '8.8 KB', 'today'),
+      _file('lib/ds/tree_theme.dart', 'tree_theme.dart', 'code', '5.5 KB', '2 d'),
     ]),
     _file('lib/barrel.dart', 'super_tree.dart', 'code', '0.8 KB', '2 d'),
   ]),
   _dir('example', 'example', [
     _dir('ex/lib', 'lib', [
-      _file('ex/lib/tree_demo.dart', 'account_tree_demo.dart', 'code', '44 KB',
-          'today'),
-      _file('ex/lib/data.dart', 'account_tree_data.dart', 'code', '9.8 KB',
-          'today'),
+      _file('ex/lib/tree_demo.dart', 'account_tree_demo.dart', 'code', '44 KB', 'today'),
+      _file('ex/lib/data.dart', 'account_tree_data.dart', 'code', '9.8 KB', 'today'),
       _file('ex/lib/main.dart', 'main.dart', 'code', '21 KB', '1 h'),
     ]),
   ]),
@@ -70,11 +57,9 @@ class FileTreeDemo extends StatefulWidget {
 }
 
 class _FileTreeDemoState extends State<FileTreeDemo> {
-  late final SuperTreeController<FileMeta> _controller =
-      SuperTreeController<FileMeta>(
+  late final SuperTreeController<FileMeta> _controller = SuperTreeController<FileMeta>(
     roots: _fileTree,
     defaultExpandDepth: 0,
-    mode: SuperTreeMode.editable,
     searchText: (n) => n.name,
     newNodeBuilder: (code) => TreeNode<FileMeta>(
         code: code, name: 'new_folder', value: const FileMeta('dir')),
@@ -109,8 +94,7 @@ class _FileTreeDemoState extends State<FileTreeDemo> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: t.fg2),
-        title: Text('File Explorer',
-            style: SuperText.heading.copyWith(color: t.fg1)),
+        title: Text('File Explorer', style: SuperText.heading.copyWith(color: t.fg1)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -144,15 +128,13 @@ class _FileTreeDemoState extends State<FileTreeDemo> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(m.size ?? '',
-                          style: SuperText.mono
-                              .copyWith(fontSize: 11.5, color: t.fg2)),
+                          style: SuperText.mono.copyWith(fontSize: 11.5, color: t.fg2)),
                       const SizedBox(width: 12),
                       SizedBox(
                         width: 46,
                         child: Text(m.modified ?? '',
                             textAlign: TextAlign.end,
-                            style: SuperText.caption
-                                .copyWith(fontSize: 11, color: t.fg4)),
+                            style: SuperText.caption.copyWith(fontSize: 11, color: t.fg4)),
                       ),
                     ],
                   );

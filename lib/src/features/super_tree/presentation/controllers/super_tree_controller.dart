@@ -29,6 +29,19 @@ import '../../domain/usecases/tree_logic.dart';
 ///                 delete subtree and drag-and-drop reordering.
 enum SuperTreeMode { readable, editable }
 
+/// How checkbox selection behaves in a [SuperTree].
+///
+/// * [none]   — no checkboxes; selection is disabled (the default).
+/// * [single] — at most one checkbox is on at a time (radio-like behaviour,
+///              still rendered as a checkbox). Any node may be selected.
+/// * [multi]  — many checkboxes; checking a group cascades to every descendant
+///              leaf, and each group row shows a tristate ([TreeCheckState])
+///              derived from its leaves.
+enum SuperTreeSelectionMode { none, single, multi }
+
+/// The tristate of a node's checkbox under [SuperTreeSelectionMode.multi].
+enum TreeCheckState { unchecked, partial, checked }
+
 class SuperTreeController<T> extends ChangeNotifier {
   SuperTreeController({
     required List<TreeNode<T>> roots,
@@ -36,12 +49,16 @@ class SuperTreeController<T> extends ChangeNotifier {
     int defaultExpandDepth = 1,
     String query = '',
     SuperTreeMode mode = SuperTreeMode.readable,
+    this.selectionMode = SuperTreeSelectionMode.none,
+    Set<String>? initialChecked,
     this.onOpenLeaf,
     this.onTreeChanged,
+    this.onSelectionChanged,
     TreeNode<T> Function(String code)? newNodeBuilder,
   })  : _roots = roots,
         _query = query,
         _mode = mode,
+        _checked = {...?initialChecked},
         _newNodeBuilder = newNodeBuilder {
     _expanded = TreeLogic.groupCodes(roots, maxDepth: defaultExpandDepth).toSet();
   }
@@ -57,6 +74,13 @@ class SuperTreeController<T> extends ChangeNotifier {
   /// new roots — the host's hook to persist the mutated tree.
   final void Function(List<TreeNode<T>> roots)? onTreeChanged;
 
+  /// The checkbox selection behaviour. Immutable for the controller's lifetime.
+  final SuperTreeSelectionMode selectionMode;
+
+  /// Called after every selection change with the current set of checked leaf
+  /// codes (a single code in [SuperTreeSelectionMode.single]).
+  final void Function(Set<String> checked)? onSelectionChanged;
+
   /// Mints a fresh node for the "add" actions. Defaults to an untitled leaf.
   final TreeNode<T> Function(String code)? _newNodeBuilder;
 
@@ -68,6 +92,10 @@ class SuperTreeController<T> extends ChangeNotifier {
   SuperTreeMode _mode;
   String? _editingId;
   int _seq = 0;
+
+  /// Leaf codes the user has turned on. The single source of truth for
+  /// selection — group states are derived from this set, never stored.
+  Set<String> _checked;
 
   // ── reads ──
   List<TreeNode<T>> get roots => _roots;
@@ -192,6 +220,125 @@ class SuperTreeController<T> extends ChangeNotifier {
     } else {
       openLeaf(node);
     }
+  }
+
+  // ── checkbox selection (single / multi) ───────────────────────────────────
+  // Leaves are the source of truth (`_checked`); group states are derived so a
+  // group can never disagree with its children. In single mode the set holds at
+  // most one code (any node). Disabled entirely when [selectionMode] is none.
+
+  /// Whether checkboxes are shown / selection is active.
+  bool get selectable => selectionMode != SuperTreeSelectionMode.none;
+
+  /// The checked leaf codes (a single code in [SuperTreeSelectionMode.single]).
+  Set<String> get checked => Set<String>.unmodifiable(_checked);
+
+  /// How many leaves are checked.
+  int get checkedCount => _checked.length;
+
+  /// The checked nodes, resolved against the current tree (skips stale codes).
+  List<TreeNode<T>> get checkedNodes =>
+      [for (final c in _checked) TreeLogic.findNode(_roots, c)].whereType<TreeNode<T>>().toList();
+
+  /// The tristate of [code] for rendering its checkbox. A leaf is checked iff in
+  /// the set; a group reflects its leaves (all ⇒ checked, some ⇒ partial).
+  TreeCheckState checkState(String code) {
+    if (!selectable) return TreeCheckState.unchecked;
+    final node = TreeLogic.findNode(_roots, code);
+    if (node == null) return TreeCheckState.unchecked;
+    if (!node.hasChildren) {
+      return _checked.contains(code) ? TreeCheckState.checked : TreeCheckState.unchecked;
+    }
+    if (selectionMode == SuperTreeSelectionMode.single) {
+      // Groups aren't aggregated in single mode — only the exact node counts.
+      return _checked.contains(code) ? TreeCheckState.checked : TreeCheckState.unchecked;
+    }
+    final leaves = TreeLogic.leafCodes(node);
+    final on = leaves.where(_checked.contains).length;
+    if (on == 0) return TreeCheckState.unchecked;
+    if (on == leaves.length) return TreeCheckState.checked;
+    return TreeCheckState.partial;
+  }
+
+  /// Convenience: fully-checked? (false for partial / unchecked.)
+  bool isChecked(String code) => checkState(code) == TreeCheckState.checked;
+
+  /// The overall tristate across every root — drives the header "select all".
+  TreeCheckState get rootCheckState {
+    if (!selectable || _roots.isEmpty) return TreeCheckState.unchecked;
+    final all = _roots.expand(TreeLogic.leafCodes).toList();
+    if (all.isEmpty) return TreeCheckState.unchecked;
+    final on = all.where(_checked.contains).length;
+    if (on == 0) return TreeCheckState.unchecked;
+    if (on == all.length) return TreeCheckState.checked;
+    return TreeCheckState.partial;
+  }
+
+  void _emitSelection() {
+    notifyListeners();
+    onSelectionChanged?.call(Set<String>.unmodifiable(_checked));
+  }
+
+  /// Toggle [node]'s checkbox per the active selection mode. No-op when
+  /// selection is disabled.
+  void toggleChecked(TreeNode<T> node) {
+    if (!selectable) return;
+    switch (selectionMode) {
+      case SuperTreeSelectionMode.none:
+        return;
+      case SuperTreeSelectionMode.single:
+        // Radio-like: replace the selection, or clear it when re-tapped.
+        _checked = _checked.contains(node.code) ? <String>{} : <String>{node.code};
+      case SuperTreeSelectionMode.multi:
+        final leaves = TreeLogic.leafCodes(node);
+        final allOn = leaves.every(_checked.contains);
+        if (allOn) {
+          _checked.removeAll(leaves);
+        } else {
+          _checked.addAll(leaves);
+        }
+    }
+    _emitSelection();
+  }
+
+  /// Toggle the checkbox of the focused row (keyboard `Space` in selection mode).
+  void toggleCheckedFocused() {
+    final cur = _current;
+    if (cur != null) toggleChecked(cur);
+  }
+
+  /// Check every leaf in the tree (multi mode). No-op otherwise.
+  void checkAll() {
+    if (selectionMode != SuperTreeSelectionMode.multi) return;
+    _checked = _roots.expand(TreeLogic.leafCodes).toSet();
+    _emitSelection();
+  }
+
+  /// Clear the whole selection.
+  void clearChecked() {
+    if (_checked.isEmpty) return;
+    _checked = <String>{};
+    _emitSelection();
+  }
+
+  /// Toggle between all-checked and none (the header master checkbox).
+  void toggleCheckAll() {
+    if (rootCheckState == TreeCheckState.checked) {
+      clearChecked();
+    } else {
+      checkAll();
+    }
+  }
+
+  /// Replace the checked set directly (host-driven selection). In single mode
+  /// only the first code is kept.
+  void setChecked(Iterable<String> codes) {
+    if (!selectable) return;
+    final next = selectionMode == SuperTreeSelectionMode.single
+        ? (codes.isEmpty ? <String>{} : <String>{codes.first})
+        : codes.toSet();
+    _checked = next;
+    _emitSelection();
   }
 
   // ── keyboard navigation (intent methods) ──
@@ -351,6 +498,11 @@ class SuperTreeController<T> extends ChangeNotifier {
     if (_editingId == code) _editingId = null;
     if (_focusId == code) _focusId = parent?.code;
     _expanded.remove(code);
+    // Drop any selection that lived inside the removed subtree.
+    if (selectable && _checked.isNotEmpty) {
+      final node = TreeLogic.findNode(_roots, code);
+      if (node != null) _checked.removeAll(TreeLogic.leafCodes(node));
+    }
     _commit(TreeLogic.removeNode(_roots, code));
   }
 

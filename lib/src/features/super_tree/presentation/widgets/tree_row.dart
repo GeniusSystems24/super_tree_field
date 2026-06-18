@@ -150,6 +150,18 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
         children: [
           // ── drag handle (editable) ──
           if (editable) _dragHandle(t, node),
+          // ── selection checkbox ──
+          if (c.selectable) ...[
+            TreeCheckbox(
+              state: c.checkState(node.code),
+              accent: widget.accent,
+              onTap: () {
+                widget.onFocusRequest?.call();
+                c.toggleChecked(node);
+              },
+            ),
+            const SizedBox(width: 10),
+          ],
           // ── twisty ──
           SizedBox(
             width: 14,
@@ -531,6 +543,52 @@ class _MenuButton extends StatelessWidget {
         child: SizedBox(
           width: 18,
           child: Icon(Icons.more_vert, size: 16, color: color),
+        ),
+      ),
+    );
+  }
+}
+
+/// A design-system tristate checkbox used for row selection. 18×18, 4 px
+/// radius, hairline border when off, accent fill with a check (or a dash when
+/// partial) when on. Owns its own tap so the row beneath does not activate.
+/// Also reused by [SuperTree]'s header "select all" control.
+class TreeCheckbox extends StatelessWidget {
+  const TreeCheckbox({super.key, required this.state, required this.accent, required this.onTap});
+
+  final TreeCheckState state;
+  final Color accent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.superTheme;
+    final on = state != TreeCheckState.unchecked;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: SuperTokens.durFast,
+          width: 18,
+          height: 18,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: on ? accent : const Color(0x00000000),
+            borderRadius: BorderRadius.circular(SuperTokens.radiusControl),
+            border: Border.all(
+              color: on ? accent : t.borderStrong,
+              width: on ? 0 : 1.4,
+            ),
+          ),
+          child: on
+              ? Icon(
+                  state == TreeCheckState.partial ? Icons.remove : Icons.check,
+                  size: 13,
+                  color: Colors.white,
+                )
+              : null,
         ),
       ),
     );

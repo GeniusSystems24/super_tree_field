@@ -3,6 +3,36 @@
 All notable changes to **super_tree** are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/); versioning is [SemVer](https://semver.org/).
 
+## [0.3.0] — 2026-06-18
+
+### Added
+- **Checkbox selection modes** — opt in with `SuperTreeController(selectionMode: …)`:
+  - **`SuperTreeSelectionMode.single`** — radio-like: at most one checkbox on at
+    a time (any node), still rendered as a checkbox.
+  - **`SuperTreeSelectionMode.multi`** — many checkboxes. Checking a group
+    cascades to every descendant leaf; each group row shows a **tristate**
+    (`TreeCheckState.checked / partial / unchecked`) derived from its leaves —
+    leaves are the single source of truth, so a group can never disagree with
+    its children. The column header gains a master **select-all** checkbox.
+  - **`SuperTreeSelectionMode.none`** (default) — checkboxes hidden; unchanged
+    behaviour for existing trees.
+- Selection state + intents on `SuperTreeController`: `checkState(code)`,
+  `isChecked`, `rootCheckState`, `checked` / `checkedCount` / `checkedNodes`,
+  `toggleChecked(node)`, `toggleCheckedFocused()`, `checkAll` / `clearChecked` /
+  `toggleCheckAll`, and host-driven `setChecked(codes)`. An `onSelectionChanged`
+  callback fires with the checked leaf codes after every change; seed the
+  initial state with `initialChecked`.
+- **Keyboard**: in selection mode `Space` toggles the focused row's checkbox
+  (`Enter` still opens a leaf / toggles a group). Cheatsheet updated.
+- **UI**: a tristate `TreeCheckbox` cell on every row, a header select-all (multi
+  mode), and a selection-summary footer ("N items selected · Clear").
+- **`TreeLogic.leafCodes(node)`** — the leaf codes under a node (the selection
+  model's truth set).
+- **New example — `PermissionTreeDemo`** ("Permission Settings"): a role's
+  permissions granted via checkboxes, with a Single / Multi segmented toggle
+  demonstrating both modes over one `SuperTree<Permission>`. Bilingual, scoped
+  by access level (View / Write / Admin) with a destructive-permission accent.
+
 ## [0.2.0] — 2026-06-17
 
 ### Added
