@@ -281,6 +281,7 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
 
     // ── drop target (editable, not searching) ──
     if (editable) {
+      final child = interactive;
       interactive = DragTarget<String>(
         onWillAcceptWithDetails: (d) => c.canDrop(d.data, node.code),
         onMove: (d) {
@@ -296,7 +297,7 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
           setState(() => _dropPos = null);
           c.moveNode(d.data, node.code, z);
         },
-        builder: (context, _, __) => interactive,
+        builder: (context, _, __) => child,
       );
     }
 
