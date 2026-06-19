@@ -91,8 +91,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
     super.initState();
     _searchCtl.text = _c.query;
     _c.addListener(_syncSearch);
-    _searchFocus.addListener(
-        () => setState(() => _searchActive = _searchFocus.hasFocus));
+    _searchFocus.addListener(() => setState(() => _searchActive = _searchFocus.hasFocus));
   }
 
   void _syncSearch() {
@@ -152,8 +151,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
       _c.jumpLast();
       return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.arrowRight ||
-        key == LogicalKeyboardKey.arrowLeft) {
+    if (key == LogicalKeyboardKey.arrowRight || key == LogicalKeyboardKey.arrowLeft) {
       arrowGoesInto(key, dir) ? _c.stepInto() : _c.stepOut();
       return KeyEventResult.handled;
     }
@@ -212,10 +210,8 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
               tooltip: 'Keyboard shortcuts  ·  ?',
               onPressed: () => showShortcutsHelp(context),
             ),
-            _toolBtn(context,
-                label: 'Expand all', up: false, onTap: _c.expandAll),
-            _toolBtn(context,
-                label: 'Collapse', up: true, onTap: _c.collapseAll),
+            _toolBtn(context, label: 'Expand all', up: false, onTap: _c.expandAll),
+            _toolBtn(context, label: 'Collapse', up: true, onTap: _c.collapseAll),
           ],
         ),
         if (widget.toolbarExtra != null) ...[
@@ -283,9 +279,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
   }
 
   Widget _toolAction(BuildContext context,
-      {required IconData icon,
-      required String label,
-      required VoidCallback onTap}) {
+      {required IconData icon, required String label, required VoidCallback onTap}) {
     final t = context.superTheme;
     return _HoverButton(
       onTap: onTap,
@@ -305,10 +299,8 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
             Icon(icon, size: 16, color: widget.accent),
             const SizedBox(width: 7),
             Text(label,
-                style: SuperText.body.copyWith(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: widget.accent)),
+                style: SuperText.body
+                    .copyWith(fontSize: 13, fontWeight: FontWeight.w600, color: widget.accent)),
           ],
         ),
       ),
@@ -354,8 +346,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
                     isCollapsed: true,
                     border: InputBorder.none,
                     hintText: widget.placeholder,
-                    hintStyle:
-                        SuperText.body.copyWith(fontSize: 13.5, color: t.fg4),
+                    hintStyle: SuperText.body.copyWith(fontSize: 13.5, color: t.fg4),
                   ),
                 ),
               ),
@@ -387,15 +378,12 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
         padding: const EdgeInsets.symmetric(horizontal: 10),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: on
-              ? Color.alphaBlend(widget.accent.withOpacity(0.18), t.surface)
-              : t.inputBg,
+          color: on ? Color.alphaBlend(widget.accent.withOpacity(0.18), t.surface) : t.inputBg,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: on ? widget.accent : t.border),
         ),
         child: Text(q,
-            style: SuperText.mono
-                .copyWith(fontSize: 11.5, color: on ? widget.accent : t.fg2)),
+            style: SuperText.mono.copyWith(fontSize: 11.5, color: on ? widget.accent : t.fg2)),
       ),
     );
   }
@@ -421,8 +409,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
               child: Icon(Icons.keyboard_arrow_down, size: 16, color: t.fg2),
             ),
             const SizedBox(width: 7),
-            Text(label,
-                style: SuperText.body.copyWith(fontSize: 13, color: t.fg1)),
+            Text(label, style: SuperText.body.copyWith(fontSize: 13, color: t.fg1)),
           ],
         ),
       ),
@@ -515,16 +502,14 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
                     ],
                     Flexible(
                       child: Text(widget.title,
-                          style: SuperText.heading
-                              .copyWith(fontSize: 15, color: t.fg1)),
+                          style: SuperText.heading.copyWith(fontSize: 15, color: t.fg1)),
                     ),
                   ],
                 ),
                 if (widget.subtitle != null) ...[
                   const SizedBox(height: 2),
                   Text(widget.subtitle!,
-                      style: SuperText.caption
-                          .copyWith(fontSize: 12, color: t.fg3)),
+                      style: SuperText.caption.copyWith(fontSize: 12, color: t.fg3)),
                 ],
               ],
             ),
@@ -534,8 +519,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
             searching
                 ? '${_c.visibleLeaves} of ${_c.totalLeaves}'
                 : '${_c.totalLeaves} ${widget.unit}',
-            style: SuperText.label
-                .copyWith(fontSize: 10, letterSpacing: 0.5, color: t.fg3),
+            style: SuperText.label.copyWith(fontSize: 10, letterSpacing: 0.5, color: t.fg3),
           ),
         ],
       ),
@@ -562,13 +546,11 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           ],
           Expanded(
             child: Text(widget.nameColumnLabel.toUpperCase(),
-                style: SuperText.label.copyWith(
-                    fontSize: 9.5, letterSpacing: 0.76, color: t.fg3)),
+                style: SuperText.label.copyWith(fontSize: 9.5, letterSpacing: 0.76, color: t.fg3)),
           ),
           if (widget.trailingColumnLabel.isNotEmpty)
             Text(widget.trailingColumnLabel.toUpperCase(),
-                style: SuperText.label.copyWith(
-                    fontSize: 9.5, letterSpacing: 0.76, color: t.fg3)),
+                style: SuperText.label.copyWith(fontSize: 9.5, letterSpacing: 0.76, color: t.fg3)),
         ],
       ),
     );
@@ -585,14 +567,12 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
             Icon(Icons.account_tree_outlined, size: 26, color: t.fg4),
             const SizedBox(height: 12),
             Text('This tree is empty',
-                style: SuperText.body
-                    .copyWith(fontWeight: FontWeight.w600, color: t.fg2)),
+                style: SuperText.body.copyWith(fontWeight: FontWeight.w600, color: t.fg2)),
             const SizedBox(height: 4),
             Text('Add a node to get started.',
                 style: SuperText.caption.copyWith(color: t.fg3)),
             const SizedBox(height: 16),
-            _toolAction(context,
-                icon: Icons.add, label: 'Add node', onTap: _c.addRoot),
+            _toolAction(context, icon: Icons.add, label: 'Add node', onTap: _c.addRoot),
           ],
         ),
       );
@@ -604,8 +584,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           Icon(Icons.search_off, size: 26, color: t.fg4),
           const SizedBox(height: 12),
           Text('No matches for “${_c.query}”',
-              style: SuperText.body
-                  .copyWith(fontWeight: FontWeight.w600, color: t.fg2)),
+              style: SuperText.body.copyWith(fontWeight: FontWeight.w600, color: t.fg2)),
           const SizedBox(height: 4),
           Text('Try a different code or name, or clear the filters.',
               style: SuperText.caption.copyWith(color: t.fg3)),
@@ -635,9 +614,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
                   TextSpan(
                     text: _c.selected,
                     style: SuperText.mono.copyWith(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                        color: t.fg1),
+                        fontSize: 12.5, fontWeight: FontWeight.w700, color: t.fg1),
                   ),
                 ],
               ),
@@ -660,12 +637,13 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
     final n = _c.checkedCount;
     final single = _c.selectionMode == SuperTreeSelectionMode.single;
     return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-        decoration: BoxDecoration(
-          color: Color.alphaBlend(widget.accent.withOpacity(0.07), t.surface),
-          border: Border(top: BorderSide(color: t.border)),
-        ),
-        child: Row(children: [
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+      decoration: BoxDecoration(
+        color: Color.alphaBlend(widget.accent.withOpacity(0.07), t.surface),
+        border: Border(top: BorderSide(color: t.border)),
+      ),
+      child: Row(
+        children: [
           Icon(single ? Icons.radio_button_checked : Icons.check_box_outlined,
               size: 15, color: widget.accent),
           const SizedBox(width: 10),
@@ -677,19 +655,21 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
                   TextSpan(
                     text: '$n',
                     style: SuperText.mono.copyWith(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                        color: t.fg1),
+                        fontSize: 12.5, fontWeight: FontWeight.w700, color: t.fg1),
                   ),
-                  TextSpan(
-                      text: single
-                          ? ' selected'
-                          : ' ${n == 1 ? 'item' : 'items'} selected'),
+                  TextSpan(text: single ? ' selected' : ' ${n == 1 ? 'item' : 'items'} selected'),
                 ],
               ),
             ),
           ),
-        ]));
+          GestureDetector(
+            onTap: _c.clearChecked,
+            child: Text('Clear',
+                style: SuperText.label.copyWith(fontSize: 10.5, letterSpacing: 0.5, color: t.fg3)),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -711,8 +691,7 @@ class _HoverButtonState extends State<_HoverButton> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child:
-          GestureDetector(onTap: widget.onTap, child: widget.builder(_hover)),
+      child: GestureDetector(onTap: widget.onTap, child: widget.builder(_hover)),
     );
   }
 }

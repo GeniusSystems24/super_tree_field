@@ -9,7 +9,7 @@
 
 import 'package:flutter/widgets.dart' show Color, immutable;
 
-import '../../../../core/theme/super_tokens.dart';
+import 'package:super_core/super_core.dart';
 
 /// The five account natures of a double-entry chart of accounts.
 enum AccountType {
