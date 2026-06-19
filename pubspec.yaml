@@ -7,8 +7,18 @@ description: >
   preserving search, a DR/CR nature column and per-account share bars. The
   engine is generic over a node payload, so it reskins for files, org charts or
   any nested data. Light/dark + LTR/RTL.
-publish_to: "none"
+
 version: 0.3.0
+homepage: https://geniussystems24.github.io/super_tree
+repository: https://github.com/GeniusSystems24/super_tree
+issue_tracker: https://github.com/GeniusSystems24/super_tree/issues
+
+topics:
+  - flutter
+  - widgets
+  - treeview
+  - hierarchy
+  - accessibility
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -18,8 +28,7 @@ dependencies:
   flutter:
     sdk: flutter
   # Shared GeniusLink design-system foundation (theme, tokens, type, widgets).
-  super_core:
-    path: ../super_core
+  super_core: ^0.1.0
 
 dev_dependencies:
   flutter_test:

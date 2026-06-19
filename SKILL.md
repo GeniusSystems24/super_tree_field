@@ -33,8 +33,7 @@ roll-ups and RTL come for free.
 
 ```yaml
 dependencies:
-  super_tree:
-    path: ../super_tree
+  super_tree: ^0.3.0
 ```
 
 ```dart
