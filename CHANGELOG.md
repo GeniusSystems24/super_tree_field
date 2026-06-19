@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to **super_tree** are documented here. Format follows
+All notable changes to **super_tree_field** are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/); versioning is [SemVer](https://semver.org/).
 
 ## [0.3.0] — 2026-06-18

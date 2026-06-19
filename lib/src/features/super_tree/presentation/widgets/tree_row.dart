@@ -1,5 +1,5 @@
 // ============================================================
-// features/super_tree/presentation/widgets/tree_row.dart
+// features/super_tree_field/presentation/widgets/tree_row.dart
 // ------------------------------------------------------------
 // One recursive node row. Owns the twisty, indent, connector line, the
 // hover/selected/focused backgrounds, the highlighted name, the optional Arabic

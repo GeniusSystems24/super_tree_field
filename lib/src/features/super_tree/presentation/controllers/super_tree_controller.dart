@@ -1,5 +1,5 @@
 // ============================================================
-// features/super_tree/presentation/controllers/super_tree_controller.dart
+// features/super_tree_field/presentation/controllers/super_tree_controller.dart
 // ------------------------------------------------------------
 // The MVC controller for SuperTree — the single source of truth a thin View
 // renders and forwards events to. A faithful port of the React component's hook

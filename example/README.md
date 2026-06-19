@@ -1,3 +1,3 @@
-# super_tree_example
+# super_tree_field_example
 
 A new Flutter project.

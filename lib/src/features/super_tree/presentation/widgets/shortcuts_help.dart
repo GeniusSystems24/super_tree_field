@@ -1,5 +1,5 @@
 // ============================================================
-// features/super_tree/presentation/widgets/shortcuts_help.dart
+// features/super_tree_field/presentation/widgets/shortcuts_help.dart
 // ------------------------------------------------------------
 // The keyboard-shortcuts cheatsheet dialog (opened with `?` or the keyboard
 // icon). Mirrors the React `<ShortcutsHelp>` modal. Show it with

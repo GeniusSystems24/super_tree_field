@@ -1,5 +1,5 @@
 // ============================================================
-// features/super_tree/presentation/widgets/highlight_text.dart
+// features/super_tree_field/presentation/widgets/highlight_text.dart
 // ------------------------------------------------------------
 // Renders [text] with the first case-insensitive match of [query] wrapped in an
 // accent-tinted highlight — the tree's search emphasis. Mirrors the React

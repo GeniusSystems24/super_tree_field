@@ -1,5 +1,5 @@
 // ============================================================
-// features/super_tree/super_tree.dart
+// features/super_tree_field/super_tree.dart
 // ------------------------------------------------------------
 // Public barrel for the SuperTree feature.
 //

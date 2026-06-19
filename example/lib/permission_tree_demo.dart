@@ -9,7 +9,7 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
-import 'package:super_tree/super_tree.dart';
+import 'package:super_tree_field/super_tree.dart';
 
 /// A permission's payload: an access [level] (scope pill) and a [danger] flag
 /// for destructive grants. Group (module) nodes carry only an [icon].

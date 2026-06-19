@@ -16,8 +16,8 @@
 /// Shared, cross-feature code lives in `lib/src/core/`.
 ///
 /// Import this single barrel to get everything:
-///   `import 'package:super_tree/super_tree.dart';`
-library super_tree;
+///   `import 'package:super_tree_field/super_tree.dart';`
+library super_tree_field;
 
 // ── Core (theme tokens, shared widgets, utils) ──────────────────────────────
 export 'src/core/core.dart';

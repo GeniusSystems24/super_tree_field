@@ -1,5 +1,5 @@
-name: super_tree_example
-description: Runnable gallery for the super_tree Flutter package.
+name: super_tree_field_example
+description: Runnable gallery for the super_tree_field Flutter package.
 
 version: 0.1.0
 
@@ -19,7 +19,7 @@ dependencies:
     sdk: flutter
   # Shared GeniusLink foundation (transitive via the package; listed for resolution).
   super_core: ^0.1.0
-  super_tree:
+  super_tree_field:
     path: ../
 
 dev_dependencies:

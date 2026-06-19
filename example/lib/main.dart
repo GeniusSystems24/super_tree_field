@@ -1,7 +1,7 @@
 // ============================================================
 // example/lib/main.dart
 // ------------------------------------------------------------
-// Gallery launcher for super_tree. Registers the SuperThemeData extension (so
+// Gallery launcher for super_tree_field. Registers the SuperThemeData extension (so
 // the tree themes light/dark in parity), exposes a global Light/Dark + LTR/RTL
 // toggle, and lists the three demos that share ONE engine:
 //   • Account Tree   — the flagship: SuperTree<AccountData> (KPIs · balance · DR/CR)
@@ -10,7 +10,7 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
-import 'package:super_tree/super_tree.dart';
+import 'package:super_tree_field/super_tree.dart';
 
 import 'file_tree_demo.dart';
 import 'org_tree_demo.dart';

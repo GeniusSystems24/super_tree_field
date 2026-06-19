@@ -1,4 +1,4 @@
-name: super_tree
+name: super_tree_field
 description: >
   Super Tree — a GeniusLink design-system Flutter package providing SuperTree, a
   recursive, generic, keyboard-first hierarchy component. Its flagship instance
@@ -9,9 +9,9 @@ description: >
   any nested data. Light/dark + LTR/RTL.
 
 version: 0.3.0
-homepage: https://geniussystems24.github.io/super_tree
-repository: https://github.com/GeniusSystems24/super_tree
-issue_tracker: https://github.com/GeniusSystems24/super_tree/issues
+homepage: https://geniussystems24.github.io/super_tree_field
+repository: https://github.com/GeniusSystems24/super_tree_field
+issue_tracker: https://github.com/GeniusSystems24/super_tree_field/issues
 
 topics:
   - flutter

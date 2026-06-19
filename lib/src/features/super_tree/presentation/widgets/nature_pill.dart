@@ -1,5 +1,5 @@
 // ============================================================
-// features/super_tree/presentation/widgets/nature_pill.dart
+// features/super_tree_field/presentation/widgets/nature_pill.dart
 // ------------------------------------------------------------
 // The DR / CR debit-credit pill — blue for debit, orange for credit — shown in
 // the account tree's "Nature" column. Mirrors the React `<NaturePill>` atom.

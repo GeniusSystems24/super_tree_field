@@ -1,5 +1,5 @@
 // ============================================================
-// features/super_tree/presentation/widgets/account_tree.dart
+// features/super_tree_field/presentation/widgets/account_tree.dart
 // ------------------------------------------------------------
 // The flagship instance of SuperTree: a five-level bilingual chart of accounts
 // with roll-up balances, a financial-summary KPI grid, a live A = L + E balance

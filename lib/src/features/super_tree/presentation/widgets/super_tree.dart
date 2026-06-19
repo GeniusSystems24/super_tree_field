@@ -1,5 +1,5 @@
 // ============================================================
-// features/super_tree/presentation/widgets/super_tree.dart
+// features/super_tree_field/presentation/widgets/super_tree.dart
 // ------------------------------------------------------------
 // The generic SuperTree View: a search toolbar (live filter · match count ·
 // sample chips · expand-all / collapse · keyboard help) over a bordered tree
