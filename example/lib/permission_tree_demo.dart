@@ -21,10 +21,10 @@ class Permission {
 }
 
 Color _levelColor(BuildContext context, Permission p) {
-  if (p.danger) return SuperTokens.danger;
+  if (p.danger) return SuperMaterialThemeData.of(context).colorScheme.error;
   switch (p.level) {
     case 'View':
-      return SuperTokens.accent;
+      return SuperMaterialThemeData.of(context).colorScheme.primary;
     case 'Write':
       return SuperTokens.success;
     case 'Admin':
@@ -37,12 +37,19 @@ Color _levelColor(BuildContext context, Permission p) {
 TreeNode<Permission> _mod(String code, String name, String ar, IconData icon,
         List<TreeNode<Permission>> children) =>
     TreeNode<Permission>(
-        code: code, name: name, ar: ar, value: Permission(icon: icon), children: children);
+        code: code,
+        name: name,
+        ar: ar,
+        value: Permission(icon: icon),
+        children: children);
 
 TreeNode<Permission> _perm(String code, String name, String ar, String level,
         {bool danger = false}) =>
     TreeNode<Permission>(
-        code: code, name: name, ar: ar, value: Permission(level: level, danger: danger));
+        code: code,
+        name: name,
+        ar: ar,
+        value: Permission(level: level, danger: danger));
 
 final List<TreeNode<Permission>> _permissionTree = [
   _mod('acc', 'Accounting', 'المحاسبة', Icons.account_balance_outlined, [
@@ -50,12 +57,14 @@ final List<TreeNode<Permission>> _permissionTree = [
     _perm('acc.create', 'Create journal entry', 'إنشاء قيد يومية', 'Write'),
     _perm('acc.post', 'Post entries', 'ترحيل القيود', 'Write'),
     _perm('acc.reverse', 'Reverse entries', 'عكس القيود', 'Write'),
-    _perm('acc.coa', 'Manage chart of accounts', 'إدارة شجرة الحسابات', 'Admin'),
+    _perm(
+        'acc.coa', 'Manage chart of accounts', 'إدارة شجرة الحسابات', 'Admin'),
   ]),
   _mod('inv', 'Inventory', 'المخزون', Icons.inventory_2_outlined, [
     _perm('inv.view', 'View stock levels', 'عرض المخزون', 'View'),
     _perm('inv.issue', 'Issue inventory', 'صرف المخزون', 'Write'),
-    _perm('inv.transfer', 'Transfer between stores', 'تحويل بين المخازن', 'Write'),
+    _perm('inv.transfer', 'Transfer between stores', 'تحويل بين المخازن',
+        'Write'),
     _perm('inv.adjust', 'Adjust quantities', 'تعديل الكميات', 'Admin'),
   ]),
   _mod('trz', 'Treasury', 'الخزينة', Icons.savings_outlined, [
@@ -64,15 +73,25 @@ final List<TreeNode<Permission>> _permissionTree = [
     _perm('trz.transfer', 'Local transfers', 'التحويلات المحلية', 'Write'),
     _perm('trz.reconcile', 'Reconcile statements', 'تسوية الكشوف', 'Admin'),
   ]),
-  _mod('adm', 'Administration', 'إدارة النظام', Icons.admin_panel_settings_outlined, [
+  _mod('adm', 'Administration', 'إدارة النظام',
+      Icons.admin_panel_settings_outlined, [
     _perm('adm.users', 'Manage users', 'إدارة المستخدمين', 'Admin'),
-    _perm('adm.roles', 'Manage roles & permissions', 'إدارة الأدوار والصلاحيات', 'Admin'),
+    _perm('adm.roles', 'Manage roles & permissions', 'إدارة الأدوار والصلاحيات',
+        'Admin'),
     _perm('adm.audit', 'View audit log', 'عرض سجل التدقيق', 'View'),
-    _perm('adm.wipe', 'Delete fiscal-year data', 'حذف بيانات السنة المالية', 'Admin', danger: true),
+    _perm('adm.wipe', 'Delete fiscal-year data', 'حذف بيانات السنة المالية',
+        'Admin',
+        danger: true),
   ]),
 ];
 
-const _multiSeed = {'acc.view', 'acc.create', 'acc.post', 'inv.view', 'trz.view'};
+const _multiSeed = {
+  'acc.view',
+  'acc.create',
+  'acc.post',
+  'inv.view',
+  'trz.view'
+};
 const _singleSeed = {'acc.view'};
 
 class PermissionTreeDemo extends StatefulWidget {
@@ -83,18 +102,23 @@ class PermissionTreeDemo extends StatefulWidget {
 }
 
 class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
-  static const _accent = SuperTokens.accent;
+  static Color _accent(BuildContext context) =>
+      SuperMaterialThemeData.of(context).colorScheme.primary;
 
   // One controller per mode so each remembers its own selection while the user
   // flips the segmented control. selectionMode is fixed per controller.
-  late final Map<SuperTreeSelectionMode, SuperTreeController<Permission>> _controllers = {
-    SuperTreeSelectionMode.multi: _build(SuperTreeSelectionMode.multi, _multiSeed),
-    SuperTreeSelectionMode.single: _build(SuperTreeSelectionMode.single, _singleSeed),
+  late final Map<SuperTreeSelectionMode, SuperTreeController<Permission>>
+      _controllers = {
+    SuperTreeSelectionMode.multi:
+        _build(SuperTreeSelectionMode.multi, _multiSeed),
+    SuperTreeSelectionMode.single:
+        _build(SuperTreeSelectionMode.single, _singleSeed),
   };
 
   SuperTreeSelectionMode _mode = SuperTreeSelectionMode.multi;
 
-  SuperTreeController<Permission> _build(SuperTreeSelectionMode mode, Set<String> seed) =>
+  SuperTreeController<Permission> _build(
+          SuperTreeSelectionMode mode, Set<String> seed) =>
       SuperTreeController<Permission>(
         roots: _permissionTree,
         defaultExpandDepth: 1,
@@ -125,7 +149,8 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: t.fg2),
-        title: Text('Permission Settings', style: SuperText.heading.copyWith(color: t.fg1)),
+        title: Text('Permission Settings',
+            style: SuperText.heading.copyWith(color: t.fg1)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -137,9 +162,11 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text('ADMINISTRATION • ROLES & PERMISSIONS',
-                      style: SuperText.eyebrow.copyWith(color: _accent)),
+                      style:
+                          SuperText.eyebrow.copyWith(color: _accent(context))),
                   const SizedBox(height: SuperTokens.space2),
-                  Text('Permission Settings صلاحيات', style: SuperText.h1.copyWith(color: t.fg1)),
+                  Text('Permission Settings صلاحيات',
+                      style: SuperText.h1.copyWith(color: t.fg1)),
                   const SizedBox(height: SuperTokens.space6),
                   _ModeToggle(
                     mode: _mode,
@@ -149,7 +176,7 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
                   SuperTree<Permission>(
                     key: ValueKey(_mode),
                     controller: _controller,
-                    accent: _accent,
+                    accent: _accent(context),
                     title: 'Role: Senior Accountant',
                     subtitle: multi
                         ? 'Check the permissions granted to this role · a module checks all its actions'
@@ -172,18 +199,24 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
     );
   }
 
-  Widget _leading(BuildContext context, TreeNode<Permission> node, TreeRowInfo info) {
-    final t = context.superTheme;
+  Widget _leading(
+      BuildContext context, TreeNode<Permission> node, TreeRowInfo info) {
     final p = node.value;
     if (info.hasChildren) {
-      return Icon(p?.icon ?? Icons.folder_outlined, size: 16, color: _accent);
+      return Icon(p?.icon ?? Icons.folder_outlined,
+          size: 16, color: _accent(context));
     }
     final c = _levelColor(context, p ?? const Permission());
-    return Icon(p?.danger == true ? Icons.warning_amber_rounded : Icons.vpn_key_outlined,
-        size: 14, color: c);
+    return Icon(
+        p?.danger == true
+            ? Icons.warning_amber_rounded
+            : Icons.vpn_key_outlined,
+        size: 14,
+        color: c);
   }
 
-  Widget? _trailing(BuildContext context, TreeNode<Permission> node, TreeRowInfo info) {
+  Widget? _trailing(
+      BuildContext context, TreeNode<Permission> node, TreeRowInfo info) {
     final p = node.value;
     if (p == null || p.level == null) return null;
     final c = _levelColor(context, p);
@@ -223,21 +256,37 @@ class _ModeToggle extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: active
-                ? Color.alphaBlend(SuperTokens.accent.withOpacity(0.20), t.surface)
+                ? Color.alphaBlend(
+                    SuperMaterialThemeData.of(context)
+                        .colorScheme
+                        .primary
+                        .withOpacity(0.20),
+                    t.surface)
                 : const Color(0x00000000),
             borderRadius: BorderRadius.circular(SuperTokens.radiusControl - 2),
-            border: Border.all(color: active ? SuperTokens.accent : const Color(0x00000000)),
+            border: Border.all(
+                color: active
+                    ? SuperMaterialThemeData.of(context).colorScheme.primary
+                    : const Color(0x00000000)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 14, color: active ? SuperTokens.accent : t.fg3),
+              Icon(icon,
+                  size: 14,
+                  color: active
+                      ? SuperMaterialThemeData.of(context).colorScheme.primary
+                      : t.fg3),
               const SizedBox(width: 7),
               Text(label,
                   style: SuperText.body.copyWith(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
-                      color: active ? SuperTokens.accent : t.fg3)),
+                      color: active
+                          ? SuperMaterialThemeData.of(context)
+                              .colorScheme
+                              .primary
+                          : t.fg3)),
             ],
           ),
         ),
@@ -247,7 +296,8 @@ class _ModeToggle extends StatelessWidget {
     return Row(
       children: [
         Text('SELECTION MODE',
-            style: SuperText.label.copyWith(fontSize: 10, letterSpacing: 0.6, color: t.fg3)),
+            style: SuperText.label
+                .copyWith(fontSize: 10, letterSpacing: 0.6, color: t.fg3)),
         const SizedBox(width: SuperTokens.space3),
         Container(
           height: SuperTokens.controlHeight,
@@ -260,9 +310,11 @@ class _ModeToggle extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              seg('Multi', Icons.check_box_outlined, SuperTreeSelectionMode.multi),
+              seg('Multi', Icons.check_box_outlined,
+                  SuperTreeSelectionMode.multi),
               const SizedBox(width: 3),
-              seg('Single', Icons.radio_button_checked, SuperTreeSelectionMode.single),
+              seg('Single', Icons.radio_button_checked,
+                  SuperTreeSelectionMode.single),
             ],
           ),
         ),

@@ -142,7 +142,7 @@ class _AccountTreeState extends State<AccountTree> {
 
     return SuperTree<AccountData>(
       controller: _controller,
-      accent: SuperTokens.accent,
+      accent: SuperMaterialThemeData.of(context).colorScheme.primary,
       title: 'Chart of Accounts Hierarchy',
       subtitle: '5 levels · click or use ↑↓ ← → · Enter opens a leaf · right-click to edit',
       nameColumnLabel: 'Account · الحساب',
@@ -402,7 +402,7 @@ class _BalanceBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.superTheme;
-    final c = balanced ? SuperTokens.success : SuperTokens.danger;
+    final c = balanced ? SuperTokens.success : SuperMaterialThemeData.of(context).colorScheme.error;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(

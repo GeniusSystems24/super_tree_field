@@ -42,7 +42,7 @@ class AccountTreeDemo extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text('ACCOUNTING • CHART OF ACCOUNTS',
-                      style: SuperText.eyebrow.copyWith(color: SuperTokens.accent)),
+                      style: SuperText.eyebrow.copyWith(color: SuperMaterialThemeData.of(context).colorScheme.primary)),
                   const SizedBox(height: SuperTokens.space2),
                   Text('Account Tree قيد افتتاحي', style: SuperText.h1.copyWith(color: t.fg1)),
                   const SizedBox(height: SuperTokens.space8),

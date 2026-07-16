@@ -36,7 +36,7 @@ class HighlightText extends StatelessWidget {
       return Text(text, style: style, overflow: overflow, maxLines: 1);
     }
     final t = context.superTheme;
-    final mark = Color.alphaBlend(SuperTokens.accent.withOpacity(0.32), t.surface);
+    final mark = Color.alphaBlend(SuperMaterialThemeData.of(context).colorScheme.primary.withOpacity(0.32), t.surface);
     return RichText(
       maxLines: 1,
       overflow: overflow ?? TextOverflow.clip,

@@ -1,5 +1,5 @@
 // ============================================================
-// features/super_tree_field/domain/entities/account_data.dart
+// features/super_tree/domain/entities/account_data.dart
 // ------------------------------------------------------------
 // The domain payload for the flagship chart-of-accounts tree: an account's
 // [AccountType] (which drives its color, debit/credit nature and grouping) and

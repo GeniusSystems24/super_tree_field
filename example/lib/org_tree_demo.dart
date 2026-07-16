@@ -25,9 +25,14 @@ const Map<String, Color> _deptColor = {
   'Finance': Color(0xFFA855F7),
 };
 
-TreeNode<Person> _p(String code, String name, String role, String dept, String initials,
+TreeNode<Person> _p(
+        String code, String name, String role, String dept, String initials,
         [List<TreeNode<Person>>? children]) =>
-    TreeNode<Person>(code: code, name: name, value: Person(role, dept, initials), children: children);
+    TreeNode<Person>(
+        code: code,
+        name: name,
+        value: Person(role, dept, initials),
+        children: children);
 
 final List<TreeNode<Person>> _orgTree = [
   _p('ceo', 'Layla Al-Saud', 'Chief Executive', 'Exec', 'LS', [
@@ -61,12 +66,16 @@ class OrgTreeDemo extends StatefulWidget {
 class _OrgTreeDemoState extends State<OrgTreeDemo> {
   static const _accent = Color(0xFFA855F7);
 
-  late final SuperTreeController<Person> _controller = SuperTreeController<Person>(
+  late final SuperTreeController<Person> _controller =
+      SuperTreeController<Person>(
     roots: _orgTree,
     defaultExpandDepth: 1,
-    searchText: (n) => '${n.name} ${n.value?.role ?? ''} ${n.value?.dept ?? ''}',
-    newNodeBuilder: (code) =>
-        TreeNode<Person>(code: code, name: 'New report', value: const Person('Role', 'Eng', 'NR')),
+    searchText: (n) =>
+        '${n.name} ${n.value?.role ?? ''} ${n.value?.dept ?? ''}',
+    newNodeBuilder: (code) => TreeNode<Person>(
+        code: code,
+        name: 'New report',
+        value: const Person('Role', 'Eng', 'NR')),
   );
 
   @override
@@ -85,7 +94,8 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: t.fg2),
-        title: Text('Org Chart', style: SuperText.heading.copyWith(color: t.fg1)),
+        title:
+            Text('Org Chart', style: SuperText.heading.copyWith(color: t.fg1)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -121,7 +131,10 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
                     ),
                     child: Text(p.initials,
                         style: SuperText.mono.copyWith(
-                            fontSize: 10, height: 1, fontWeight: FontWeight.w700, color: c)),
+                            fontSize: 10,
+                            height: 1,
+                            fontWeight: FontWeight.w700,
+                            color: c)),
                   );
                 },
                 trailingBuilder: (context, node, info) {
@@ -131,7 +144,9 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(p.role, style: SuperText.body.copyWith(fontSize: 12, color: t.fg2)),
+                      Text(p.role,
+                          style: SuperText.body
+                              .copyWith(fontSize: 12, color: t.fg2)),
                       const SizedBox(width: 10),
                       Container(
                         height: 19,
@@ -143,7 +158,8 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
                           border: Border.all(color: c.withOpacity(0.35)),
                         ),
                         child: Text(p.dept,
-                            style: SuperText.pill.copyWith(fontSize: 10, color: c)),
+                            style: SuperText.pill
+                                .copyWith(fontSize: 10, color: c)),
                       ),
                     ],
                   );

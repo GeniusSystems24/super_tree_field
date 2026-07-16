@@ -1,5 +1,5 @@
 // ============================================================
-// features/super_tree_field/domain/entities/tree_node.dart
+// features/super_tree/domain/entities/tree_node.dart
 // ------------------------------------------------------------
 // The generic hierarchy node — a faithful port of the React tool's tree model.
 // Every node carries a stable [code] (unique id + keyboard cursor key), an

@@ -1,7 +1,7 @@
 ---
 name: super-tree
 description: >
-  Use the super_tree_field Flutter package to build GeniusLink design-system tree /
+  Use the super_tree Flutter package to build GeniusLink design-system tree /
   hierarchy views — SuperTree, a recursive, generic, keyboard-first component,
   and its flagship AccountTree (a five-level bilingual chart of accounts with
   roll-up balances, KPI summary, A = L + E balance badge, type filters, DR/CR
@@ -12,7 +12,7 @@ description: >
 
 # Super Tree — Agent Skill
 
-`super_tree_field` provides **`SuperTree<T>`**, a recursive keyboard-first hierarchy
+`super_tree` provides **`SuperTree<T>`**, a recursive keyboard-first hierarchy
 component, and **`AccountTree`**, its productized chart-of-accounts instance.
 The engine is generic over a node payload `T`, so the same model renders
 accounts, files, org charts, or any nested data. This skill tells you how to
@@ -33,11 +33,12 @@ roll-ups and RTL come for free.
 
 ```yaml
 dependencies:
-  super_tree_field: ^0.3.0
+  super_tree:
+    path: ../super_tree
 ```
 
 ```dart
-import 'package:super_tree_field/super_tree.dart';
+import 'package:super_tree/super_tree.dart';
 ```
 
 Register the theme extension on your `ThemeData` (most common omission — without
@@ -203,7 +204,7 @@ are pure functions — reuse them for totals outside the widget.
 
 ## Architecture (when extending)
 
-Clean Architecture per feature under `lib/src/features/super_tree_field/`:
+Clean Architecture per feature under `lib/src/features/super_tree/`:
 `data/` (the sample chart-of-accounts datasource) · `domain/` (`TreeNode`,
 `AccountData` entities; `TreeLogic` usecases — pure Dart) · `presentation/`
 (`controllers/` = `SuperTreeController` Model as a `ChangeNotifier`, `widgets/`

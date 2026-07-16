@@ -15,12 +15,12 @@ A faithful Dart port of the React `super-tree` tool. Light + dark themes, LTR + 
 ```yaml
 # pubspec.yaml
 dependencies:
-  super_tree_field:
-    path: ../super_tree_field   # or a git/hosted ref
+  super_tree:
+    path: ../super_tree   # or a git/hosted ref
 ```
 
 ```dart
-import 'package:super_tree_field/super_tree.dart';
+import 'package:super_tree/super_tree.dart';
 ```
 
 ### Register the theme extension
@@ -41,7 +41,7 @@ MaterialApp(
 ## Quick start — the flagship AccountTree
 
 ```dart
-import 'package:super_tree_field/super_tree.dart';
+import 'package:super_tree/super_tree.dart';
 
 // uses the bundled sample chart of accounts (AccountTreeData.tree)
 AccountTree(
@@ -238,7 +238,7 @@ lib/
 └── src/
     ├── core/                             # shared tokens, widgets, utils, extensions
     └── features/
-        └── super_tree_field/
+        └── super_tree/
             ├── data/
             │   └── datasources/          # AccountTreeData (sample chart of accounts)
             ├── domain/

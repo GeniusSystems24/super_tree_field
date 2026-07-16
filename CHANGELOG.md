@@ -3,6 +3,49 @@
 All notable changes to **super_tree_field** are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/); versioning is [SemVer](https://semver.org/).
 
+## [0.4.0] — 2026-07-16
+
+### Changed
+
+- Upgraded to **super_core 1.2.0**. No source changes required — surfaces are
+  read via `SuperThemeData.of(context)`, which `SuperMaterialThemeData` (now a
+  `ThemeData` subclass) registers automatically, so palette, brightness **and**
+  the responsive `SuperDeviceMode` (mobile / tablet / desktop) tokens flow
+  through with no extra wiring:
+
+  ```dart
+  MaterialApp(
+    theme:     SuperMaterialThemeData.light(mode: SuperDeviceMode.desktop),
+    darkTheme: SuperMaterialThemeData.dark(mode: SuperDeviceMode.desktop),
+  );
+  ```
+- Minimum raised to `dart >=3.8.0`, `flutter >=3.32.0`.
+
+---
+
+## [0.3.1] — 2026-07-14
+
+### Changed
+
+- Upgraded to **super_core 1.0.0**. No source changes required — tree row
+  surfaces, borders, and text colors are read via `SuperThemeData.of(context)`,
+  which is now auto-registered by `SuperMaterialThemeData`. Palette switching and
+  light/dark mode work without any extra wiring:
+
+  ```dart
+  MaterialApp(
+    theme:     SuperMaterialThemeData.light(palette: SuperPalette.grayPalette),
+    darkTheme: SuperMaterialThemeData.dark(palette: SuperPalette.grayPalette),
+    // SuperTree, AccountTree, File Explorer, Org Chart — all adapt automatically.
+  );
+  ```
+
+- `AccountTree` KPI badges and the `A = L + E` balance indicator now resolve
+  their accent from `SuperMaterialThemeData.of(context).colorScheme.primary` for full palette
+  awareness.
+
+---
+
 ## [0.3.0] — 2026-06-18
 
 ### Added

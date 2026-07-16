@@ -56,7 +56,7 @@ class _ShortcutsDialog extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.keyboard_command_key, size: 17, color: SuperTokens.accent),
+                    Icon(Icons.keyboard_command_key, size: 17, color: SuperMaterialThemeData.of(context).colorScheme.primary),
                     const SizedBox(width: 9),
                     Expanded(
                       child: Text('Keyboard shortcuts',

@@ -1,5 +1,5 @@
 // ============================================================
-// features/super_tree_field/domain/usecases/tree_logic.dart
+// features/super_tree/domain/usecases/tree_logic.dart
 // ------------------------------------------------------------
 // Pure, widget-free algorithms for any [TreeNode] hierarchy — a 1:1 port of the
 // React engine atoms (flattenVisible / parentOf / filterTree / countMatches /

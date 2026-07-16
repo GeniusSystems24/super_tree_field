@@ -223,9 +223,10 @@ class _MenuRowState extends State<_MenuRow> {
   Widget build(BuildContext context) {
     final t = context.superTheme;
     final danger = widget.item.danger;
-    final fg = danger ? SuperTokens.danger : t.fg1;
+    final cs = SuperMaterialThemeData.of(context).colorScheme;
+    final fg = danger ? cs.error : t.fg1;
     final hoverBg = danger
-        ? SuperTokens.danger.withOpacity(0.12)
+        ? cs.error.withOpacity(0.12)
         : Color.alphaBlend(widget.accent.withOpacity(0.10), t.surface);
 
     return MouseRegion(
@@ -244,7 +245,7 @@ class _MenuRowState extends State<_MenuRow> {
           ),
           child: Row(
             children: [
-              Icon(widget.item.icon, size: 15, color: danger ? SuperTokens.danger : t.fg3),
+              Icon(widget.item.icon, size: 15, color: danger ? cs.error : t.fg3),
               const SizedBox(width: 11),
               Expanded(
                 child: Text(
