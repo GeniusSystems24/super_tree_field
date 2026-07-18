@@ -42,11 +42,11 @@ class _ShortcutsDialog extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: Container(
-            margin: const EdgeInsets.all(SuperTokens.space6),
+            margin: const EdgeInsets.all(SuperTokensData.defaultSpace6),
             padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
             decoration: BoxDecoration(
               color: t.surface,
-              borderRadius: BorderRadius.circular(SuperTokens.radiusCard),
+              borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusCard),
               border: Border.all(color: t.borderStrong),
               boxShadow: SuperThemeData.popShadow,
             ),
@@ -69,7 +69,7 @@ class _ShortcutsDialog extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: SuperTokens.space3),
+                const SizedBox(height: SuperTokensData.defaultSpace3),
                 for (final (k, d) in _shortcuts)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 5),
@@ -84,7 +84,7 @@ class _ShortcutsDialog extends StatelessWidget {
                                 color: t.fg2,
                               )),
                         ),
-                        const SizedBox(width: SuperTokens.space3),
+                        const SizedBox(width: SuperTokensData.defaultSpace3),
                         Expanded(
                           child: Text(d,
                               style: SuperText.body.copyWith(fontSize: 13, color: t.fg3)),

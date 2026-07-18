@@ -33,7 +33,7 @@ class KpiCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: t.surface,
-        borderRadius: BorderRadius.circular(SuperTokens.radiusCard),
+        borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusCard),
         border: Border.all(color: t.border),
         boxShadow: t.cardShadow,
       ),
@@ -66,19 +66,19 @@ class KpiCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: SuperTokens.space2),
+                    const SizedBox(width: SuperTokensData.defaultSpace2),
                     Text(
                       ar,
                       textDirection: TextDirection.rtl,
                       style: TextStyle(
-                        fontFamily: SuperTokens.arabicFont,
+                        fontFamily: SuperTokensData.defaultArabicFont,
                         fontSize: 11,
                         color: t.fg4,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: SuperTokens.space2),
+                const SizedBox(height: SuperTokensData.defaultSpace2),
                 Text(
                   value,
                   maxLines: 1,
@@ -92,7 +92,7 @@ class KpiCard extends StatelessWidget {
                   ),
                 ),
                 if (sub != null) ...[
-                  const SizedBox(height: SuperTokens.space2),
+                  const SizedBox(height: SuperTokensData.defaultSpace2),
                   Text(sub!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

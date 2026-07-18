@@ -19,9 +19,9 @@ class Person {
 }
 
 const Map<String, Color> _deptColor = {
-  'Exec': SuperTokens.accent,
-  'Eng': SuperTokens.success,
-  'Design': SuperTokens.warning,
+  'Exec': SuperTokensData.defaultAccent,
+  'Eng': SuperTokensData.defaultSuccess,
+  'Design': SuperTokensData.defaultWarning,
   'Finance': Color(0xFFA855F7),
 };
 

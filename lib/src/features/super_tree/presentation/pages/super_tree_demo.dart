@@ -34,7 +34,7 @@ class AccountTreeDemo extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(
-              horizontal: SuperTokens.space6, vertical: SuperTokens.space8),
+              horizontal: SuperTokensData.defaultSpace6, vertical: SuperTokensData.defaultSpace8),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1040),
@@ -43,9 +43,9 @@ class AccountTreeDemo extends StatelessWidget {
                 children: [
                   Text('ACCOUNTING • CHART OF ACCOUNTS',
                       style: SuperText.eyebrow.copyWith(color: SuperMaterialThemeData.of(context).colorScheme.primary)),
-                  const SizedBox(height: SuperTokens.space2),
+                  const SizedBox(height: SuperTokensData.defaultSpace2),
                   Text('Account Tree قيد افتتاحي', style: SuperText.h1.copyWith(color: t.fg1)),
-                  const SizedBox(height: SuperTokens.space8),
+                  const SizedBox(height: SuperTokensData.defaultSpace8),
                   const AccountTree(),
                 ],
               ),

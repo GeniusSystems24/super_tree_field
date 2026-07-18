@@ -41,7 +41,7 @@ Future<void> showTreeContextMenu<T>({
   required Offset globalPosition,
   required SuperTreeController<T> controller,
   required TreeNode<T> node,
-  Color accent = SuperTokens.accent,
+  Color accent = SuperTokensData.defaultAccent,
 }) {
   final items = _buildItems<T>(controller, node);
   if (items.isEmpty) return Future<void>.value();
@@ -51,7 +51,7 @@ Future<void> showTreeContextMenu<T>({
     barrierDismissible: true,
     barrierLabel: 'Dismiss menu',
     barrierColor: const Color(0x00000000),
-    transitionDuration: SuperTokens.durFast,
+    transitionDuration: SuperTokensData.defaultDurFast,
     pageBuilder: (context, _, __) => const SizedBox.shrink(),
     transitionBuilder: (context, anim, _, __) {
       return _ContextMenuLayer(
@@ -152,7 +152,7 @@ class _ContextMenuLayer extends StatelessWidget {
             opacity: animation,
             child: ScaleTransition(
               scale: Tween<double>(begin: 0.96, end: 1).animate(
-                CurvedAnimation(parent: animation, curve: SuperTokens.curveStandard),
+                CurvedAnimation(parent: animation, curve: SuperTokensData.defaultCurveStandard),
               ),
               alignment: Alignment.topLeft,
               child: Material(
@@ -162,7 +162,7 @@ class _ContextMenuLayer extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 5),
                   decoration: BoxDecoration(
                     color: t.surface,
-                    borderRadius: BorderRadius.circular(SuperTokens.radiusControl),
+                    borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl),
                     border: Border.all(color: t.borderStrong),
                     boxShadow: t.cardShadow,
                   ),

@@ -13,11 +13,11 @@ import 'package:super_core/super_core.dart';
 
 /// The five account natures of a double-entry chart of accounts.
 enum AccountType {
-  asset('Asset', 'الأصول', SuperTokens.accent, AccountNature.debit),
-  liability('Liability', 'الخصوم', SuperTokens.warning, AccountNature.credit),
-  equity('Equity', 'حقوق الملكية', SuperTokens.success, AccountNature.credit),
+  asset('Asset', 'الأصول', SuperTokensData.defaultAccent, AccountNature.debit),
+  liability('Liability', 'الخصوم', SuperTokensData.defaultWarning, AccountNature.credit),
+  equity('Equity', 'حقوق الملكية', SuperTokensData.defaultSuccess, AccountNature.credit),
   income('Income', 'الإيرادات', Color(0xFF38BDF8), AccountNature.credit),
-  expense('Expense', 'المصروفات', SuperTokens.danger, AccountNature.debit);
+  expense('Expense', 'المصروفات', SuperTokensData.defaultDanger, AccountNature.debit);
 
   const AccountType(this.label, this.ar, this.color, this.nature);
 

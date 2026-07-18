@@ -211,7 +211,7 @@ class _AccountTreeState extends State<AccountTree> {
             : c.maxWidth >= 540
                 ? 2
                 : 1;
-        const gap = SuperTokens.space3;
+        const gap = SuperTokensData.defaultSpace3;
         final cardW = (c.maxWidth - gap * (cols - 1)) / cols;
         return Wrap(
           spacing: gap,
@@ -251,9 +251,9 @@ class _AccountTreeState extends State<AccountTree> {
     return Row(
       children: [
         Expanded(
-          child: Wrap(spacing: SuperTokens.space2, runSpacing: SuperTokens.space2, children: chips),
+          child: Wrap(spacing: SuperTokensData.defaultSpace2, runSpacing: SuperTokensData.defaultSpace2, children: chips),
         ),
-        const SizedBox(width: SuperTokens.space3),
+        const SizedBox(width: SuperTokensData.defaultSpace3),
         _BalanceBadge(balanced: balanced),
       ],
     );
@@ -402,7 +402,7 @@ class _BalanceBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.superTheme;
-    final c = balanced ? SuperTokens.success : SuperMaterialThemeData.of(context).colorScheme.error;
+    final c = balanced ? SuperTokensData.defaultSuccess : SuperMaterialThemeData.of(context).colorScheme.error;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(

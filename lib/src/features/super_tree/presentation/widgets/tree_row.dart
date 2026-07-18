@@ -138,8 +138,8 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
     // ── the single row's visual body ──
     Widget rowInner = AnimatedContainer(
       key: _rowKey,
-      duration: SuperTokens.durFast,
-      curve: SuperTokens.curveStandard,
+      duration: SuperTokensData.defaultDurFast,
+      curve: SuperTokensData.defaultCurveStandard,
       padding: EdgeInsetsDirectional.only(start: indent, end: 12, top: 9, bottom: 9),
       decoration: BoxDecoration(
         color: bg,
@@ -168,8 +168,8 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
             child: hasKids
                 ? AnimatedRotation(
                     turns: open ? 0 : -0.25,
-                    duration: SuperTokens.durBase,
-                    curve: SuperTokens.curveStandard,
+                    duration: SuperTokensData.defaultDurBase,
+                    curve: SuperTokensData.defaultCurveStandard,
                     child: Icon(Icons.keyboard_arrow_down, size: 16, color: t.fg3),
                   )
                 : null,
@@ -214,7 +214,7 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
                       query: c.query,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          fontFamily: SuperTokens.arabicFont, fontSize: 12, color: t.fg4),
+                          fontFamily: SuperTokensData.defaultArabicFont, fontSize: 12, color: t.fg4),
                     ),
                   ),
                 ],
@@ -439,7 +439,7 @@ class _RenameFieldState extends State<_RenameField> {
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           color: t.inputBg,
-          borderRadius: BorderRadius.circular(SuperTokens.radiusControl),
+          borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl),
           border: Border.all(color: widget.accent, width: 1.5),
         ),
         alignment: Alignment.centerLeft,
@@ -477,7 +477,7 @@ class _DragFeedback extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
           decoration: BoxDecoration(
             color: t.surface,
-            borderRadius: BorderRadius.circular(SuperTokens.radiusControl),
+            borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl),
             border: Border.all(color: accent, width: 1.5),
             boxShadow: t.cardShadow,
           ),
@@ -570,13 +570,13 @@ class TreeCheckbox extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: AnimatedContainer(
-          duration: SuperTokens.durFast,
+          duration: SuperTokensData.defaultDurFast,
           width: 18,
           height: 18,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: on ? accent : const Color(0x00000000),
-            borderRadius: BorderRadius.circular(SuperTokens.radiusControl),
+            borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl),
             border: Border.all(
               color: on ? accent : t.borderStrong,
               width: on ? 0 : 1.4,

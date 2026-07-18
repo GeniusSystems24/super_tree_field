@@ -25,7 +25,7 @@ class SuperTree<T> extends StatefulWidget {
     required this.controller,
     required this.leadingBuilder,
     this.trailingBuilder,
-    this.accent = SuperTokens.accent,
+    this.accent = SuperTokensData.defaultAccent,
     this.title = 'Hierarchy',
     this.subtitle,
     this.titleIcon,
@@ -176,10 +176,10 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           children: [
             if (widget.above != null) ...[
               widget.above!,
-              const SizedBox(height: SuperTokens.space4),
+              const SizedBox(height: SuperTokensData.defaultSpace4),
             ],
             _toolbar(context),
-            const SizedBox(height: SuperTokens.space4),
+            const SizedBox(height: SuperTokensData.defaultSpace4),
             _treeCard(context),
           ],
         );
@@ -193,8 +193,8 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Wrap(
-          spacing: SuperTokens.space3,
-          runSpacing: SuperTokens.space3,
+          spacing: SuperTokensData.defaultSpace3,
+          runSpacing: SuperTokensData.defaultSpace3,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             _searchField(context),
@@ -215,7 +215,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           ],
         ),
         if (widget.toolbarExtra != null) ...[
-          const SizedBox(height: SuperTokens.space3),
+          const SizedBox(height: SuperTokensData.defaultSpace3),
           widget.toolbarExtra!,
         ],
       ],
@@ -229,15 +229,15 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
       return GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
-          duration: SuperTokens.durFast,
+          duration: SuperTokensData.defaultDurFast,
           padding: const EdgeInsets.symmetric(horizontal: 11),
-          height: SuperTokens.controlHeight - 6,
+          height: SuperTokensData.defaultControlHeight - 6,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: active
                 ? Color.alphaBlend(widget.accent.withOpacity(0.20), t.surface)
                 : const Color(0x00000000),
-            borderRadius: BorderRadius.circular(SuperTokens.radiusControl - 2),
+            borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl - 2),
             border: Border.all(
                 color: active ? widget.accent : const Color(0x00000000)),
           ),
@@ -258,11 +258,11 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
     }
 
     return Container(
-      height: SuperTokens.controlHeight,
+      height: SuperTokensData.defaultControlHeight,
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: t.inputBg,
-        borderRadius: BorderRadius.circular(SuperTokens.radiusControl),
+        borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl),
         border: Border.all(color: t.borderStrong),
       ),
       child: Row(
@@ -284,13 +284,13 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
     return _HoverButton(
       onTap: onTap,
       builder: (hover) => Container(
-        height: SuperTokens.controlHeight,
+        height: SuperTokensData.defaultControlHeight,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           color: hover
               ? Color.alphaBlend(widget.accent.withOpacity(0.16), t.surface)
               : Color.alphaBlend(widget.accent.withOpacity(0.10), t.surface),
-          borderRadius: BorderRadius.circular(SuperTokens.radiusControl),
+          borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl),
           border: Border.all(color: widget.accent.withOpacity(0.5)),
         ),
         child: Row(
@@ -312,11 +312,11 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 240, maxWidth: 380),
       child: Container(
-        height: SuperTokens.controlHeight,
+        height: SuperTokensData.defaultControlHeight,
         padding: EdgeInsets.symmetric(horizontal: _searchActive ? 13 : 14),
         decoration: BoxDecoration(
           color: t.inputBg,
-          borderRadius: BorderRadius.circular(SuperTokens.radiusControl),
+          borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl),
           border: Border.all(
             color: _searchActive ? widget.accent : t.borderStrong,
             width: _searchActive ? 2 : 1,
@@ -394,11 +394,11 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
     return _HoverButton(
       onTap: onTap,
       builder: (hover) => Container(
-        height: SuperTokens.controlHeight,
+        height: SuperTokensData.defaultControlHeight,
         padding: const EdgeInsets.symmetric(horizontal: 13),
         decoration: BoxDecoration(
           color: hover ? t.hover : const Color(0x00000000),
-          borderRadius: BorderRadius.circular(SuperTokens.radiusControl),
+          borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl),
           border: Border.all(color: t.borderStrong),
         ),
         child: Row(
@@ -428,7 +428,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
         child: Container(
           decoration: BoxDecoration(
             color: t.surface,
-            borderRadius: BorderRadius.circular(SuperTokens.radiusCard),
+            borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusCard),
             border: Border.all(color: t.border),
             boxShadow: t.cardShadow,
           ),
@@ -485,7 +485,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
             margin: const EdgeInsets.only(top: 2),
             decoration: BoxDecoration(
               color: widget.accent,
-              borderRadius: BorderRadius.circular(SuperTokens.radiusPill),
+              borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusPill),
             ),
           ),
           const SizedBox(width: 11),
@@ -514,7 +514,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
               ],
             ),
           ),
-          const SizedBox(width: SuperTokens.space3),
+          const SizedBox(width: SuperTokensData.defaultSpace3),
           Text(
             searching
                 ? '${_c.visibleLeaves} of ${_c.totalLeaves}'
