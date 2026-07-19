@@ -20,15 +20,21 @@ class NaturePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.superTheme;
     final dr = nature == AccountNature.debit;
-    final c = dr ? SuperMaterialThemeData.of(context).colorScheme.primary : SuperTokensData.defaultWarning;
+    final c = dr
+        ? SuperMaterialThemeData.of(context).colorScheme.primary
+        : SuperThemeData.of(context).tokens.warning;
     return Container(
       height: 19,
-      padding: const EdgeInsets.symmetric(horizontal: SuperTokensData.defaultSpace2),
+      padding: EdgeInsets.symmetric(
+        horizontal: SuperThemeData.of(context).tokens.space2,
+      ),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Color.alphaBlend(c.withOpacity(0.15), t.surface),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Color.alphaBlend(c.withOpacity(0.35), t.surface)),
+        border: Border.all(
+          color: Color.alphaBlend(c.withOpacity(0.35), t.surface),
+        ),
       ),
       child: Text(
         nature.code,

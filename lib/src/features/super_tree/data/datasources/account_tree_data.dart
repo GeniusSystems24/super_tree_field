@@ -21,14 +21,13 @@ abstract final class AccountTreeData {
     String ar,
     AccountType type,
     List<TreeNode<AccountData>> children,
-  ) =>
-      TreeNode<AccountData>(
-        code: code,
-        name: name,
-        ar: ar,
-        value: AccountData(type: type),
-        children: children,
-      );
+  ) => TreeNode<AccountData>(
+    code: code,
+    name: name,
+    ar: ar,
+    value: AccountData(type: type),
+    children: children,
+  );
 
   /// Leaf node carrying an explicit [bal]ance.
   static TreeNode<AccountData> _l(
@@ -37,13 +36,12 @@ abstract final class AccountTreeData {
     String ar,
     AccountType type,
     double bal,
-  ) =>
-      TreeNode<AccountData>(
-        code: code,
-        name: name,
-        ar: ar,
-        value: AccountData(type: type, balance: bal),
-      );
+  ) => TreeNode<AccountData>(
+    code: code,
+    name: name,
+    ar: ar,
+    value: AccountData(type: type, balance: bal),
+  );
 
   /// The five root accounts, each a five-level subtree.
   static List<TreeNode<AccountData>> get tree {
@@ -57,8 +55,20 @@ abstract final class AccountTreeData {
         _g('1100', 'Current Assets', 'الأصول المتداولة', a, [
           _g('1110', 'Cash & Cash Equivalents', 'النقد وما في حكمه', a, [
             _g('1111', 'Bank Accounts', 'الحسابات البنكية', a, [
-              _l('1111-01', 'Al Rajhi Bank — Main', 'مصرف الراجحي — الرئيسي', a, 186420),
-              _l('1111-02', 'NCB — Riyadh Branch', 'الأهلي — فرع الرياض', a, 92300),
+              _l(
+                '1111-01',
+                'Al Rajhi Bank — Main',
+                'مصرف الراجحي — الرئيسي',
+                a,
+                186420,
+              ),
+              _l(
+                '1111-02',
+                'NCB — Riyadh Branch',
+                'الأهلي — فرع الرياض',
+                a,
+                92300,
+              ),
               _l('1111-03', 'Riyad Bank — USD', 'بنك الرياض — دولار', a, 41250),
             ]),
             _g('1112', 'Cash on Hand', 'النقد في الصندوق', a, [

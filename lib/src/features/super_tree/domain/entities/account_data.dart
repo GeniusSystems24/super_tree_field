@@ -9,15 +9,14 @@
 
 import 'package:flutter/widgets.dart' show Color, immutable;
 
-import 'package:super_core/super_core.dart';
 
 /// The five account natures of a double-entry chart of accounts.
 enum AccountType {
-  asset('Asset', 'الأصول', SuperTokensData.defaultAccent, AccountNature.debit),
-  liability('Liability', 'الخصوم', SuperTokensData.defaultWarning, AccountNature.credit),
-  equity('Equity', 'حقوق الملكية', SuperTokensData.defaultSuccess, AccountNature.credit),
+  asset('Asset', 'الأصول', Color(0xFF4A7CFF), AccountNature.debit),
+  liability('Liability', 'الخصوم', Color(0xFFF97316), AccountNature.credit),
+  equity('Equity', 'حقوق الملكية', Color(0xFF1DB88A), AccountNature.credit),
   income('Income', 'الإيرادات', Color(0xFF38BDF8), AccountNature.credit),
-  expense('Expense', 'المصروفات', SuperTokensData.defaultDanger, AccountNature.debit);
+  expense('Expense', 'المصروفات', Color(0xFFEF4444), AccountNature.debit);
 
   const AccountType(this.label, this.ar, this.color, this.nature);
 
@@ -34,7 +33,13 @@ enum AccountType {
   final AccountNature nature;
 
   /// Stable ordering used by the type filter and KPI grid.
-  static const List<AccountType> ordered = [asset, liability, equity, income, expense];
+  static const List<AccountType> ordered = [
+    asset,
+    liability,
+    equity,
+    income,
+    expense,
+  ];
 }
 
 /// Debit (DR) or credit (CR) — the side a `NaturePill` displays.

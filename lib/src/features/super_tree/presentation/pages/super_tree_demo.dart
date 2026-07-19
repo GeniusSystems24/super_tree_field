@@ -25,27 +25,41 @@ class AccountTreeDemo extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: t.fg2),
-        title: Text('Account Tree', style: SuperText.heading.copyWith(color: t.fg1)),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: const Hairline(),
+        title: Text(
+          'Account Tree',
+          style: SuperText.heading.copyWith(color: t.fg1),
+        ),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Hairline(),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-              horizontal: SuperTokensData.defaultSpace6, vertical: SuperTokensData.defaultSpace8),
+          padding: EdgeInsets.symmetric(
+            horizontal: SuperThemeData.of(context).tokens.space6,
+            vertical: SuperThemeData.of(context).tokens.space8,
+          ),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1040),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('ACCOUNTING • CHART OF ACCOUNTS',
-                      style: SuperText.eyebrow.copyWith(color: SuperMaterialThemeData.of(context).colorScheme.primary)),
-                  const SizedBox(height: SuperTokensData.defaultSpace2),
-                  Text('Account Tree قيد افتتاحي', style: SuperText.h1.copyWith(color: t.fg1)),
-                  const SizedBox(height: SuperTokensData.defaultSpace8),
+                  Text(
+                    'ACCOUNTING • CHART OF ACCOUNTS',
+                    style: SuperText.eyebrow.copyWith(
+                      color: SuperMaterialThemeData.of(
+                        context,
+                      ).colorScheme.primary,
+                    ),
+                  ),
+                  SizedBox(height: SuperThemeData.of(context).tokens.space2),
+                  Text(
+                    'Account Tree قيد افتتاحي',
+                    style: SuperText.h1.copyWith(color: t.fg1),
+                  ),
+                  SizedBox(height: SuperThemeData.of(context).tokens.space8),
                   const AccountTree(),
                 ],
               ),

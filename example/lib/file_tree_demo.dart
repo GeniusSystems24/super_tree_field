@@ -91,9 +91,9 @@ class _FileTreeDemoState extends State<FileTreeDemo> {
       case 'dir':
         return (open ? Icons.folder_open : Icons.folder, cs.primary);
       case 'code':
-        return (Icons.code, SuperTokensData.defaultSuccess);
+        return (Icons.code, SuperThemeData.of(context).tokens.success);
       case 'img':
-        return (Icons.image_outlined, SuperTokensData.defaultWarning);
+        return (Icons.image_outlined, SuperThemeData.of(context).tokens.warning);
       default:
         return (Icons.description_outlined, context.superTheme.fg3);
     }

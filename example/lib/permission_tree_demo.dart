@@ -26,9 +26,9 @@ Color _levelColor(BuildContext context, Permission p) {
     case 'View':
       return SuperMaterialThemeData.of(context).colorScheme.primary;
     case 'Write':
-      return SuperTokensData.defaultSuccess;
+      return SuperThemeData.of(context).tokens.success;
     case 'Admin':
-      return SuperTokensData.defaultWarning;
+      return SuperThemeData.of(context).tokens.warning;
     default:
       return context.superTheme.fg3;
   }
@@ -164,15 +164,15 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
                   Text('ADMINISTRATION • ROLES & PERMISSIONS',
                       style:
                           SuperText.eyebrow.copyWith(color: _accent(context))),
-                  const SizedBox(height: SuperTokensData.defaultSpace2),
+                  SizedBox(height: SuperThemeData.of(context).tokens.space2),
                   Text('Permission Settings صلاحيات',
                       style: SuperText.h1.copyWith(color: t.fg1)),
-                  const SizedBox(height: SuperTokensData.defaultSpace6),
+                  SizedBox(height: SuperThemeData.of(context).tokens.space6),
                   _ModeToggle(
                     mode: _mode,
                     onChanged: (m) => setState(() => _mode = m),
                   ),
-                  const SizedBox(height: SuperTokensData.defaultSpace6),
+                  SizedBox(height: SuperThemeData.of(context).tokens.space6),
                   SuperTree<Permission>(
                     key: ValueKey(_mode),
                     controller: _controller,
@@ -250,9 +250,9 @@ class _ModeToggle extends StatelessWidget {
       return GestureDetector(
         onTap: () => onChanged(m),
         child: AnimatedContainer(
-          duration: SuperTokensData.defaultDurFast,
+          duration: SuperThemeData.of(context).tokens.durFast,
           padding: const EdgeInsets.symmetric(horizontal: 14),
-          height: SuperTokensData.defaultControlHeight - 6,
+          height: SuperThemeData.of(context).tokens.controlHeight - 6,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: active
@@ -263,7 +263,7 @@ class _ModeToggle extends StatelessWidget {
                         .withOpacity(0.20),
                     t.surface)
                 : const Color(0x00000000),
-            borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl - 2),
+            borderRadius: BorderRadius.circular(SuperThemeData.of(context).tokens.radiusControl - 2),
             border: Border.all(
                 color: active
                     ? SuperMaterialThemeData.of(context).colorScheme.primary
@@ -298,13 +298,13 @@ class _ModeToggle extends StatelessWidget {
         Text('SELECTION MODE',
             style: SuperText.label
                 .copyWith(fontSize: 10, letterSpacing: 0.6, color: t.fg3)),
-        const SizedBox(width: SuperTokensData.defaultSpace3),
+        SizedBox(width: SuperThemeData.of(context).tokens.space3),
         Container(
-          height: SuperTokensData.defaultControlHeight,
+          height: SuperThemeData.of(context).tokens.controlHeight,
           padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(
             color: t.inputBg,
-            borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl),
+            borderRadius: BorderRadius.circular(SuperThemeData.of(context).tokens.radiusControl),
             border: Border.all(color: t.borderStrong),
           ),
           child: Row(

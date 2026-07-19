@@ -18,12 +18,12 @@ class Person {
   final String initials;
 }
 
-const Map<String, Color> _deptColor = {
-  'Exec': SuperTokensData.defaultAccent,
-  'Eng': SuperTokensData.defaultSuccess,
-  'Design': SuperTokensData.defaultWarning,
-  'Finance': Color(0xFFA855F7),
-};
+Map<String, Color> _deptColor(BuildContext context) => {
+      'Exec': SuperThemeData.of(context).tokens.accent,
+      'Eng': SuperThemeData.of(context).tokens.success,
+      'Design': SuperThemeData.of(context).tokens.warning,
+      'Finance': const Color(0xFFA855F7),
+    };
 
 TreeNode<Person> _p(
         String code, String name, String role, String dept, String initials,
@@ -119,7 +119,7 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
                 enableEditing: true,
                 leadingBuilder: (context, node, info) {
                   final p = node.value!;
-                  final c = _deptColor[p.dept] ?? context.superTheme.fg3;
+                  final c = _deptColor(context)[p.dept] ?? context.superTheme.fg3;
                   return Container(
                     width: 24,
                     height: 24,
@@ -140,7 +140,7 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
                 trailingBuilder: (context, node, info) {
                   final p = node.value!;
                   final t = context.superTheme;
-                  final c = _deptColor[p.dept] ?? t.fg3;
+                  final c = _deptColor(context)[p.dept] ?? t.fg3;
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

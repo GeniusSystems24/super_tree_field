@@ -55,12 +55,15 @@ class SuperTreeController<T> extends ChangeNotifier {
     this.onTreeChanged,
     this.onSelectionChanged,
     TreeNode<T> Function(String code)? newNodeBuilder,
-  })  : _roots = roots,
-        _query = query,
-        _mode = mode,
-        _checked = {...?initialChecked},
-        _newNodeBuilder = newNodeBuilder {
-    _expanded = TreeLogic.groupCodes(roots, maxDepth: defaultExpandDepth).toSet();
+  }) : _roots = roots,
+       _query = query,
+       _mode = mode,
+       _checked = {...?initialChecked},
+       _newNodeBuilder = newNodeBuilder {
+    _expanded = TreeLogic.groupCodes(
+      roots,
+      maxDepth: defaultExpandDepth,
+    ).toSet();
   }
 
   /// Derives the searchable text for a node (code + names, role + dept, …).
@@ -130,10 +133,12 @@ class SuperTreeController<T> extends ChangeNotifier {
   int get totalLeaves => _roots.fold(0, (s, n) => s + TreeLogic.leafCount(n));
 
   /// Leaves currently visible under the filter.
-  int get visibleLeaves => visible.fold(0, (s, n) => s + TreeLogic.leafCount(n));
+  int get visibleLeaves =>
+      visible.fold(0, (s, n) => s + TreeLogic.leafCount(n));
 
   /// The visible nodes flattened into render / navigation order.
-  List<TreeNode<T>> get _flat => TreeLogic.flattenVisible(visible, _expanded, searching);
+  List<TreeNode<T>> get _flat =>
+      TreeLogic.flattenVisible(visible, _expanded, searching);
 
   // ── host updates ──
   /// Replace the roots (e.g. the flagship tree's type filter). Keeps the
@@ -151,8 +156,11 @@ class SuperTreeController<T> extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleMode() =>
-      setMode(_mode == SuperTreeMode.editable ? SuperTreeMode.readable : SuperTreeMode.editable);
+  void toggleMode() => setMode(
+    _mode == SuperTreeMode.editable
+        ? SuperTreeMode.readable
+        : SuperTreeMode.editable,
+  );
 
   // ── expansion ──
   void toggle(String code) {
@@ -237,8 +245,9 @@ class SuperTreeController<T> extends ChangeNotifier {
   int get checkedCount => _checked.length;
 
   /// The checked nodes, resolved against the current tree (skips stale codes).
-  List<TreeNode<T>> get checkedNodes =>
-      [for (final c in _checked) TreeLogic.findNode(_roots, c)].whereType<TreeNode<T>>().toList();
+  List<TreeNode<T>> get checkedNodes => [
+    for (final c in _checked) TreeLogic.findNode(_roots, c),
+  ].whereType<TreeNode<T>>().toList();
 
   /// The tristate of [code] for rendering its checkbox. A leaf is checked iff in
   /// the set; a group reflects its leaves (all ⇒ checked, some ⇒ partial).
@@ -247,11 +256,15 @@ class SuperTreeController<T> extends ChangeNotifier {
     final node = TreeLogic.findNode(_roots, code);
     if (node == null) return TreeCheckState.unchecked;
     if (!node.hasChildren) {
-      return _checked.contains(code) ? TreeCheckState.checked : TreeCheckState.unchecked;
+      return _checked.contains(code)
+          ? TreeCheckState.checked
+          : TreeCheckState.unchecked;
     }
     if (selectionMode == SuperTreeSelectionMode.single) {
       // Groups aren't aggregated in single mode — only the exact node counts.
-      return _checked.contains(code) ? TreeCheckState.checked : TreeCheckState.unchecked;
+      return _checked.contains(code)
+          ? TreeCheckState.checked
+          : TreeCheckState.unchecked;
     }
     final leaves = TreeLogic.leafCodes(node);
     final on = leaves.where(_checked.contains).length;
@@ -288,7 +301,9 @@ class SuperTreeController<T> extends ChangeNotifier {
         return;
       case SuperTreeSelectionMode.single:
         // Radio-like: replace the selection, or clear it when re-tapped.
-        _checked = _checked.contains(node.code) ? <String>{} : <String>{node.code};
+        _checked = _checked.contains(node.code)
+            ? <String>{}
+            : <String>{node.code};
       case SuperTreeSelectionMode.multi:
         final leaves = TreeLogic.leafCodes(node);
         final allOn = leaves.every(_checked.contains);
@@ -422,7 +437,8 @@ class SuperTreeController<T> extends ChangeNotifier {
 
   TreeNode<T> _mint() {
     final code = 'node-${DateTime.now().millisecondsSinceEpoch}-${_seq++}';
-    return _newNodeBuilder?.call(code) ?? TreeNode<T>(code: code, name: 'New node');
+    return _newNodeBuilder?.call(code) ??
+        TreeNode<T>(code: code, name: 'New node');
   }
 
   // — inline rename —
@@ -518,5 +534,6 @@ class SuperTreeController<T> extends ChangeNotifier {
 
   /// Whether dropping [dragCode] onto [targetCode] is permitted.
   bool canDrop(String dragCode, String targetCode) =>
-      dragCode != targetCode && !TreeLogic.isWithin(_roots, dragCode, targetCode);
+      dragCode != targetCode &&
+      !TreeLogic.isWithin(_roots, dragCode, targetCode);
 }

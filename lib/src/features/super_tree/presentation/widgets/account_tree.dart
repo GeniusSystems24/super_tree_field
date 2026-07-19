@@ -123,7 +123,9 @@ class _AccountTreeState extends State<AccountTree> {
   void _applyFilter(AccountType? type) {
     if (_controller.isEditable) return; // filtering disabled while editing
     setState(() => _typeFilter = type);
-    final roots = type == null ? _all : _all.where((n) => n.value?.type == type).toList();
+    final roots = type == null
+        ? _all
+        : _all.where((n) => n.value?.type == type).toList();
     _controller.setRoots(roots);
     _recompute(roots);
   }
@@ -144,7 +146,8 @@ class _AccountTreeState extends State<AccountTree> {
       controller: _controller,
       accent: SuperMaterialThemeData.of(context).colorScheme.primary,
       title: 'Chart of Accounts Hierarchy',
-      subtitle: '5 levels · click or use ↑↓ ← → · Enter opens a leaf · right-click to edit',
+      subtitle:
+          '5 levels · click or use ↑↓ ← → · Enter opens a leaf · right-click to edit',
       nameColumnLabel: 'Account · الحساب',
       trailingColumnLabel: 'Nature · Balance (SAR)',
       placeholder: 'Search by code, English or Arabic name…   ( / )',
@@ -153,7 +156,9 @@ class _AccountTreeState extends State<AccountTree> {
       selectionLabel: 'Opened ledger for account',
       enableEditing: true,
       above: _kpiGrid(assets, liabilities, equity, income, expense),
-      toolbarExtra: _controller.isEditable ? _editHint(context) : _filterRow(assets, liabilities, equity),
+      toolbarExtra: _controller.isEditable
+          ? _editHint(context)
+          : _filterRow(assets, liabilities, equity),
       leadingBuilder: _leading,
       trailingBuilder: _trailing,
     );
@@ -180,38 +185,42 @@ class _AccountTreeState extends State<AccountTree> {
   Widget _kpiGrid(double a, double l, double e, double i, double x) {
     final cards = [
       KpiCard(
-          label: 'Total Assets',
-          ar: 'الأصول',
-          value: SuperFormat.formatNumber(a),
-          accent: AccountType.asset.color,
-          sub: 'SAR · debit balance'),
+        label: 'Total Assets',
+        ar: 'الأصول',
+        value: SuperFormat.formatNumber(a),
+        accent: AccountType.asset.color,
+        sub: 'SAR · debit balance',
+      ),
       KpiCard(
-          label: 'Total Liabilities',
-          ar: 'الخصوم',
-          value: SuperFormat.formatNumber(l),
-          accent: AccountType.liability.color,
-          sub: 'SAR · credit balance'),
+        label: 'Total Liabilities',
+        ar: 'الخصوم',
+        value: SuperFormat.formatNumber(l),
+        accent: AccountType.liability.color,
+        sub: 'SAR · credit balance',
+      ),
       KpiCard(
-          label: 'Total Equity',
-          ar: 'حقوق الملكية',
-          value: SuperFormat.formatNumber(e),
-          accent: AccountType.equity.color,
-          sub: 'SAR · credit balance'),
+        label: 'Total Equity',
+        ar: 'حقوق الملكية',
+        value: SuperFormat.formatNumber(e),
+        accent: AccountType.equity.color,
+        sub: 'SAR · credit balance',
+      ),
       KpiCard(
-          label: 'Net Income',
-          ar: 'صافي الدخل',
-          value: SuperFormat.formatNumber(i - x),
-          accent: AccountType.income.color,
-          sub: 'Income ${_short(i)} − Expense ${_short(x)} SAR'),
+        label: 'Net Income',
+        ar: 'صافي الدخل',
+        value: SuperFormat.formatNumber(i - x),
+        accent: AccountType.income.color,
+        sub: 'Income ${_short(i)} − Expense ${_short(x)} SAR',
+      ),
     ];
     return LayoutBuilder(
       builder: (context, c) {
         final cols = c.maxWidth >= 820
             ? 4
             : c.maxWidth >= 540
-                ? 2
-                : 1;
-        const gap = SuperTokensData.defaultSpace3;
+            ? 2
+            : 1;
+        final gap = SuperThemeData.of(context).tokens.space3;
         final cardW = (c.maxWidth - gap * (cols - 1)) / cols;
         return Wrap(
           spacing: gap,
@@ -251,16 +260,24 @@ class _AccountTreeState extends State<AccountTree> {
     return Row(
       children: [
         Expanded(
-          child: Wrap(spacing: SuperTokensData.defaultSpace2, runSpacing: SuperTokensData.defaultSpace2, children: chips),
+          child: Wrap(
+            spacing: SuperThemeData.of(context).tokens.space2,
+            runSpacing: SuperThemeData.of(context).tokens.space2,
+            children: chips,
+          ),
         ),
-        const SizedBox(width: SuperTokensData.defaultSpace3),
+        SizedBox(width: SuperThemeData.of(context).tokens.space3),
         _BalanceBadge(balanced: balanced),
       ],
     );
   }
 
   // ── account leading cell: colored type dot + monospace code ──
-  Widget _leading(BuildContext context, TreeNode<AccountData> node, TreeRowInfo info) {
+  Widget _leading(
+    BuildContext context,
+    TreeNode<AccountData> node,
+    TreeRowInfo info,
+  ) {
     final t = context.superTheme;
     final color = node.value?.type.color ?? t.fg3;
     return Row(
@@ -280,14 +297,22 @@ class _AccountTreeState extends State<AccountTree> {
         const SizedBox(width: 9),
         Text(
           node.code,
-          style: SuperText.mono.copyWith(fontSize: 11.5, height: 1.2, color: t.fg3),
+          style: SuperText.mono.copyWith(
+            fontSize: 11.5,
+            height: 1.2,
+            color: t.fg3,
+          ),
         ),
       ],
     );
   }
 
   // ── account trailing cells: nature pill + balance + share bar ──
-  Widget? _trailing(BuildContext context, TreeNode<AccountData> node, TreeRowInfo info) {
+  Widget? _trailing(
+    BuildContext context,
+    TreeNode<AccountData> node,
+    TreeRowInfo info,
+  ) {
     final t = context.superTheme;
     final type = node.value?.type;
     if (type == null) return null;
@@ -310,7 +335,9 @@ class _AccountTreeState extends State<AccountTree> {
                 style: SuperText.mono.copyWith(
                   fontSize: 12.5,
                   height: 1.2,
-                  fontWeight: info.depth == 0 ? FontWeight.w700 : FontWeight.w500,
+                  fontWeight: info.depth == 0
+                      ? FontWeight.w700
+                      : FontWeight.w500,
                   color: t.fg1,
                 ),
               ),
@@ -325,7 +352,9 @@ class _AccountTreeState extends State<AccountTree> {
                     child: FractionallySizedBox(
                       widthFactor: (share).clamp(0.015, 1.0),
                       child: Container(
-                        color: type.color.withOpacity(info.depth == 0 ? 0.9 : 0.55),
+                        color: type.color.withOpacity(
+                          info.depth == 0 ? 0.9 : 0.55,
+                        ),
                       ),
                     ),
                   ),
@@ -341,7 +370,12 @@ class _AccountTreeState extends State<AccountTree> {
 
 /// A type-filter chip with an optional colored dot.
 class _TypeChip extends StatefulWidget {
-  const _TypeChip({required this.label, required this.color, required this.active, required this.onTap});
+  const _TypeChip({
+    required this.label,
+    required this.color,
+    required this.active,
+    required this.onTap,
+  });
   final String label;
   final Color? color;
   final bool active;
@@ -381,11 +415,24 @@ class _TypeChipState extends State<_TypeChip> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (color != null) ...[
-                Container(width: 7, height: 7, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+                Container(
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
                 const SizedBox(width: 7),
               ],
-              Text(widget.label,
-                  style: SuperText.label.copyWith(fontSize: 11, letterSpacing: 0.33, color: fg)),
+              Text(
+                widget.label,
+                style: SuperText.label.copyWith(
+                  fontSize: 11,
+                  letterSpacing: 0.33,
+                  color: fg,
+                ),
+              ),
             ],
           ),
         ),
@@ -402,7 +449,9 @@ class _BalanceBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.superTheme;
-    final c = balanced ? SuperTokensData.defaultSuccess : SuperMaterialThemeData.of(context).colorScheme.error;
+    final c = balanced
+        ? SuperThemeData.of(context).tokens.success
+        : SuperMaterialThemeData.of(context).colorScheme.error;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -417,7 +466,11 @@ class _BalanceBadge extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             balanced ? 'Balanced · A = L + E' : 'Out of balance',
-            style: SuperText.label.copyWith(fontSize: 11, letterSpacing: 0.44, color: c),
+            style: SuperText.label.copyWith(
+              fontSize: 11,
+              letterSpacing: 0.44,
+              color: c,
+            ),
           ),
         ],
       ),

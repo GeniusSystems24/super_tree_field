@@ -41,9 +41,10 @@ Future<void> showTreeContextMenu<T>({
   required Offset globalPosition,
   required SuperTreeController<T> controller,
   required TreeNode<T> node,
-  Color accent = SuperTokensData.defaultAccent,
+  Color? accent,
 }) {
   final items = _buildItems<T>(controller, node);
+
   if (items.isEmpty) return Future<void>.value();
 
   return showGeneralDialog<void>(
@@ -51,12 +52,13 @@ Future<void> showTreeContextMenu<T>({
     barrierDismissible: true,
     barrierLabel: 'Dismiss menu',
     barrierColor: const Color(0x00000000),
-    transitionDuration: SuperTokensData.defaultDurFast,
+    transitionDuration: SuperThemeData.of(context).tokens.durFast,
     pageBuilder: (context, _, __) => const SizedBox.shrink(),
     transitionBuilder: (context, anim, _, __) {
+      accent ??= SuperThemeData.of(context).tokens.accent;
       return _ContextMenuLayer(
         anchor: globalPosition,
-        accent: accent,
+        accent: accent!,
         node: node,
         items: items,
         animation: anim,
@@ -92,26 +94,34 @@ List<_MenuItem> _buildItems<T>(SuperTreeController<T> c, TreeNode<T> node) {
   }
   // ── editable mode ──
   return [
-    _MenuItem(icon: Icons.edit_outlined, label: 'Rename', onTap: () => c.beginRename(node.code)),
     _MenuItem(
-        icon: Icons.subdirectory_arrow_right,
-        label: 'Add child',
-        onTap: () => c.addChild(node.code)),
+      icon: Icons.edit_outlined,
+      label: 'Rename',
+      onTap: () => c.beginRename(node.code),
+    ),
     _MenuItem(
-        icon: Icons.arrow_upward,
-        label: 'Add sibling above',
-        dividerAbove: true,
-        onTap: () => c.addSiblingBefore(node.code)),
+      icon: Icons.subdirectory_arrow_right,
+      label: 'Add child',
+      onTap: () => c.addChild(node.code),
+    ),
     _MenuItem(
-        icon: Icons.arrow_downward,
-        label: 'Add sibling below',
-        onTap: () => c.addSiblingAfter(node.code)),
+      icon: Icons.arrow_upward,
+      label: 'Add sibling above',
+      dividerAbove: true,
+      onTap: () => c.addSiblingBefore(node.code),
+    ),
     _MenuItem(
-        icon: Icons.delete_outline,
-        label: 'Delete',
-        danger: true,
-        dividerAbove: true,
-        onTap: () => c.deleteNode(node.code)),
+      icon: Icons.arrow_downward,
+      label: 'Add sibling below',
+      onTap: () => c.addSiblingAfter(node.code),
+    ),
+    _MenuItem(
+      icon: Icons.delete_outline,
+      label: 'Delete',
+      danger: true,
+      dividerAbove: true,
+      onTap: () => c.deleteNode(node.code),
+    ),
   ];
 }
 
@@ -140,8 +150,12 @@ class _ContextMenuLayer extends StatelessWidget {
     // Clamp so the menu stays on-screen, flipping past the pointer if needed.
     var dx = anchor.dx;
     var dy = anchor.dy;
-    if (dx + menuW > media.width - 8) dx = (anchor.dx - menuW).clamp(8.0, media.width - menuW - 8);
-    if (dy + menuH > media.height - 8) dy = (anchor.dy - menuH).clamp(8.0, media.height - menuH - 8);
+    if (dx + menuW > media.width - 8) {
+      dx = (anchor.dx - menuW).clamp(8.0, media.width - menuW - 8);
+    }
+    if (dy + menuH > media.height - 8) {
+      dy = (anchor.dy - menuH).clamp(8.0, media.height - menuH - 8);
+    }
 
     return Stack(
       children: [
@@ -152,7 +166,10 @@ class _ContextMenuLayer extends StatelessWidget {
             opacity: animation,
             child: ScaleTransition(
               scale: Tween<double>(begin: 0.96, end: 1).animate(
-                CurvedAnimation(parent: animation, curve: SuperTokensData.defaultCurveStandard),
+                CurvedAnimation(
+                  parent: animation,
+                  curve: SuperThemeData.of(context).tokens.curveStandard,
+                ),
               ),
               alignment: Alignment.topLeft,
               child: Material(
@@ -162,7 +179,9 @@ class _ContextMenuLayer extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 5),
                   decoration: BoxDecoration(
                     color: t.surface,
-                    borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl),
+                    borderRadius: BorderRadius.circular(
+                      SuperThemeData.of(context).tokens.radiusControl,
+                    ),
                     border: Border.all(color: t.borderStrong),
                     boxShadow: t.cardShadow,
                   ),
@@ -172,8 +191,8 @@ class _ContextMenuLayer extends StatelessWidget {
                     children: [
                       for (final item in items) ...[
                         if (item.dividerAbove)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5),
                             child: Hairline(),
                           ),
                         _MenuRow(
@@ -207,7 +226,11 @@ class _ContextMenuLayer extends StatelessWidget {
 }
 
 class _MenuRow extends StatefulWidget {
-  const _MenuRow({required this.item, required this.accent, required this.onSelected});
+  const _MenuRow({
+    required this.item,
+    required this.accent,
+    required this.onSelected,
+  });
   final _MenuItem item;
   final Color accent;
   final VoidCallback onSelected;
@@ -245,7 +268,11 @@ class _MenuRowState extends State<_MenuRow> {
           ),
           child: Row(
             children: [
-              Icon(widget.item.icon, size: 15, color: danger ? cs.error : t.fg3),
+              Icon(
+                widget.item.icon,
+                size: 15,
+                color: danger ? cs.error : t.fg3,
+              ),
               const SizedBox(width: 11),
               Expanded(
                 child: Text(

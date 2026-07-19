@@ -26,19 +26,23 @@ import 'tree_context_menu.dart';
 
 /// Per-row context handed to the leading / trailing builders.
 class TreeRowInfo {
-  const TreeRowInfo({required this.depth, required this.open, required this.hasChildren});
+  const TreeRowInfo({
+    required this.depth,
+    required this.open,
+    required this.hasChildren,
+  });
   final int depth;
   final bool open;
   final bool hasChildren;
 }
 
 /// Builds the leading cell (type dot, file icon, avatar) for a node.
-typedef TreeSlotBuilder<T> = Widget Function(
-    BuildContext context, TreeNode<T> node, TreeRowInfo info);
+typedef TreeSlotBuilder<T> =
+    Widget Function(BuildContext context, TreeNode<T> node, TreeRowInfo info);
 
 /// Builds the optional trailing cell(s) for a node (balance, size, role).
-typedef TreeTrailingBuilder<T> = Widget? Function(
-    BuildContext context, TreeNode<T> node, TreeRowInfo info);
+typedef TreeTrailingBuilder<T> =
+    Widget? Function(BuildContext context, TreeNode<T> node, TreeRowInfo info);
 
 /// A single recursive tree row + (when open) its children.
 class TreeRow<T> extends StatefulWidget {
@@ -94,7 +98,10 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
   DropPosition? _zoneFor(Offset globalPos, bool hasKids) {
     final box = _rowKey.currentContext?.findRenderObject() as RenderBox?;
     if (box == null) return null;
-    final frac = (box.globalToLocal(globalPos).dy / box.size.height).clamp(0.0, 1.0);
+    final frac = (box.globalToLocal(globalPos).dy / box.size.height).clamp(
+      0.0,
+      1.0,
+    );
     if (hasKids) {
       if (frac < 0.28) return DropPosition.before;
       if (frac > 0.72) return DropPosition.after;
@@ -115,7 +122,11 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
     final isFocus = c.focusId == node.code;
     final editing = c.isEditing(node.code);
     final editable = c.isEditable && !c.searching;
-    final info = TreeRowInfo(depth: widget.depth, open: open, hasChildren: hasKids);
+    final info = TreeRowInfo(
+      depth: widget.depth,
+      open: open,
+      hasChildren: hasKids,
+    );
 
     final trailing = widget.trailingBuilder?.call(context, node, info);
     final dropInside = _dropPos == DropPosition.inside;
@@ -123,24 +134,35 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
     final bg = dropInside
         ? Color.alphaBlend(widget.accent.withOpacity(0.14), t.surface)
         : isSel
-            ? Color.alphaBlend(widget.accent.withOpacity(0.12), t.surface)
-            : (_hover ? t.hover : const Color(0x00000000));
+        ? Color.alphaBlend(widget.accent.withOpacity(0.12), t.surface)
+        : (_hover ? t.hover : const Color(0x00000000));
     final boxBorder = dropInside
         ? Border.all(color: widget.accent, width: 1.5)
         : isSel
-            ? Border.all(color: Color.alphaBlend(widget.accent.withOpacity(0.45), t.surface))
-            : (isFocus
-                ? Border.all(
-                    color: Color.alphaBlend(widget.accent.withOpacity(0.70), t.surface),
-                    width: 1.5)
-                : null);
+        ? Border.all(
+            color: Color.alphaBlend(widget.accent.withOpacity(0.45), t.surface),
+          )
+        : (isFocus
+              ? Border.all(
+                  color: Color.alphaBlend(
+                    widget.accent.withOpacity(0.70),
+                    t.surface,
+                  ),
+                  width: 1.5,
+                )
+              : null);
 
     // ── the single row's visual body ──
     Widget rowInner = AnimatedContainer(
       key: _rowKey,
-      duration: SuperTokensData.defaultDurFast,
-      curve: SuperTokensData.defaultCurveStandard,
-      padding: EdgeInsetsDirectional.only(start: indent, end: 12, top: 9, bottom: 9),
+      duration: SuperThemeData.of(context).tokens.durFast,
+      curve: SuperThemeData.of(context).tokens.curveStandard,
+      padding: EdgeInsetsDirectional.only(
+        start: indent,
+        end: 12,
+        top: 9,
+        bottom: 9,
+      ),
       decoration: BoxDecoration(
         color: bg,
         border: boxBorder,
@@ -168,9 +190,13 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
             child: hasKids
                 ? AnimatedRotation(
                     turns: open ? 0 : -0.25,
-                    duration: SuperTokensData.defaultDurBase,
-                    curve: SuperTokensData.defaultCurveStandard,
-                    child: Icon(Icons.keyboard_arrow_down, size: 16, color: t.fg3),
+                    duration: SuperThemeData.of(context).tokens.durBase,
+                    curve: SuperThemeData.of(context).tokens.curveStandard,
+                    child: Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 16,
+                      color: t.fg3,
+                    ),
                   )
                 : null,
           ),
@@ -201,7 +227,9 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
                         height: 1.2,
                         fontWeight: widget.depth == 0
                             ? FontWeight.w700
-                            : (widget.depth == 1 ? FontWeight.w600 : FontWeight.w500),
+                            : (widget.depth == 1
+                                  ? FontWeight.w600
+                                  : FontWeight.w500),
                         color: widget.depth >= 3 ? t.fg2 : t.fg1,
                       ),
                     ),
@@ -214,7 +242,12 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
                       query: c.query,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          fontFamily: SuperTokensData.defaultArabicFont, fontSize: 12, color: t.fg4),
+                        fontFamily: SuperThemeData.of(
+                          context,
+                        ).tokens.arabicFont,
+                        fontSize: 12,
+                        color: t.fg4,
+                      ),
                     ),
                   ),
                 ],
@@ -237,9 +270,12 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
               visible: _hover,
               color: t.fg3,
               onTap: () {
-                final box = _rowKey.currentContext?.findRenderObject() as RenderBox?;
+                final box =
+                    _rowKey.currentContext?.findRenderObject() as RenderBox?;
                 final pos = box != null
-                    ? box.localToGlobal(Offset(box.size.width - 30, box.size.height - 4))
+                    ? box.localToGlobal(
+                        Offset(box.size.width - 30, box.size.height - 4),
+                      )
                     : Offset.zero;
                 _openMenu(pos);
               },
@@ -356,7 +392,11 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
   Widget _dragHandle(SuperThemeData t, TreeNode<T> node) {
     final grip = Padding(
       padding: const EdgeInsetsDirectional.only(end: 4),
-      child: Icon(Icons.drag_indicator, size: 15, color: _hover ? t.fg3 : t.fg4),
+      child: Icon(
+        Icons.drag_indicator,
+        size: 15,
+        color: _hover ? t.fg3 : t.fg4,
+      ),
     );
     return Draggable<String>(
       data: node.code,
@@ -389,8 +429,12 @@ class _RenameField extends StatefulWidget {
 }
 
 class _RenameFieldState extends State<_RenameField> {
-  late final TextEditingController _ctl = TextEditingController(text: widget.initial)
-    ..selection = TextSelection(baseOffset: 0, extentOffset: widget.initial.length);
+  late final TextEditingController _ctl =
+      TextEditingController(text: widget.initial)
+        ..selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: widget.initial.length,
+        );
   final FocusNode _focus = FocusNode();
   bool _done = false;
 
@@ -439,7 +483,9 @@ class _RenameFieldState extends State<_RenameField> {
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           color: t.inputBg,
-          borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl),
+          borderRadius: BorderRadius.circular(
+            SuperThemeData.of(context).tokens.radiusControl,
+          ),
           border: Border.all(color: widget.accent, width: 1.5),
         ),
         alignment: Alignment.centerLeft,
@@ -449,7 +495,11 @@ class _RenameFieldState extends State<_RenameField> {
           cursorColor: widget.accent,
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _commit(),
-          style: SuperText.body.copyWith(fontSize: 13, height: 1.1, color: t.fg1),
+          style: SuperText.body.copyWith(
+            fontSize: 13,
+            height: 1.1,
+            color: t.fg1,
+          ),
           decoration: const InputDecoration(
             isCollapsed: true,
             border: InputBorder.none,
@@ -477,7 +527,9 @@ class _DragFeedback extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
           decoration: BoxDecoration(
             color: t.surface,
-            borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl),
+            borderRadius: BorderRadius.circular(
+              SuperThemeData.of(context).tokens.radiusControl,
+            ),
             border: Border.all(color: accent, width: 1.5),
             boxShadow: t.cardShadow,
           ),
@@ -488,10 +540,12 @@ class _DragFeedback extends StatelessWidget {
               const SizedBox(width: 7),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 220),
-                child: Text(label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: SuperText.body.copyWith(fontSize: 12.5, color: t.fg1)),
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: SuperText.body.copyWith(fontSize: 12.5, color: t.fg1),
+                ),
               ),
             ],
           ),
@@ -527,7 +581,11 @@ class _DropLine extends StatelessWidget {
 
 /// The hover-revealed ⋮ button that opens the editable context menu.
 class _MenuButton extends StatelessWidget {
-  const _MenuButton({required this.visible, required this.color, required this.onTap});
+  const _MenuButton({
+    required this.visible,
+    required this.color,
+    required this.onTap,
+  });
   final bool visible;
   final Color color;
   final VoidCallback onTap;
@@ -554,7 +612,12 @@ class _MenuButton extends StatelessWidget {
 /// partial) when on. Owns its own tap so the row beneath does not activate.
 /// Also reused by [SuperTree]'s header "select all" control.
 class TreeCheckbox extends StatelessWidget {
-  const TreeCheckbox({super.key, required this.state, required this.accent, required this.onTap});
+  const TreeCheckbox({
+    super.key,
+    required this.state,
+    required this.accent,
+    required this.onTap,
+  });
 
   final TreeCheckState state;
   final Color accent;
@@ -570,13 +633,15 @@ class TreeCheckbox extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: AnimatedContainer(
-          duration: SuperTokensData.defaultDurFast,
+          duration: SuperThemeData.of(context).tokens.durFast,
           width: 18,
           height: 18,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: on ? accent : const Color(0x00000000),
-            borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusControl),
+            borderRadius: BorderRadius.circular(
+              SuperThemeData.of(context).tokens.radiusControl,
+            ),
             border: Border.all(
               color: on ? accent : t.borderStrong,
               width: on ? 0 : 1.4,

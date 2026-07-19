@@ -59,13 +59,8 @@ class TreeNode<T> {
 
   /// A copy with [children] replaced — used by the search filter to prune
   /// branches while preserving the rest of the node.
-  TreeNode<T> withChildren(List<TreeNode<T>>? next) => TreeNode<T>(
-        code: code,
-        name: name,
-        ar: ar,
-        value: value,
-        children: next,
-      );
+  TreeNode<T> withChildren(List<TreeNode<T>>? next) =>
+      TreeNode<T>(code: code, name: name, ar: ar, value: value, children: next);
 
   /// A copy with selected fields overridden. Omitted args are left untouched;
   /// pass `null` explicitly to clear a nullable field. Used by the edit ops.
@@ -75,16 +70,15 @@ class TreeNode<T> {
     Object? ar = _unset,
     Object? value = _unset,
     Object? children = _unset,
-  }) =>
-      TreeNode<T>(
-        code: code ?? this.code,
-        name: name ?? this.name,
-        ar: identical(ar, _unset) ? this.ar : ar as String?,
-        value: identical(value, _unset) ? this.value : value as T?,
-        children: identical(children, _unset)
-            ? this.children
-            : children as List<TreeNode<T>>?,
-      );
+  }) => TreeNode<T>(
+    code: code ?? this.code,
+    name: name ?? this.name,
+    ar: identical(ar, _unset) ? this.ar : ar as String?,
+    value: identical(value, _unset) ? this.value : value as T?,
+    children: identical(children, _unset)
+        ? this.children
+        : children as List<TreeNode<T>>?,
+  );
 
   /// A copy with new labels — the inline-rename path. Passing `null` for [ar]
   /// leaves the Arabic label unchanged; pass an empty string to clear it.

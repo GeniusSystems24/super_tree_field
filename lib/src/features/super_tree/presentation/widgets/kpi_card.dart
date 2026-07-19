@@ -33,7 +33,9 @@ class KpiCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: t.surface,
-        borderRadius: BorderRadius.circular(SuperTokensData.defaultRadiusCard),
+        borderRadius: BorderRadius.circular(
+          SuperThemeData.of(context).tokens.radiusCard,
+        ),
         border: Border.all(color: t.border),
         boxShadow: t.cardShadow,
       ),
@@ -66,19 +68,21 @@ class KpiCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: SuperTokensData.defaultSpace2),
+                    SizedBox(width: SuperThemeData.of(context).tokens.space2),
                     Text(
                       ar,
                       textDirection: TextDirection.rtl,
                       style: TextStyle(
-                        fontFamily: SuperTokensData.defaultArabicFont,
+                        fontFamily: SuperThemeData.of(
+                          context,
+                        ).tokens.arabicFont,
                         fontSize: 11,
                         color: t.fg4,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: SuperTokensData.defaultSpace2),
+                SizedBox(height: SuperThemeData.of(context).tokens.space2),
                 Text(
                   value,
                   maxLines: 1,
@@ -92,11 +96,16 @@ class KpiCard extends StatelessWidget {
                   ),
                 ),
                 if (sub != null) ...[
-                  const SizedBox(height: SuperTokensData.defaultSpace2),
-                  Text(sub!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: SuperText.caption.copyWith(fontSize: 11, color: t.fg3)),
+                  SizedBox(height: SuperThemeData.of(context).tokens.space2),
+                  Text(
+                    sub!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: SuperText.caption.copyWith(
+                      fontSize: 11,
+                      color: t.fg3,
+                    ),
+                  ),
                 ],
               ],
             ),

@@ -23,9 +23,8 @@ typedef LeafValue<T> = double Function(TreeNode<T> node);
 /// Stateless tree algorithms. Never instantiated.
 abstract final class TreeLogic {
   /// Total number of leaves under [node] (1 for a leaf itself).
-  static int leafCount<T>(TreeNode<T> node) => node.hasChildren
-      ? node.children!.fold(0, (s, c) => s + leafCount(c))
-      : 1;
+  static int leafCount<T>(TreeNode<T> node) =>
+      node.hasChildren ? node.children!.fold(0, (s, c) => s + leafCount(c)) : 1;
 
   /// Every leaf code under [node] (just `[node.code]` when it is itself a
   /// leaf). The selection model uses leaves as the source of truth, deriving
@@ -48,8 +47,8 @@ abstract final class TreeLogic {
   /// so every figure reconciles with no double-counting.
   static double rollup<T>(TreeNode<T> node, LeafValue<T> leafValue) =>
       node.hasChildren
-          ? node.children!.fold(0.0, (s, c) => s + rollup(c, leafValue))
-          : leafValue(node);
+      ? node.children!.fold(0.0, (s, c) => s + rollup(c, leafValue))
+      : leafValue(node);
 
   /// The codes of every group node at depth ≤ [maxDepth] (default: all groups).
   /// Used to seed / drive expand-all and the default expansion depth.
@@ -136,7 +135,11 @@ abstract final class TreeLogic {
   }
 
   /// The parent of the node with [code], or null when it is a root / absent.
-  static TreeNode<T>? parentOf<T>(List<TreeNode<T>> nodes, String code, [TreeNode<T>? parent]) {
+  static TreeNode<T>? parentOf<T>(
+    List<TreeNode<T>> nodes,
+    String code, [
+    TreeNode<T>? parent,
+  ]) {
     for (final n in nodes) {
       if (n.code == code) return parent;
       if (n.hasChildren) {
@@ -164,7 +167,11 @@ abstract final class TreeLogic {
 
   /// True when [code] is [ancestorCode] itself or lives within its subtree.
   /// Used to forbid dropping a node into its own descendants.
-  static bool isWithin<T>(List<TreeNode<T>> nodes, String ancestorCode, String code) {
+  static bool isWithin<T>(
+    List<TreeNode<T>> nodes,
+    String ancestorCode,
+    String code,
+  ) {
     if (ancestorCode == code) return true;
     final anc = findNode(nodes, ancestorCode);
     if (anc == null || !anc.hasChildren) return false;
@@ -194,7 +201,9 @@ abstract final class TreeLogic {
     final out = <TreeNode<T>>[];
     for (final n in nodes) {
       if (n.code == code) continue;
-      out.add(n.hasChildren ? n.withChildren(removeNode(n.children!, code)) : n);
+      out.add(
+        n.hasChildren ? n.withChildren(removeNode(n.children!, code)) : n,
+      );
     }
     return out;
   }
@@ -231,7 +240,11 @@ abstract final class TreeLogic {
     }
     return [
       for (final n in nodes)
-        n.hasChildren ? n.withChildren(insertSibling(n.children!, targetCode, node, after: after)) : n,
+        n.hasChildren
+            ? n.withChildren(
+                insertSibling(n.children!, targetCode, node, after: after),
+              )
+            : n,
     ];
   }
 
@@ -245,7 +258,9 @@ abstract final class TreeLogic {
     DropPosition pos,
   ) {
     if (dragCode == targetCode) return nodes;
-    if (isWithin(nodes, dragCode, targetCode)) return nodes; // can't drop into own subtree
+    if (isWithin(nodes, dragCode, targetCode)) {
+      return nodes; // can't drop into own subtree
+    }
     final moving = findNode(nodes, dragCode);
     if (moving == null) return nodes;
     final pruned = removeNode(nodes, dragCode);

@@ -15,8 +15,7 @@ A faithful Dart port of the React `super-tree` tool. Light + dark themes, LTR + 
 ```yaml
 # pubspec.yaml
 dependencies:
-  super_tree:
-    path: ../super_tree   # or a git/hosted ref
+  super_tree: ^0.4.2
 ```
 
 ```dart
