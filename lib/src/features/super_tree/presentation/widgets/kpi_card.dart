@@ -34,7 +34,7 @@ class KpiCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(
-          SuperThemeData.of(context).tokens.radiusCard,
+          context.superTheme.spacing.radiusCard,
         ),
         border: Border.all(color: t.border),
         boxShadow: t.cardShadow,
@@ -61,14 +61,14 @@ class KpiCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         label.toUpperCase(),
-                        style: SuperText.label.copyWith(
+                        style: context.superTheme.textTheme.label.copyWith(
                           fontSize: 10,
                           letterSpacing: 0.6,
                           color: t.fg3,
                         ),
                       ),
                     ),
-                    SizedBox(width: SuperThemeData.of(context).tokens.space2),
+                    SizedBox(width: context.superTheme.spacing.space2),
                     Text(
                       ar,
                       textDirection: TextDirection.rtl,
@@ -82,12 +82,12 @@ class KpiCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: SuperThemeData.of(context).tokens.space2),
+                SizedBox(height: context.superTheme.spacing.space2),
                 Text(
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: SuperText.mono.copyWith(
+                  style: context.superTheme.textTheme.mono.copyWith(
                     fontSize: 20,
                     height: 1.1,
                     fontWeight: FontWeight.w700,
@@ -96,12 +96,12 @@ class KpiCard extends StatelessWidget {
                   ),
                 ),
                 if (sub != null) ...[
-                  SizedBox(height: SuperThemeData.of(context).tokens.space2),
+                  SizedBox(height: context.superTheme.spacing.space2),
                   Text(
                     sub!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: SuperText.caption.copyWith(
+                    style: context.superTheme.textTheme.caption.copyWith(
                       fontSize: 11,
                       color: t.fg3,
                     ),

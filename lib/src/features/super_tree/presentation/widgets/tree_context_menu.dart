@@ -180,7 +180,7 @@ class _ContextMenuLayer extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: t.surface,
                     borderRadius: BorderRadius.circular(
-                      SuperThemeData.of(context).tokens.radiusControl,
+                      context.superTheme.spacing.radiusControl,
                     ),
                     border: Border.all(color: t.borderStrong),
                     boxShadow: t.cardShadow,
@@ -249,8 +249,8 @@ class _MenuRowState extends State<_MenuRow> {
     final cs = SuperMaterialThemeData.of(context).colorScheme;
     final fg = danger ? cs.error : t.fg1;
     final hoverBg = danger
-        ? cs.error.withOpacity(0.12)
-        : Color.alphaBlend(widget.accent.withOpacity(0.10), t.surface);
+        ? cs.error.withValues(alpha: 0.12)
+        : Color.alphaBlend(widget.accent.withValues(alpha: 0.10), t.surface);
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -277,7 +277,7 @@ class _MenuRowState extends State<_MenuRow> {
               Expanded(
                 child: Text(
                   widget.item.label,
-                  style: SuperText.body.copyWith(fontSize: 13, color: fg),
+                  style: context.superTheme.textTheme.body.copyWith(fontSize: 13, color: fg),
                 ),
               ),
             ],

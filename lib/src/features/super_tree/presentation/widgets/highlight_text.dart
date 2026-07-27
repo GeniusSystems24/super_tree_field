@@ -37,7 +37,7 @@ class HighlightText extends StatelessWidget {
     }
     final t = context.superTheme;
     final mark = Color.alphaBlend(
-      SuperMaterialThemeData.of(context).colorScheme.primary.withOpacity(0.32),
+      SuperMaterialThemeData.of(context).colorScheme.primary.withValues(alpha: 0.32),
       t.surface,
     );
     return RichText(

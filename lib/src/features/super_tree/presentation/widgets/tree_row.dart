@@ -132,20 +132,20 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
     final dropInside = _dropPos == DropPosition.inside;
 
     final bg = dropInside
-        ? Color.alphaBlend(widget.accent.withOpacity(0.14), t.surface)
+        ? Color.alphaBlend(widget.accent.withValues(alpha: 0.14), t.surface)
         : isSel
-        ? Color.alphaBlend(widget.accent.withOpacity(0.12), t.surface)
+        ? Color.alphaBlend(widget.accent.withValues(alpha: 0.12), t.surface)
         : (_hover ? t.hover : const Color(0x00000000));
     final boxBorder = dropInside
         ? Border.all(color: widget.accent, width: 1.5)
         : isSel
         ? Border.all(
-            color: Color.alphaBlend(widget.accent.withOpacity(0.45), t.surface),
+            color: Color.alphaBlend(widget.accent.withValues(alpha: 0.45), t.surface),
           )
         : (isFocus
               ? Border.all(
                   color: Color.alphaBlend(
-                    widget.accent.withOpacity(0.70),
+                    widget.accent.withValues(alpha: 0.70),
                     t.surface,
                   ),
                   width: 1.5,
@@ -222,7 +222,7 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
                       text: node.name,
                       query: c.query,
                       overflow: TextOverflow.ellipsis,
-                      style: SuperText.body.copyWith(
+                      style: context.superTheme.textTheme.body.copyWith(
                         fontSize: 13,
                         height: 1.2,
                         fontWeight: widget.depth == 0
@@ -484,7 +484,7 @@ class _RenameFieldState extends State<_RenameField> {
         decoration: BoxDecoration(
           color: t.inputBg,
           borderRadius: BorderRadius.circular(
-            SuperThemeData.of(context).tokens.radiusControl,
+            context.superTheme.spacing.radiusControl,
           ),
           border: Border.all(color: widget.accent, width: 1.5),
         ),
@@ -495,7 +495,7 @@ class _RenameFieldState extends State<_RenameField> {
           cursorColor: widget.accent,
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _commit(),
-          style: SuperText.body.copyWith(
+          style: context.superTheme.textTheme.body.copyWith(
             fontSize: 13,
             height: 1.1,
             color: t.fg1,
@@ -528,7 +528,7 @@ class _DragFeedback extends StatelessWidget {
           decoration: BoxDecoration(
             color: t.surface,
             borderRadius: BorderRadius.circular(
-              SuperThemeData.of(context).tokens.radiusControl,
+              context.superTheme.spacing.radiusControl,
             ),
             border: Border.all(color: accent, width: 1.5),
             boxShadow: t.cardShadow,
@@ -544,7 +544,7 @@ class _DragFeedback extends StatelessWidget {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: SuperText.body.copyWith(fontSize: 12.5, color: t.fg1),
+                  style: context.superTheme.textTheme.body.copyWith(fontSize: 12.5, color: t.fg1),
                 ),
               ),
             ],
@@ -640,7 +640,7 @@ class TreeCheckbox extends StatelessWidget {
           decoration: BoxDecoration(
             color: on ? accent : const Color(0x00000000),
             borderRadius: BorderRadius.circular(
-              SuperThemeData.of(context).tokens.radiusControl,
+              context.superTheme.spacing.radiusControl,
             ),
             border: Border.all(
               color: on ? accent : t.borderStrong,
@@ -677,7 +677,7 @@ class _CountBadge extends StatelessWidget {
       ),
       child: Text(
         '$count',
-        style: SuperText.mono.copyWith(
+        style: context.superTheme.textTheme.mono.copyWith(
           fontSize: 9.5,
           height: 1.3,
           fontWeight: FontWeight.w700,

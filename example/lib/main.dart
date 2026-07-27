@@ -103,27 +103,27 @@ class _Launcher extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(SuperThemeData.of(context).tokens.space10),
+            padding: EdgeInsets.all(context.superTheme.spacing.space10),
             child: ConstrainedBox(
               constraints:
-                  BoxConstraints(maxWidth: SuperThemeData.of(context).tokens.contentColumn),
+                  BoxConstraints(maxWidth: context.superTheme.sizing.contentColumn),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text('SUPER TREE \u2022 GALLERY',
-                      style: SuperText.eyebrow.copyWith(
+                      style: context.superTheme.textTheme.eyebrow.copyWith(
                           color: SuperMaterialThemeData.of(context)
                               .colorScheme
                               .primary)),
-                  SizedBox(height: SuperThemeData.of(context).tokens.space2),
+                  SizedBox(height: context.superTheme.spacing.space2),
                   Text('Component Demos مكتبة المكونات',
-                      style: SuperText.h1.copyWith(color: t.fg1)),
-                  SizedBox(height: SuperThemeData.of(context).tokens.space8),
+                      style: context.superTheme.textTheme.h1.copyWith(color: t.fg1)),
+                  SizedBox(height: context.superTheme.spacing.space8),
                   for (final d in _demos) ...[
                     _DemoCard(demo: d),
-                    SizedBox(height: SuperThemeData.of(context).tokens.space3),
+                    SizedBox(height: context.superTheme.spacing.space3),
                   ],
-                  SizedBox(height: SuperThemeData.of(context).tokens.space6),
+                  SizedBox(height: context.superTheme.spacing.space6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -134,7 +134,7 @@ class _Launcher extends StatelessWidget {
                         variant: SuperButtonVariant.secondary,
                         onPressed: onToggleTheme,
                       ),
-                      SizedBox(width: SuperThemeData.of(context).tokens.space3),
+                      SizedBox(width: context.superTheme.spacing.space3),
                       SuperButton(
                         label: dir == TextDirection.ltr
                             ? 'العربية (RTL)'
@@ -164,14 +164,14 @@ class _DemoCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(SuperThemeData.of(context).tokens.radiusCard),
+        borderRadius: BorderRadius.circular(context.superTheme.spacing.radiusCard),
         onTap: () => Navigator.of(context)
             .push(MaterialPageRoute<void>(builder: demo.builder)),
         child: Container(
-          padding: EdgeInsets.all(SuperThemeData.of(context).tokens.space4),
+          padding: EdgeInsets.all(context.superTheme.spacing.space4),
           decoration: BoxDecoration(
             color: t.surface,
-            borderRadius: BorderRadius.circular(SuperThemeData.of(context).tokens.radiusCard),
+            borderRadius: BorderRadius.circular(context.superTheme.spacing.radiusCard),
             border: Border.all(color: t.border),
             boxShadow: t.cardShadow,
           ),
@@ -186,26 +186,26 @@ class _DemoCard extends StatelessWidget {
                       SuperMaterialThemeData.of(context)
                           .colorScheme
                           .primary
-                          .withOpacity(0.14),
+                          .withValues(alpha: 0.14),
                       t.surface),
                   borderRadius:
-                      BorderRadius.circular(SuperThemeData.of(context).tokens.radiusControl),
+                      BorderRadius.circular(context.superTheme.spacing.radiusControl),
                 ),
                 child: Icon(demo.icon,
                     size: 22,
                     color:
                         SuperMaterialThemeData.of(context).colorScheme.primary),
               ),
-              SizedBox(width: SuperThemeData.of(context).tokens.space4),
+              SizedBox(width: context.superTheme.spacing.space4),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(demo.title,
-                        style: SuperText.heading.copyWith(color: t.fg1)),
+                        style: context.superTheme.textTheme.heading.copyWith(color: t.fg1)),
                     const SizedBox(height: 2),
                     Text(demo.subtitle,
-                        style: SuperText.caption.copyWith(color: t.fg3)),
+                        style: context.superTheme.textTheme.caption.copyWith(color: t.fg3)),
                   ],
                 ),
               ),

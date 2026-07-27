@@ -150,7 +150,7 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
         elevation: 0,
         iconTheme: IconThemeData(color: t.fg2),
         title: Text('Permission Settings',
-            style: SuperText.heading.copyWith(color: t.fg1)),
+            style: context.superTheme.textTheme.heading.copyWith(color: t.fg1)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -163,16 +163,16 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
                 children: [
                   Text('ADMINISTRATION • ROLES & PERMISSIONS',
                       style:
-                          SuperText.eyebrow.copyWith(color: _accent(context))),
-                  SizedBox(height: SuperThemeData.of(context).tokens.space2),
+                          context.superTheme.textTheme.eyebrow.copyWith(color: _accent(context))),
+                  SizedBox(height: context.superTheme.spacing.space2),
                   Text('Permission Settings صلاحيات',
-                      style: SuperText.h1.copyWith(color: t.fg1)),
-                  SizedBox(height: SuperThemeData.of(context).tokens.space6),
+                      style: context.superTheme.textTheme.h1.copyWith(color: t.fg1)),
+                  SizedBox(height: context.superTheme.spacing.space6),
                   _ModeToggle(
                     mode: _mode,
                     onChanged: (m) => setState(() => _mode = m),
                   ),
-                  SizedBox(height: SuperThemeData.of(context).tokens.space6),
+                  SizedBox(height: context.superTheme.spacing.space6),
                   SuperTree<Permission>(
                     key: ValueKey(_mode),
                     controller: _controller,
@@ -225,12 +225,12 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: c.withOpacity(0.15),
+        color: c.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: c.withOpacity(0.35)),
+        border: Border.all(color: c.withValues(alpha: 0.35)),
       ),
       child: Text(p.level!.toUpperCase(),
-          style: SuperText.pill.copyWith(fontSize: 10, color: c)),
+          style: context.superTheme.textTheme.pill.copyWith(fontSize: 10, color: c)),
     );
   }
 }
@@ -252,7 +252,7 @@ class _ModeToggle extends StatelessWidget {
         child: AnimatedContainer(
           duration: SuperThemeData.of(context).tokens.durFast,
           padding: const EdgeInsets.symmetric(horizontal: 14),
-          height: SuperThemeData.of(context).tokens.controlHeight - 6,
+          height: context.superTheme.spacing.controlHeight - 6,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: active
@@ -260,10 +260,10 @@ class _ModeToggle extends StatelessWidget {
                     SuperMaterialThemeData.of(context)
                         .colorScheme
                         .primary
-                        .withOpacity(0.20),
+                        .withValues(alpha: 0.20),
                     t.surface)
                 : const Color(0x00000000),
-            borderRadius: BorderRadius.circular(SuperThemeData.of(context).tokens.radiusControl - 2),
+            borderRadius: BorderRadius.circular(context.superTheme.spacing.radiusControl - 2),
             border: Border.all(
                 color: active
                     ? SuperMaterialThemeData.of(context).colorScheme.primary
@@ -279,7 +279,7 @@ class _ModeToggle extends StatelessWidget {
                       : t.fg3),
               const SizedBox(width: 7),
               Text(label,
-                  style: SuperText.body.copyWith(
+                  style: context.superTheme.textTheme.body.copyWith(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
                       color: active
@@ -296,15 +296,15 @@ class _ModeToggle extends StatelessWidget {
     return Row(
       children: [
         Text('SELECTION MODE',
-            style: SuperText.label
+            style: context.superTheme.textTheme.label
                 .copyWith(fontSize: 10, letterSpacing: 0.6, color: t.fg3)),
-        SizedBox(width: SuperThemeData.of(context).tokens.space3),
+        SizedBox(width: context.superTheme.spacing.space3),
         Container(
-          height: SuperThemeData.of(context).tokens.controlHeight,
+          height: context.superTheme.spacing.controlHeight,
           padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(
             color: t.inputBg,
-            borderRadius: BorderRadius.circular(SuperThemeData.of(context).tokens.radiusControl),
+            borderRadius: BorderRadius.circular(context.superTheme.spacing.radiusControl),
             border: Border.all(color: t.borderStrong),
           ),
           child: Row(

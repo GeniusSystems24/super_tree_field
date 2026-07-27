@@ -111,7 +111,7 @@ class _FileTreeDemoState extends State<FileTreeDemo> {
         elevation: 0,
         iconTheme: IconThemeData(color: t.fg2),
         title: Text('File Explorer',
-            style: SuperText.heading.copyWith(color: t.fg1)),
+            style: context.superTheme.textTheme.heading.copyWith(color: t.fg1)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -145,14 +145,14 @@ class _FileTreeDemoState extends State<FileTreeDemo> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(m.size ?? '',
-                          style: SuperText.mono
+                          style: context.superTheme.textTheme.mono
                               .copyWith(fontSize: 11.5, color: t.fg2)),
                       const SizedBox(width: 12),
                       SizedBox(
                         width: 46,
                         child: Text(m.modified ?? '',
                             textAlign: TextAlign.end,
-                            style: SuperText.caption
+                            style: context.superTheme.textTheme.caption
                                 .copyWith(fontSize: 11, color: t.fg4)),
                       ),
                     ],

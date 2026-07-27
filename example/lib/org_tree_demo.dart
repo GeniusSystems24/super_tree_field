@@ -95,7 +95,7 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
         elevation: 0,
         iconTheme: IconThemeData(color: t.fg2),
         title:
-            Text('Org Chart', style: SuperText.heading.copyWith(color: t.fg1)),
+            Text('Org Chart', style: context.superTheme.textTheme.heading.copyWith(color: t.fg1)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -125,12 +125,12 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
                     height: 24,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: c.withOpacity(0.16),
+                      color: c.withValues(alpha: 0.16),
                       shape: BoxShape.circle,
-                      border: Border.all(color: c.withOpacity(0.35)),
+                      border: Border.all(color: c.withValues(alpha: 0.35)),
                     ),
                     child: Text(p.initials,
-                        style: SuperText.mono.copyWith(
+                        style: context.superTheme.textTheme.mono.copyWith(
                             fontSize: 10,
                             height: 1,
                             fontWeight: FontWeight.w700,
@@ -145,7 +145,7 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(p.role,
-                          style: SuperText.body
+                          style: context.superTheme.textTheme.body
                               .copyWith(fontSize: 12, color: t.fg2)),
                       const SizedBox(width: 10),
                       Container(
@@ -153,12 +153,12 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: c.withOpacity(0.15),
+                          color: c.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: c.withOpacity(0.35)),
+                          border: Border.all(color: c.withValues(alpha: 0.35)),
                         ),
                         child: Text(p.dept,
-                            style: SuperText.pill
+                            style: context.superTheme.textTheme.pill
                                 .copyWith(fontSize: 10, color: c)),
                       ),
                     ],

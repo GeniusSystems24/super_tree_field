@@ -174,7 +174,7 @@ class _AccountTreeState extends State<AccountTree> {
         Expanded(
           child: Text(
             'Drag the handle to move · right-click (or ⋮) to rename, add or delete · type filter is paused while editing',
-            style: SuperText.caption.copyWith(fontSize: 12, color: t.fg3),
+            style: context.superTheme.textTheme.caption.copyWith(fontSize: 12, color: t.fg3),
           ),
         ),
       ],
@@ -220,7 +220,7 @@ class _AccountTreeState extends State<AccountTree> {
             : c.maxWidth >= 540
             ? 2
             : 1;
-        final gap = SuperThemeData.of(context).tokens.space3;
+        final gap = context.superTheme.spacing.space3;
         final cardW = (c.maxWidth - gap * (cols - 1)) / cols;
         return Wrap(
           spacing: gap,
@@ -261,12 +261,12 @@ class _AccountTreeState extends State<AccountTree> {
       children: [
         Expanded(
           child: Wrap(
-            spacing: SuperThemeData.of(context).tokens.space2,
-            runSpacing: SuperThemeData.of(context).tokens.space2,
+            spacing: context.superTheme.spacing.space2,
+            runSpacing: context.superTheme.spacing.space2,
             children: chips,
           ),
         ),
-        SizedBox(width: SuperThemeData.of(context).tokens.space3),
+        SizedBox(width: context.superTheme.spacing.space3),
         _BalanceBadge(balanced: balanced),
       ],
     );
@@ -290,14 +290,14 @@ class _AccountTreeState extends State<AccountTree> {
             color: color,
             shape: BoxShape.circle,
             boxShadow: info.depth == 0
-                ? [BoxShadow(color: color.withOpacity(0.13), spreadRadius: 3)]
+                ? [BoxShadow(color: color.withValues(alpha: 0.13), spreadRadius: 3)]
                 : null,
           ),
         ),
         const SizedBox(width: 9),
         Text(
           node.code,
-          style: SuperText.mono.copyWith(
+          style: context.superTheme.textTheme.mono.copyWith(
             fontSize: 11.5,
             height: 1.2,
             color: t.fg3,
@@ -332,7 +332,7 @@ class _AccountTreeState extends State<AccountTree> {
             children: [
               Text(
                 SuperFormat.formatNumber(total),
-                style: SuperText.mono.copyWith(
+                style: context.superTheme.textTheme.mono.copyWith(
                   fontSize: 12.5,
                   height: 1.2,
                   fontWeight: info.depth == 0
@@ -352,9 +352,7 @@ class _AccountTreeState extends State<AccountTree> {
                     child: FractionallySizedBox(
                       widthFactor: (share).clamp(0.015, 1.0),
                       child: Container(
-                        color: type.color.withOpacity(
-                          info.depth == 0 ? 0.9 : 0.55,
-                        ),
+                        color: type.color.withValues(alpha: info.depth == 0 ? 0.9 : 0.55),
                       ),
                     ),
                   ),
@@ -393,7 +391,7 @@ class _TypeChipState extends State<_TypeChip> {
     final t = context.superTheme;
     final color = widget.color;
     final bg = widget.active
-        ? (color != null ? color.withOpacity(0.12) : t.hover)
+        ? (color != null ? color.withValues(alpha: 0.12) : t.hover)
         : (_hover ? t.hover : const Color(0x00000000));
     final borderColor = widget.active ? (color ?? t.borderStrong) : t.border;
     final fg = widget.active ? (color ?? t.fg1) : t.fg2;
@@ -427,7 +425,7 @@ class _TypeChipState extends State<_TypeChip> {
               ],
               Text(
                 widget.label,
-                style: SuperText.label.copyWith(
+                style: context.superTheme.textTheme.label.copyWith(
                   fontSize: 11,
                   letterSpacing: 0.33,
                   color: fg,
@@ -457,7 +455,7 @@ class _BalanceBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: t.tintFill(c, 0.12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: c.withOpacity(0.4)),
+        border: Border.all(color: c.withValues(alpha: 0.4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -466,7 +464,7 @@ class _BalanceBadge extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             balanced ? 'Balanced · A = L + E' : 'Out of balance',
-            style: SuperText.label.copyWith(
+            style: context.superTheme.textTheme.label.copyWith(
               fontSize: 11,
               letterSpacing: 0.44,
               color: c,

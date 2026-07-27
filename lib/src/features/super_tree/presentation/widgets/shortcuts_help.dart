@@ -42,12 +42,12 @@ class _ShortcutsDialog extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: Container(
-            margin: EdgeInsets.all(SuperThemeData.of(context).tokens.space6),
+            margin: EdgeInsets.all(context.superTheme.spacing.space6),
             padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
             decoration: BoxDecoration(
               color: t.surface,
               borderRadius: BorderRadius.circular(
-                SuperThemeData.of(context).tokens.radiusCard,
+                context.superTheme.spacing.radiusCard,
               ),
               border: Border.all(color: t.borderStrong),
               boxShadow: SuperThemeData.popShadow,
@@ -69,7 +69,7 @@ class _ShortcutsDialog extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'Keyboard shortcuts',
-                        style: SuperText.heading.copyWith(color: t.fg1),
+                        style: context.superTheme.textTheme.heading.copyWith(color: t.fg1),
                       ),
                     ),
                     SuperIconButton(
@@ -79,7 +79,7 @@ class _ShortcutsDialog extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: SuperThemeData.of(context).tokens.space3),
+                SizedBox(height: context.superTheme.spacing.space3),
                 for (final (k, d) in _shortcuts)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 5),
@@ -89,7 +89,7 @@ class _ShortcutsDialog extends StatelessWidget {
                           width: 130,
                           child: Text(
                             k,
-                            style: SuperText.mono.copyWith(
+                            style: context.superTheme.textTheme.mono.copyWith(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w700,
                               color: t.fg2,
@@ -97,12 +97,12 @@ class _ShortcutsDialog extends StatelessWidget {
                           ),
                         ),
                         SizedBox(
-                          width: SuperThemeData.of(context).tokens.space3,
+                          width: context.superTheme.spacing.space3,
                         ),
                         Expanded(
                           child: Text(
                             d,
-                            style: SuperText.body.copyWith(
+                            style: context.superTheme.textTheme.body.copyWith(
                               fontSize: 13,
                               color: t.fg3,
                             ),

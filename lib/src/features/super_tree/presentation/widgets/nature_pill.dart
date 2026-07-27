@@ -26,19 +26,19 @@ class NaturePill extends StatelessWidget {
     return Container(
       height: 19,
       padding: EdgeInsets.symmetric(
-        horizontal: SuperThemeData.of(context).tokens.space2,
+        horizontal: context.superTheme.spacing.space2,
       ),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Color.alphaBlend(c.withOpacity(0.15), t.surface),
+        color: Color.alphaBlend(c.withValues(alpha: 0.15), t.surface),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: Color.alphaBlend(c.withOpacity(0.35), t.surface),
+          color: Color.alphaBlend(c.withValues(alpha: 0.35), t.surface),
         ),
       ),
       child: Text(
         nature.code,
-        style: SuperText.mono.copyWith(
+        style: context.superTheme.textTheme.mono.copyWith(
           fontSize: 10,
           height: 1,
           fontWeight: FontWeight.w700,
