@@ -9,7 +9,7 @@ description: >
   any nested data. Light/dark + LTR/RTL.
 
 # package version
-version: 0.5.0
+version: 0.5.1
 
 # package homepage, repository and issue tracker
 homepage: https://geniussystems24.github.io/super_tree_field
