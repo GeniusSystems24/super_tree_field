@@ -69,7 +69,7 @@ class _ShortcutsDialog extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'Keyboard shortcuts',
-                        style: context.superTheme.textTheme.heading.copyWith(color: t.fg1),
+                        style: context.superTextTheme.heading.copyWith(color: t.fg1),
                       ),
                     ),
                     SuperIconButton(
@@ -89,7 +89,7 @@ class _ShortcutsDialog extends StatelessWidget {
                           width: 130,
                           child: Text(
                             k,
-                            style: context.superTheme.textTheme.mono.copyWith(
+                            style: context.superTextTheme.mono.copyWith(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w700,
                               color: t.fg2,
@@ -102,7 +102,7 @@ class _ShortcutsDialog extends StatelessWidget {
                         Expanded(
                           child: Text(
                             d,
-                            style: context.superTheme.textTheme.body.copyWith(
+                            style: context.superTextTheme.body.copyWith(
                               fontSize: 13,
                               color: t.fg3,
                             ),

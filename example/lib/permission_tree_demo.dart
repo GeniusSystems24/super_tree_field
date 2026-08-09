@@ -150,7 +150,7 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
         elevation: 0,
         iconTheme: IconThemeData(color: t.fg2),
         title: Text('Permission Settings',
-            style: context.superTheme.textTheme.heading.copyWith(color: t.fg1)),
+            style: context.superTextTheme.heading.copyWith(color: t.fg1)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -163,10 +163,10 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
                 children: [
                   Text('ADMINISTRATION • ROLES & PERMISSIONS',
                       style:
-                          context.superTheme.textTheme.eyebrow.copyWith(color: _accent(context))),
+                          context.superTextTheme.eyebrow.copyWith(color: _accent(context))),
                   SizedBox(height: context.superTheme.spacing.space2),
                   Text('Permission Settings صلاحيات',
-                      style: context.superTheme.textTheme.h1.copyWith(color: t.fg1)),
+                      style: context.superTextTheme.h1.copyWith(color: t.fg1)),
                   SizedBox(height: context.superTheme.spacing.space6),
                   _ModeToggle(
                     mode: _mode,
@@ -230,7 +230,7 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
         border: Border.all(color: c.withValues(alpha: 0.35)),
       ),
       child: Text(p.level!.toUpperCase(),
-          style: context.superTheme.textTheme.pill.copyWith(fontSize: 10, color: c)),
+          style: context.superTextTheme.pill.copyWith(fontSize: 10, color: c)),
     );
   }
 }
@@ -279,7 +279,7 @@ class _ModeToggle extends StatelessWidget {
                       : t.fg3),
               const SizedBox(width: 7),
               Text(label,
-                  style: context.superTheme.textTheme.body.copyWith(
+                  style: context.superTextTheme.body.copyWith(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
                       color: active
@@ -296,7 +296,7 @@ class _ModeToggle extends StatelessWidget {
     return Row(
       children: [
         Text('SELECTION MODE',
-            style: context.superTheme.textTheme.label
+            style: context.superTextTheme.label
                 .copyWith(fontSize: 10, letterSpacing: 0.6, color: t.fg3)),
         SizedBox(width: context.superTheme.spacing.space3),
         Container(

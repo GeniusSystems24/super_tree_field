@@ -9,7 +9,7 @@ description: >
   any nested data. Light/dark + LTR/RTL.
 
 # package version
-version: 0.5.1
+version: 0.5.2
 
 # package homepage, repository and issue tracker
 homepage: https://geniussystems24.github.io/super_tree_field
@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   # Shared GeniusLink design-system foundation (theme, tokens, type, widgets).
-  super_core: ">=3.0.0 <4.0.0"
+  super_core: ">=3.3.0 <4.0.0"
 
 dev_dependencies:
   flutter_test:

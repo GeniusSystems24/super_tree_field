@@ -1,8 +1,9 @@
 // ============================================================
 // example/lib/main.dart
 // ------------------------------------------------------------
-// Gallery launcher for super_tree_field. Registers the SuperThemeData extension (so
-// the tree themes light/dark in parity), exposes a global Light/Dark + LTR/RTL
+// Gallery launcher for super_tree_field. Uses SuperMaterialThemeData with the
+// explicit SuperTextTheme required by super_core 3.3.0, and exposes a global
+// Light/Dark + LTR/RTL
 // toggle, and lists the three demos that share ONE engine:
 //   • Account Tree   — the flagship: SuperTree<AccountData> (KPIs · balance · DR/CR)
 //   • File Explorer  — SuperTree<FileMeta>
@@ -36,12 +37,22 @@ class _ExampleAppState extends State<ExampleApp> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = SuperTextTheme(
+      isArabic: _dir == TextDirection.rtl,
+    );
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Super Tree',
       themeMode: _mode,
-      theme: SuperMaterialThemeData.light(),
-      darkTheme: SuperMaterialThemeData.dark(),
+      theme: SuperMaterialThemeData.light(
+        textTheme: textTheme,
+        primaryTextTheme: textTheme,
+      ),
+      darkTheme: SuperMaterialThemeData.dark(
+        textTheme: textTheme,
+        primaryTextTheme: textTheme,
+      ),
       builder: (context, child) =>
           Directionality(textDirection: _dir, child: child!),
       home: _Launcher(
@@ -111,13 +122,13 @@ class _Launcher extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text('SUPER TREE \u2022 GALLERY',
-                      style: context.superTheme.textTheme.eyebrow.copyWith(
+                      style: context.superTextTheme.eyebrow.copyWith(
                           color: SuperMaterialThemeData.of(context)
                               .colorScheme
                               .primary)),
                   SizedBox(height: context.superTheme.spacing.space2),
                   Text('Component Demos مكتبة المكونات',
-                      style: context.superTheme.textTheme.h1.copyWith(color: t.fg1)),
+                      style: context.superTextTheme.h1.copyWith(color: t.fg1)),
                   SizedBox(height: context.superTheme.spacing.space8),
                   for (final d in _demos) ...[
                     _DemoCard(demo: d),
@@ -202,10 +213,10 @@ class _DemoCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(demo.title,
-                        style: context.superTheme.textTheme.heading.copyWith(color: t.fg1)),
+                        style: context.superTextTheme.heading.copyWith(color: t.fg1)),
                     const SizedBox(height: 2),
                     Text(demo.subtitle,
-                        style: context.superTheme.textTheme.caption.copyWith(color: t.fg3)),
+                        style: context.superTextTheme.caption.copyWith(color: t.fg3)),
                   ],
                 ),
               ),

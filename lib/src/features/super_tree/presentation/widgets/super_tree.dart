@@ -269,7 +269,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
               const SizedBox(width: 6),
               Text(
                 label,
-                style: context.superTheme.textTheme.body.copyWith(
+                style: context.superTextTheme.body.copyWith(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                   color: active ? accent : t.fg3,
@@ -341,7 +341,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
             const SizedBox(width: 7),
             Text(
               label,
-              style: context.superTheme.textTheme.body.copyWith(
+              style: context.superTextTheme.body.copyWith(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: accent,
@@ -390,12 +390,12 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
                   focusNode: _searchFocus,
                   onChanged: _c.setQuery,
                   cursorColor: accent,
-                  style: context.superTheme.textTheme.body.copyWith(fontSize: 13.5, color: t.fg1),
+                  style: context.superTextTheme.body.copyWith(fontSize: 13.5, color: t.fg1),
                   decoration: InputDecoration(
                     isCollapsed: true,
                     border: InputBorder.none,
                     hintText: widget.placeholder,
-                    hintStyle: context.superTheme.textTheme.body.copyWith(
+                    hintStyle: context.superTextTheme.body.copyWith(
                       fontSize: 13.5,
                       color: t.fg4,
                     ),
@@ -408,7 +408,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
                 padding: const EdgeInsetsDirectional.only(end: 6),
                 child: Text(
                   '${_c.matchCount}',
-                  style: context.superTheme.textTheme.mono.copyWith(fontSize: 11, color: t.fg3),
+                  style: context.superTextTheme.mono.copyWith(fontSize: 11, color: t.fg3),
                 ),
               ),
             if (_c.query.isNotEmpty)
@@ -441,7 +441,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
         ),
         child: Text(
           q,
-          style: context.superTheme.textTheme.mono.copyWith(
+          style: context.superTextTheme.mono.copyWith(
             fontSize: 11.5,
             color: on ? accent : t.fg2,
           ),
@@ -479,7 +479,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
             const SizedBox(width: 7),
             Text(
               label,
-              style: context.superTheme.textTheme.body.copyWith(fontSize: 13, color: t.fg1),
+              style: context.superTextTheme.body.copyWith(fontSize: 13, color: t.fg1),
             ),
           ],
         ),
@@ -580,7 +580,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
                     Flexible(
                       child: Text(
                         widget.title,
-                        style: context.superTheme.textTheme.heading.copyWith(
+                        style: context.superTextTheme.heading.copyWith(
                           fontSize: 15,
                           color: t.fg1,
                         ),
@@ -592,7 +592,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
                   const SizedBox(height: 2),
                   Text(
                     widget.subtitle!,
-                    style: context.superTheme.textTheme.caption.copyWith(
+                    style: context.superTextTheme.caption.copyWith(
                       fontSize: 12,
                       color: t.fg3,
                     ),
@@ -606,7 +606,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
             searching
                 ? '${_c.visibleLeaves} of ${_c.totalLeaves}'
                 : '${_c.totalLeaves} ${widget.unit}',
-            style: context.superTheme.textTheme.label.copyWith(
+            style: context.superTextTheme.label.copyWith(
               fontSize: 10,
               letterSpacing: 0.5,
               color: t.fg3,
@@ -639,7 +639,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           Expanded(
             child: Text(
               widget.nameColumnLabel.toUpperCase(),
-              style: context.superTheme.textTheme.label.copyWith(
+              style: context.superTextTheme.label.copyWith(
                 fontSize: 9.5,
                 letterSpacing: 0.76,
                 color: t.fg3,
@@ -649,7 +649,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           if (widget.trailingColumnLabel.isNotEmpty)
             Text(
               widget.trailingColumnLabel.toUpperCase(),
-              style: context.superTheme.textTheme.label.copyWith(
+              style: context.superTextTheme.label.copyWith(
                 fontSize: 9.5,
                 letterSpacing: 0.76,
                 color: t.fg3,
@@ -672,7 +672,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
             const SizedBox(height: 12),
             Text(
               'This tree is empty',
-              style: context.superTheme.textTheme.body.copyWith(
+              style: context.superTextTheme.body.copyWith(
                 fontWeight: FontWeight.w600,
                 color: t.fg2,
               ),
@@ -680,7 +680,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
             const SizedBox(height: 4),
             Text(
               'Add a node to get started.',
-              style: context.superTheme.textTheme.caption.copyWith(color: t.fg3),
+              style: context.superTextTheme.caption.copyWith(color: t.fg3),
             ),
             const SizedBox(height: 16),
             _toolAction(
@@ -701,7 +701,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           const SizedBox(height: 12),
           Text(
             'No matches for “${_c.query}”',
-            style: context.superTheme.textTheme.body.copyWith(
+            style: context.superTextTheme.body.copyWith(
               fontWeight: FontWeight.w600,
               color: t.fg2,
             ),
@@ -709,7 +709,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           const SizedBox(height: 4),
           Text(
             'Try a different code or name, or clear the filters.',
-            style: context.superTheme.textTheme.caption.copyWith(color: t.fg3),
+            style: context.superTextTheme.caption.copyWith(color: t.fg3),
           ),
         ],
       ),
@@ -732,12 +732,12 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           Expanded(
             child: RichText(
               text: TextSpan(
-                style: context.superTheme.textTheme.body.copyWith(fontSize: 12.5, color: t.fg2),
+                style: context.superTextTheme.body.copyWith(fontSize: 12.5, color: t.fg2),
                 children: [
                   TextSpan(text: '${widget.selectionLabel} '),
                   TextSpan(
                     text: _c.selected,
-                    style: context.superTheme.textTheme.mono.copyWith(
+                    style: context.superTextTheme.mono.copyWith(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
                       color: t.fg1,
@@ -751,7 +751,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
             onTap: _c.clearChecked,
             child: Text(
               'Clear',
-              style: context.superTheme.textTheme.label.copyWith(
+              style: context.superTextTheme.label.copyWith(
                 fontSize: 10.5,
                 letterSpacing: 0.5,
                 color: t.fg3,
@@ -786,11 +786,11 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           Expanded(
             child: RichText(
               text: TextSpan(
-                style: context.superTheme.textTheme.body.copyWith(fontSize: 12.5, color: t.fg2),
+                style: context.superTextTheme.body.copyWith(fontSize: 12.5, color: t.fg2),
                 children: [
                   TextSpan(
                     text: '$n',
-                    style: context.superTheme.textTheme.mono.copyWith(
+                    style: context.superTextTheme.mono.copyWith(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
                       color: t.fg1,
@@ -809,7 +809,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
             onTap: _c.clearChecked,
             child: Text(
               'Clear',
-              style: context.superTheme.textTheme.label.copyWith(
+              style: context.superTextTheme.label.copyWith(
                 fontSize: 10.5,
                 letterSpacing: 0.5,
                 color: t.fg3,

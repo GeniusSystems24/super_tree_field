@@ -61,7 +61,7 @@ class KpiCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         label.toUpperCase(),
-                        style: context.superTheme.textTheme.label.copyWith(
+                        style: context.superTextTheme.label.copyWith(
                           fontSize: 10,
                           letterSpacing: 0.6,
                           color: t.fg3,
@@ -87,7 +87,7 @@ class KpiCard extends StatelessWidget {
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.superTheme.textTheme.mono.copyWith(
+                  style: context.superTextTheme.mono.copyWith(
                     fontSize: 20,
                     height: 1.1,
                     fontWeight: FontWeight.w700,
@@ -101,7 +101,7 @@ class KpiCard extends StatelessWidget {
                     sub!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: context.superTheme.textTheme.caption.copyWith(
+                    style: context.superTextTheme.caption.copyWith(
                       fontSize: 11,
                       color: t.fg3,
                     ),

@@ -27,7 +27,7 @@ class AccountTreeDemo extends StatelessWidget {
         iconTheme: IconThemeData(color: t.fg2),
         title: Text(
           'Account Tree',
-          style: context.superTheme.textTheme.heading.copyWith(color: t.fg1),
+          style: context.superTextTheme.heading.copyWith(color: t.fg1),
         ),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
@@ -48,7 +48,7 @@ class AccountTreeDemo extends StatelessWidget {
                 children: [
                   Text(
                     'ACCOUNTING • CHART OF ACCOUNTS',
-                    style: context.superTheme.textTheme.eyebrow.copyWith(
+                    style: context.superTextTheme.eyebrow.copyWith(
                       color: SuperMaterialThemeData.of(
                         context,
                       ).colorScheme.primary,
@@ -57,7 +57,7 @@ class AccountTreeDemo extends StatelessWidget {
                   SizedBox(height: context.superTheme.spacing.space2),
                   Text(
                     'Account Tree قيد افتتاحي',
-                    style: context.superTheme.textTheme.h1.copyWith(color: t.fg1),
+                    style: context.superTextTheme.h1.copyWith(color: t.fg1),
                   ),
                   SizedBox(height: context.superTheme.spacing.space8),
                   const AccountTree(),

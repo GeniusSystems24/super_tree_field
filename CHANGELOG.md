@@ -3,6 +3,26 @@
 All notable changes to **super_tree_field** are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/); versioning is [SemVer](https://semver.org/).
 
+## [0.5.2] — 2026-08-10
+
+### Changed
+
+- Raised the minimum `super_core` version to **3.3.0**.
+- Migrated all tree typography reads from the removed
+  `SuperThemeData.textTheme` API to `context.superTextTheme`, which resolves
+  the active `SuperMaterialThemeData.textTheme`.
+- Updated the example app and documentation to pass the now-required
+  `SuperTextTheme textTheme` and `SuperTextTheme primaryTextTheme` values to
+  `SuperMaterialThemeData.light` / `dark`.
+- The example now rebuilds `SuperTextTheme(isArabic: true)` when switching to
+  RTL so the typography follows the selected language direction.
+- Documented the `super_core 3.3.0` `_familyOf` removal: font families from
+  `SuperTextTheme` are not inferred back into `SuperTokensData`; token-level
+  font metadata must be configured explicitly when required.
+- Updated the agent skill with the new typography access and migration rules.
+
+---
+
 ## [0.4.0] — 2026-07-16
 
 ### Changed

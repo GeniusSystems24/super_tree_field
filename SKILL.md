@@ -33,21 +33,41 @@ roll-ups and RTL come for free.
 
 ```yaml
 dependencies:
-  super_tree:
-    path: ../super_tree
+  super_tree_field: ^0.5.2
 ```
 
 ```dart
-import 'package:super_tree/super_tree.dart';
+import 'package:super_tree_field/super_tree.dart';
 ```
 
-Register the theme extension on your `ThemeData` (most common omission — without
-it colors fall back to defaults):
+Use `SuperMaterialThemeData` from `super_core >=3.3.0`. Typography must be
+provided explicitly as `SuperTextTheme` for both the normal and primary text
+ramps:
 
 ```dart
-theme:     ThemeData(brightness: Brightness.light, extensions: [SuperThemeData.light]),
-darkTheme: ThemeData(brightness: Brightness.dark,  extensions: [SuperThemeData.dark]),
+final textTheme = SuperTextTheme(isDesktop: true);
+
+theme: SuperMaterialThemeData.light(
+  mode: SuperDeviceMode.desktop,
+  textTheme: textTheme,
+  primaryTextTheme: textTheme,
+),
+darkTheme: SuperMaterialThemeData.dark(
+  mode: SuperDeviceMode.desktop,
+  textTheme: textTheme,
+  primaryTextTheme: textTheme,
+),
 ```
+
+Inside tree widgets, read typography with `context.superTextTheme`. Do **not**
+generate `context.superTheme.textTheme` or
+`SuperThemeData.of(context).textTheme`; `SuperThemeData.textTheme` was removed
+in `super_core 3.3.0`.
+
+When the app switches to Arabic typography, rebuild the theme with
+`SuperTextTheme(isArabic: true)`. The removed `_familyOf` helper no longer
+infers token font-family metadata from `SuperTextTheme`, so configure token
+fonts explicitly only when token-level metadata is required.
 
 ## The data model
 
@@ -213,7 +233,9 @@ algorithms in `domain/usecases/tree_logic.dart`; keep the controller widget-free
 
 ## Common mistakes
 
-- Forgetting to register `SuperThemeData` → the tree looks unstyled.
+- Using `context.superTheme.textTheme` or `SuperThemeData.of(context).textTheme`
+  → invalid on `super_core 3.3.0`; use `context.superTextTheme`.
+- Forgetting to use `SuperMaterialThemeData` with required `SuperTextTheme` values → the tree theme/typography is incomplete.
 - Non-unique `TreeNode.code` → broken expansion and keyboard cursor; codes must
   be globally unique. (The `addRoot`/`addChild`/`addSibling*` helpers mint unique
   codes for you.)

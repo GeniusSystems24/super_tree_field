@@ -277,7 +277,7 @@ class _MenuRowState extends State<_MenuRow> {
               Expanded(
                 child: Text(
                   widget.item.label,
-                  style: context.superTheme.textTheme.body.copyWith(fontSize: 13, color: fg),
+                  style: context.superTextTheme.body.copyWith(fontSize: 13, color: fg),
                 ),
               ),
             ],

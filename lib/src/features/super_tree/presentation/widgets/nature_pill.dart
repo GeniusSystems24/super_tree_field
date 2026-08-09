@@ -38,7 +38,7 @@ class NaturePill extends StatelessWidget {
       ),
       child: Text(
         nature.code,
-        style: context.superTheme.textTheme.mono.copyWith(
+        style: context.superTextTheme.mono.copyWith(
           fontSize: 10,
           height: 1,
           fontWeight: FontWeight.w700,

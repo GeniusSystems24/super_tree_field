@@ -222,7 +222,7 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
                       text: node.name,
                       query: c.query,
                       overflow: TextOverflow.ellipsis,
-                      style: context.superTheme.textTheme.body.copyWith(
+                      style: context.superTextTheme.body.copyWith(
                         fontSize: 13,
                         height: 1.2,
                         fontWeight: widget.depth == 0
@@ -495,7 +495,7 @@ class _RenameFieldState extends State<_RenameField> {
           cursorColor: widget.accent,
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _commit(),
-          style: context.superTheme.textTheme.body.copyWith(
+          style: context.superTextTheme.body.copyWith(
             fontSize: 13,
             height: 1.1,
             color: t.fg1,
@@ -544,7 +544,7 @@ class _DragFeedback extends StatelessWidget {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.superTheme.textTheme.body.copyWith(fontSize: 12.5, color: t.fg1),
+                  style: context.superTextTheme.body.copyWith(fontSize: 12.5, color: t.fg1),
                 ),
               ),
             ],
@@ -677,7 +677,7 @@ class _CountBadge extends StatelessWidget {
       ),
       child: Text(
         '$count',
-        style: context.superTheme.textTheme.mono.copyWith(
+        style: context.superTextTheme.mono.copyWith(
           fontSize: 9.5,
           height: 1.3,
           fontWeight: FontWeight.w700,

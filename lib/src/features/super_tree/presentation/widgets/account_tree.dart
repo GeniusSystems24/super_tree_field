@@ -174,7 +174,7 @@ class _AccountTreeState extends State<AccountTree> {
         Expanded(
           child: Text(
             'Drag the handle to move · right-click (or ⋮) to rename, add or delete · type filter is paused while editing',
-            style: context.superTheme.textTheme.caption.copyWith(fontSize: 12, color: t.fg3),
+            style: context.superTextTheme.caption.copyWith(fontSize: 12, color: t.fg3),
           ),
         ),
       ],
@@ -297,7 +297,7 @@ class _AccountTreeState extends State<AccountTree> {
         const SizedBox(width: 9),
         Text(
           node.code,
-          style: context.superTheme.textTheme.mono.copyWith(
+          style: context.superTextTheme.mono.copyWith(
             fontSize: 11.5,
             height: 1.2,
             color: t.fg3,
@@ -332,7 +332,7 @@ class _AccountTreeState extends State<AccountTree> {
             children: [
               Text(
                 SuperFormat.formatNumber(total),
-                style: context.superTheme.textTheme.mono.copyWith(
+                style: context.superTextTheme.mono.copyWith(
                   fontSize: 12.5,
                   height: 1.2,
                   fontWeight: info.depth == 0
@@ -425,7 +425,7 @@ class _TypeChipState extends State<_TypeChip> {
               ],
               Text(
                 widget.label,
-                style: context.superTheme.textTheme.label.copyWith(
+                style: context.superTextTheme.label.copyWith(
                   fontSize: 11,
                   letterSpacing: 0.33,
                   color: fg,
@@ -464,7 +464,7 @@ class _BalanceBadge extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             balanced ? 'Balanced · A = L + E' : 'Out of balance',
-            style: context.superTheme.textTheme.label.copyWith(
+            style: context.superTextTheme.label.copyWith(
               fontSize: 11,
               letterSpacing: 0.44,
               color: c,

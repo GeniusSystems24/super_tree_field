@@ -38,7 +38,7 @@ and bundled sample data.
 | --- | --- |
 | Dart | `3.8.0` |
 | Flutter | `3.32.0` |
-| `super_core` | `3.0.0` |
+| `super_core` | `3.3.0` |
 
 ## Installation
 
@@ -46,7 +46,7 @@ Add the package to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  super_tree_field: ^0.5.0
+  super_tree_field: ^0.5.2
 ```
 
 Then install dependencies:
@@ -66,7 +66,10 @@ The barrel also re-exports the public `super_core` API used by this package.
 ## Theme setup
 
 `super_tree_field` reads its colors, spacing, typography, radii, and motion
-from `SuperMaterialThemeData`. Configure the theme at the application root:
+from `SuperMaterialThemeData`. Starting with `super_core 3.3.0`, both
+`textTheme` and `primaryTextTheme` are required `SuperTextTheme` values.
+Typography is read with `context.superTextTheme`; it is no longer exposed by
+`SuperThemeData`. Configure the theme at the application root:
 
 ```dart
 import 'package:flutter/material.dart';
@@ -81,16 +84,22 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = SuperTextTheme(isDesktop: true);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
       theme: SuperMaterialThemeData.light(
         palette: SuperPalette.bluePalette,
         mode: SuperDeviceMode.desktop,
+        textTheme: textTheme,
+        primaryTextTheme: textTheme,
       ),
       darkTheme: SuperMaterialThemeData.dark(
         palette: SuperPalette.bluePalette,
         mode: SuperDeviceMode.desktop,
+        textTheme: textTheme,
+        primaryTextTheme: textTheme,
       ),
       home: const FileTreePage(),
     );
@@ -106,6 +115,15 @@ final mode = SuperDeviceMode.forWidth(MediaQuery.sizeOf(context).width);
 
 When the application supports multiple form factors, rebuild the root theme
 when the active width crosses the mobile, tablet, or desktop breakpoint.
+
+For locale changes, rebuild `SuperTextTheme` as well. For example, use
+`SuperTextTheme(isArabic: true)` for an Arabic typography ramp. Do not use
+`context.superTheme.textTheme` or `SuperThemeData.of(context).textTheme` in
+`super_core 3.3.0`.
+
+`super_core 3.3.0` also removed the internal `_familyOf` inference. A font
+family configured in `SuperTextTheme` is no longer copied implicitly into
+`SuperTokensData`; set token-level font metadata explicitly only when needed.
 
 ## Quick start
 
@@ -698,9 +716,15 @@ count based on available width. For predictable component density, generate the
 ```dart
 final mode = SuperDeviceMode.forWidth(width);
 
+final textTheme = SuperTextTheme(
+  isDesktop: mode == SuperDeviceMode.desktop,
+);
+
 final lightTheme = SuperMaterialThemeData.light(
   palette: SuperPalette.purplePalette,
   mode: mode,
+  textTheme: textTheme,
+  primaryTextTheme: textTheme,
 );
 ```
 
@@ -781,9 +805,14 @@ testWidgets('filters nodes through the controller', (tester) async {
   );
   addTearDown(controller.dispose);
 
+  final textTheme = SuperTextTheme();
+
   await tester.pumpWidget(
     MaterialApp(
-      theme: SuperMaterialThemeData.light(),
+      theme: SuperMaterialThemeData.light(
+        textTheme: textTheme,
+        primaryTextTheme: textTheme,
+      ),
       home: Scaffold(
         body: SuperTree<FileItem>(
           controller: controller,

@@ -95,7 +95,7 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
         elevation: 0,
         iconTheme: IconThemeData(color: t.fg2),
         title:
-            Text('Org Chart', style: context.superTheme.textTheme.heading.copyWith(color: t.fg1)),
+            Text('Org Chart', style: context.superTextTheme.heading.copyWith(color: t.fg1)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -130,7 +130,7 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
                       border: Border.all(color: c.withValues(alpha: 0.35)),
                     ),
                     child: Text(p.initials,
-                        style: context.superTheme.textTheme.mono.copyWith(
+                        style: context.superTextTheme.mono.copyWith(
                             fontSize: 10,
                             height: 1,
                             fontWeight: FontWeight.w700,
@@ -145,7 +145,7 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(p.role,
-                          style: context.superTheme.textTheme.body
+                          style: context.superTextTheme.body
                               .copyWith(fontSize: 12, color: t.fg2)),
                       const SizedBox(width: 10),
                       Container(
@@ -158,7 +158,7 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
                           border: Border.all(color: c.withValues(alpha: 0.35)),
                         ),
                         child: Text(p.dept,
-                            style: context.superTheme.textTheme.pill
+                            style: context.superTextTheme.pill
                                 .copyWith(fontSize: 10, color: c)),
                       ),
                     ],
