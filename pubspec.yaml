@@ -1,15 +1,12 @@
 name: super_tree_field
 description: >
-  Super Tree — a GeniusLink design-system Flutter package providing SuperTree, a
-  recursive, generic, keyboard-first hierarchy component. Its flagship instance
-  AccountTree is a five-level bilingual chart of accounts with roll-up balances,
-  a KPI summary, a live A = L + E balance badge, type filters, ancestor-
-  preserving search, a DR/CR nature column and per-account share bars. The
-  engine is generic over a node payload, so it reskins for files, org charts or
-  any nested data. Light/dark + LTR/RTL.
+  Super Tree — a GeniusLink design-system Flutter package providing a
+  recursive, generic, keyboard-first hierarchy component for arbitrary
+  typed data. Supports search, expansion, selection, inline editing,
+  drag-and-drop, custom cells, scrolling, LTR/RTL, and light/dark themes.
 
 # package version
-version: 0.5.2
+version: 1.0.0
 
 # package homepage, repository and issue tracker
 homepage: https://geniussystems24.github.io/super_tree_field
@@ -32,6 +29,7 @@ dependencies:
     sdk: flutter
   # Shared GeniusLink design-system foundation (theme, tokens, type, widgets).
   super_core: ">=3.3.0 <4.0.0"
+  super_form_field: ">=1.8.2 <2.0.0"
 
 dev_dependencies:
   flutter_test:

@@ -5,51 +5,50 @@
 [![Dart](https://img.shields.io/badge/Dart-%E2%89%A53.8.0-0175C2.svg)](https://dart.dev)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A generic, recursive, keyboard-first tree widget for Flutter.
+A generic, typed, keyboard-first tree widget for Flutter.
 
-`super_tree_field` provides a reusable hierarchy engine built around
-`TreeNode<T>`, `SuperTreeController<T>`, and `SuperTree<T>`. It supports
-search, expansion, keyboard navigation, single or multi-selection, inline
-editing, drag-and-drop reordering, contextual actions, bilingual node labels,
-and light/dark themes through `super_core`.
-
-The package also includes `AccountTree`, a ready-made chart-of-accounts tree
-with account types, debit/credit nature, roll-up balances, KPI cards, filters,
-and bundled sample data.
+`super_tree_field` renders arbitrary hierarchical data through
+`TreeNode<T>`, manages interaction state with `SuperTreeController<T>`, and
+keeps domain-specific models and presentation outside the package API.
 
 ## Features
 
-- Generic tree nodes with typed payloads.
-- Recursive rendering for hierarchies of any depth.
-- Ancestor-preserving search with inline highlighting.
-- Keyboard navigation with LTR and RTL-aware arrow behavior.
+- Generic `TreeNode<T>` payloads for any application domain.
+- Recursive hierarchies with unlimited practical depth.
+- Expand, collapse, expand-all, collapse-all, and subtree expansion.
+- Ancestor-preserving, case-insensitive search with inline highlighting.
+- Keyboard navigation with LTR- and RTL-aware horizontal behavior.
+- Single and multi checkbox selection with derived tristate groups.
 - Readable and editable modes.
-- Inline rename, add, delete, and drag-and-drop operations.
-- Single and multi-selection with tristate group checkboxes.
-- Expand all, collapse all, and expand-subtree actions.
-- Custom leading and trailing cells.
-- Optional Arabic labels on every node.
-- Responsive layouts using `super_core` device modes.
-- A chart-of-accounts implementation with financial summaries.
+- Inline rename, add, delete, and drag-and-drop tree mutations.
+- Custom leading and trailing row content.
+- Optional Arabic secondary labels.
+- Optional responsive `SuperTreeControls<T>` rendered outside the tree.
+- Configurable internal `ListView` scrolling and external `ScrollController`.
+- Light and dark design-system theming through `super_core`.
+- Text input integration through `super_form_field`.
 
-## Requirements
+## Getting started
 
-| Dependency | Minimum version |
+### Requirements
+
+| Requirement | Version |
 | --- | --- |
-| Dart | `3.8.0` |
-| Flutter | `3.32.0` |
-| `super_core` | `3.3.0` |
+| Dart | `>=3.8.0 <4.0.0` |
+| Flutter | `>=3.32.0` |
+| `super_core` | `>=3.3.0 <4.0.0` |
+| `super_form_field` | `^1.8.2` |
 
-## Installation
+### Install
 
 Add the package to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  super_tree_field: ^0.5.2
+  super_tree_field: ^1.0.0
 ```
 
-Then install dependencies:
+Then run:
 
 ```bash
 flutter pub get
@@ -61,147 +60,113 @@ Import the public barrel:
 import 'package:super_tree_field/super_tree.dart';
 ```
 
-The barrel also re-exports the public `super_core` API used by this package.
+The barrel also re-exports the `super_core` API used by the package.
 
-## Theme setup
+### Configure the theme
 
-`super_tree_field` reads its colors, spacing, typography, radii, and motion
-from `SuperMaterialThemeData`. Starting with `super_core 3.3.0`, both
-`textTheme` and `primaryTextTheme` are required `SuperTextTheme` values.
-Typography is read with `context.superTextTheme`; it is no longer exposed by
-`SuperThemeData`. Configure the theme at the application root:
+`super_tree_field` reads colors, spacing, typography, radii, and motion from
+`SuperMaterialThemeData`. With `super_core >=3.3.0`, provide both
+`textTheme` and `primaryTextTheme` explicitly:
 
 ```dart
-import 'package:flutter/material.dart';
-import 'package:super_tree_field/super_tree.dart';
+final textTheme = SuperTextTheme(isDesktop: true);
 
-void main() {
-  runApp(const App());
-}
-
-class App extends StatelessWidget {
-  const App({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = SuperTextTheme(isDesktop: true);
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.system,
-      theme: SuperMaterialThemeData.light(
-        palette: SuperPalette.bluePalette,
-        mode: SuperDeviceMode.desktop,
-        textTheme: textTheme,
-        primaryTextTheme: textTheme,
-      ),
-      darkTheme: SuperMaterialThemeData.dark(
-        palette: SuperPalette.bluePalette,
-        mode: SuperDeviceMode.desktop,
-        textTheme: textTheme,
-        primaryTextTheme: textTheme,
-      ),
-      home: const FileTreePage(),
-    );
-  }
-}
+MaterialApp(
+  theme: SuperMaterialThemeData.light(
+    mode: SuperDeviceMode.desktop,
+    textTheme: textTheme,
+    primaryTextTheme: textTheme,
+  ),
+  darkTheme: SuperMaterialThemeData.dark(
+    mode: SuperDeviceMode.desktop,
+    textTheme: textTheme,
+    primaryTextTheme: textTheme,
+  ),
+  home: const ProjectTreePage(),
+);
 ```
 
-Choose the device mode that matches the current layout:
+For adaptive applications, resolve the device mode from the available width and
+rebuild the application theme when the active breakpoint changes:
 
 ```dart
-final mode = SuperDeviceMode.forWidth(MediaQuery.sizeOf(context).width);
+final mode = SuperDeviceMode.forWidth(width);
 ```
 
-When the application supports multiple form factors, rebuild the root theme
-when the active width crosses the mobile, tablet, or desktop breakpoint.
+Use `context.superTextTheme` to read typography. Do not use the removed
+`SuperThemeData.textTheme` API from older `super_core` releases.
 
-For locale changes, rebuild `SuperTextTheme` as well. For example, use
-`SuperTextTheme(isArabic: true)` for an Arabic typography ramp. Do not use
-`context.superTheme.textTheme` or `SuperThemeData.of(context).textTheme` in
-`super_core 3.3.0`.
+## Usage
 
-`super_core 3.3.0` also removed the internal `_familyOf` inference. A font
-family configured in `SuperTextTheme` is no longer copied implicitly into
-`SuperTokensData`; set token-level font metadata explicitly only when needed.
+### 1. Define typed nodes
 
-## Quick start
-
-The following example creates a reusable file tree. The controller is created
-once in `initState` and disposed with the widget, following Flutter controller
-lifecycle conventions.
+Every node has a stable `code`, a primary `name`, an optional Arabic label,
+an optional typed `value`, and optional children:
 
 ```dart
-import 'package:flutter/material.dart';
-import 'package:super_tree_field/super_tree.dart';
-
 @immutable
-class FileItem {
-  const FileItem.folder() : isFolder = true, size = null;
-  const FileItem.file(this.size) : isFolder = false;
+class FileInfo {
+  const FileInfo({required this.isDirectory, this.sizeLabel});
 
-  final bool isFolder;
-  final String? size;
+  final bool isDirectory;
+  final String? sizeLabel;
 }
 
-const files = <TreeNode<FileItem>>[
-  TreeNode<FileItem>(
+const projectTree = <TreeNode<FileInfo>>[
+  TreeNode<FileInfo>(
     code: 'lib',
     name: 'lib',
-    value: FileItem.folder(),
+    value: FileInfo(isDirectory: true),
     children: [
-      TreeNode<FileItem>(
+      TreeNode<FileInfo>(
         code: 'lib/main.dart',
         name: 'main.dart',
-        value: FileItem.file('2.4 KB'),
-      ),
-      TreeNode<FileItem>(
-        code: 'lib/features',
-        name: 'features',
-        value: FileItem.folder(),
-        children: [
-          TreeNode<FileItem>(
-            code: 'lib/features/home.dart',
-            name: 'home.dart',
-            value: FileItem.file('5.1 KB'),
-          ),
-        ],
+        value: FileInfo(isDirectory: false, sizeLabel: '2.4 KB'),
       ),
     ],
   ),
-  TreeNode<FileItem>(
-    code: 'README.md',
-    name: 'README.md',
-    value: FileItem.file('8.7 KB'),
-  ),
 ];
+```
 
-class FileTreePage extends StatefulWidget {
-  const FileTreePage({super.key});
+`TreeNode.code` must be unique across the complete tree. Expansion, focus,
+selection, editing, and drag-and-drop identity all depend on it.
+
+Useful node APIs include `hasChildren`, `isLeaf`, `withChildren`, `copyWith`,
+and `renamed`.
+
+### 2. Create and dispose the controllers
+
+Create controllers once in `State`, not in `build()`, and dispose every
+controller that the host owns:
+
+```dart
+class ProjectTreePage extends StatefulWidget {
+  const ProjectTreePage({super.key});
 
   @override
-  State<FileTreePage> createState() => _FileTreePageState();
+  State<ProjectTreePage> createState() => _ProjectTreePageState();
 }
 
-class _FileTreePageState extends State<FileTreePage> {
-  late final SuperTreeController<FileItem> _controller;
+class _ProjectTreePageState extends State<ProjectTreePage> {
+  late final SuperTreeController<FileInfo> _treeController;
+  late final SuperTreeControlsController _controlsController;
 
   @override
   void initState() {
     super.initState();
-    _controller = SuperTreeController<FileItem>(
-      roots: files,
+    _treeController = SuperTreeController<FileInfo>(
+      roots: projectTree,
       defaultExpandDepth: 0,
       searchText: (node) => '${node.code} ${node.name}',
-      onOpenLeaf: (node) {
-        debugPrint('Open ${node.code}');
-      },
+      onOpenLeaf: (node) => debugPrint('Open ${node.code}'),
     );
+    _controlsController = SuperTreeControlsController();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controlsController.dispose();
+    _treeController.dispose();
     super.dispose();
   }
 
@@ -209,32 +174,45 @@ class _FileTreePageState extends State<FileTreePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: SuperTree<FileItem>(
-            controller: _controller,
-            title: 'Project files',
-            subtitle: 'Browse the current Flutter project',
-            titleIcon: Icons.folder_open_outlined,
-            nameColumnLabel: 'Name',
-            trailingColumnLabel: 'Size',
-            placeholder: 'Search files',
-            samples: const ['dart', 'features', 'README'],
-            unit: 'files',
-            showArabic: false,
-            leadingBuilder: (context, node, info) {
-              final isFolder = node.value?.isFolder ?? node.hasChildren;
-              return Icon(
-                isFolder
-                    ? (info.open ? Icons.folder_open : Icons.folder)
-                    : Icons.description_outlined,
-                size: 18,
-              );
-            },
-            trailingBuilder: (context, node, info) {
-              final size = node.value?.size;
-              return size == null ? null : Text(size);
-            },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              SuperTreeControls<FileInfo>(
+                controller: _treeController,
+                controlsController: _controlsController,
+                placeholder: 'Search project files',
+                samples: const ['lib', 'main.dart'],
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: SuperTree<FileInfo>(
+                  controller: _treeController,
+                  title: 'Project files',
+                  nameColumnLabel: 'Name',
+                  trailingColumnLabel: 'Size',
+                  unit: 'files',
+                  showArabic: false,
+                  onSearchRequested:
+                      _controlsController.requestSearchFocus,
+                  onShortcutsRequested: () => showShortcutsHelp(context),
+                  leadingBuilder: (context, node, info) {
+                    final isDirectory =
+                        node.value?.isDirectory ?? node.hasChildren;
+                    return Icon(
+                      isDirectory
+                          ? (info.open ? Icons.folder_open : Icons.folder)
+                          : Icons.description_outlined,
+                      size: 18,
+                    );
+                  },
+                  trailingBuilder: (context, node, info) {
+                    final size = node.value?.sizeLabel;
+                    return size == null ? null : Text(size);
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -243,599 +221,312 @@ class _FileTreePageState extends State<FileTreePage> {
 }
 ```
 
-## Tree data model
+`SuperTree` renders the hierarchy only. `SuperTreeControls` is an optional,
+separate toolbar that provides responsive search, quick-query chips, editing
+controls, keyboard help, and expand/collapse actions.
 
-Every hierarchy is represented by `TreeNode<T>`:
+### Build custom controls
 
-```dart
-const node = TreeNode<String>(
-  code: 'departments.engineering.mobile',
-  name: 'Mobile',
-  ar: 'تطبيقات الجوال',
-  value: 'mobile-team',
-  children: [
-    TreeNode<String>(
-      code: 'employees.42',
-      name: 'Anwar',
-      ar: 'أنور',
-      value: 'employee-42',
-    ),
-  ],
-);
-```
-
-| Property | Description |
-| --- | --- |
-| `code` | Stable unique identifier used for expansion, focus, selection, editing, and drag-and-drop. |
-| `name` | Primary node label. |
-| `ar` | Optional Arabic label. |
-| `value` | Optional domain payload of type `T`. |
-| `children` | Optional child nodes. A null or empty list creates a leaf. |
-
-Useful node APIs:
+You do not have to use `SuperTreeControls`. Any host UI can drive the public
+controller API directly:
 
 ```dart
-node.hasChildren;
-node.isLeaf;
-node.withChildren(updatedChildren);
-node.copyWith(name: 'Updated name');
-node.renamed('Updated name', ar: 'اسم محدّث');
+controller.setQuery(query);
+controller.clearQuery();
+controller.expandAll();
+controller.collapseAll();
+controller.setMode(SuperTreeMode.editable);
+controller.addRoot();
 ```
 
-Codes must be unique across the complete tree. Duplicate codes cause expansion,
-focus, selection, and editing state to target the wrong node.
+Connect host-owned search and help UI to keyboard shortcuts with
+`onSearchRequested` and `onShortcutsRequested`.
 
-## Controller
+## Controller state
 
-`SuperTreeController<T>` is the state owner for the tree. It extends
-`ChangeNotifier`, so the widget reacts automatically when controller state
-changes.
+`SuperTreeController<T>` extends `ChangeNotifier` and owns the hierarchy's
+interaction state.
 
-```dart
-final controller = SuperTreeController<MyItem>(
-  roots: roots,
-  searchText: (node) => '${node.code} ${node.name} ${node.ar ?? ''}',
-  defaultExpandDepth: 1,
-  query: '',
-  mode: SuperTreeMode.readable,
-  selectionMode: SuperTreeSelectionMode.none,
-  onOpenLeaf: openItem,
-  onTreeChanged: saveTree,
-  onSelectionChanged: saveSelection,
-);
-```
-
-The host that creates the controller owns it and must call `dispose()`.
-
-### Reading state
+Common reads:
 
 ```dart
 controller.roots;
 controller.visible;
 controller.query;
-controller.searching;
 controller.matchCount;
-controller.totalLeaves;
-controller.visibleLeaves;
 controller.focusId;
 controller.selected;
 controller.mode;
-controller.isEditable;
 controller.editingId;
 controller.checked;
 controller.checkedCount;
-controller.checkedNodes;
 ```
 
-### Updating state
+Common updates:
 
 ```dart
 controller.setRoots(updatedRoots);
-controller.setQuery('invoice');
+controller.setQuery('settings');
 controller.clearQuery();
 controller.setMode(SuperTreeMode.editable);
 controller.toggleMode();
 controller.expandAll();
 controller.collapseAll();
-controller.expandSubtree('root-code');
-controller.clearSelection();
+controller.expandSubtree('root.tools');
 ```
+
+Supply `onTreeChanged` when structural edits must be persisted, and
+`onSelectionChanged` when checkbox selection must be synchronized with
+application state.
 
 ## Search
 
-Supply a `searchText` callback when creating the controller. The callback should
-return every field that must participate in search:
+Search text is application-defined:
 
 ```dart
-searchText: (node) => [
-  node.code,
-  node.name,
-  node.ar,
-  node.value?.category,
-].whereType<String>().join(' '),
+final controller = SuperTreeController<MyItem>(
+  roots: roots,
+  searchText: (node) => [
+    node.code,
+    node.name,
+    node.ar,
+    node.value?.searchLabel,
+  ].whereType<String>().join(' '),
+);
 ```
 
-Search is case-insensitive and ancestor-preserving:
-
-- A matching node keeps its complete subtree.
-- A matching descendant keeps the path from the root to that descendant.
-- All filtered branches are rendered expanded while the query is active.
-- Matching text is highlighted by `HighlightText`.
-
-Drive search programmatically when needed:
-
-```dart
-controller.setQuery('bank');
-final matches = controller.matchCount;
-controller.clearQuery();
-```
+Search is case-insensitive and ancestor-preserving. A matching descendant keeps
+its path visible, and filtered branches render expanded for the duration of the
+query.
 
 ## Selection
 
-Selection is configured when the controller is created.
-
-### Single selection
+Configure selection when the controller is created:
 
 ```dart
 final controller = SuperTreeController<Permission>(
-  roots: permissionTree,
-  searchText: (node) => node.name,
-  selectionMode: SuperTreeSelectionMode.single,
-  initialChecked: const {'permission.read'},
-  onSelectionChanged: (codes) {
-    debugPrint('Selected: $codes');
-  },
-);
-```
-
-Single selection keeps at most one node code.
-
-### Multi-selection
-
-```dart
-final controller = SuperTreeController<Permission>(
-  roots: permissionTree,
+  roots: permissions,
   searchText: (node) => node.name,
   selectionMode: SuperTreeSelectionMode.multi,
-  initialChecked: const {
-    'permission.read',
-    'permission.create',
-  },
-  onSelectionChanged: persistPermissions,
+  initialChecked: const {'permission.read'},
+  onSelectionChanged: persistSelection,
 );
 ```
 
-In multi-selection mode:
+| Mode | Behavior |
+| --- | --- |
+| `SuperTreeSelectionMode.none` | No checkboxes. This is the default. |
+| `SuperTreeSelectionMode.single` | At most one node code is checked. |
+| `SuperTreeSelectionMode.multi` | Groups derive checked, partial, or unchecked state from descendant leaves. |
 
-- Selecting a group selects all descendant leaves.
-- Group checkboxes derive a checked, partial, or unchecked state from leaves.
-- The table header provides a select-all checkbox.
-- `checked` contains checked leaf codes.
-
-Selection APIs:
-
-```dart
-controller.checkState('permission.manage');
-controller.isChecked('permission.read');
-controller.rootCheckState;
-controller.toggleChecked(node);
-controller.toggleCheckedFocused();
-controller.checkAll();
-controller.clearChecked();
-controller.toggleCheckAll();
-controller.setChecked({'permission.read'});
-```
-
-The available states are:
-
-```dart
-TreeCheckState.unchecked
-TreeCheckState.partial
-TreeCheckState.checked
-```
+Useful APIs include `checkState`, `isChecked`, `rootCheckState`,
+`toggleChecked`, `toggleCheckedFocused`, `checkAll`, `clearChecked`,
+`toggleCheckAll`, and `setChecked`.
 
 ## Editing
 
-Editing requires two related settings:
+Editing is controlled by `SuperTreeController.mode`; the tree does not render a
+built-in Read/Edit switch or Add button.
 
-1. The controller mode controls whether mutations are active.
-2. `SuperTree.enableEditing` displays the built-in Read/Edit switch and Add node action.
+Provide `newNodeBuilder` when newly created nodes require a non-null typed
+payload:
 
 ```dart
-late final controller = SuperTreeController<Category>(
+final controller = SuperTreeController<Category>(
   roots: categories,
   searchText: (node) => node.name,
-  mode: SuperTreeMode.readable,
   newNodeBuilder: (code) => TreeNode<Category>(
     code: code,
     name: 'New category',
     value: const Category(),
   ),
-  onTreeChanged: (updatedRoots) {
-    repository.save(updatedRoots);
-  },
-);
-
-SuperTree<Category>(
-  controller: controller,
-  enableEditing: true,
-  leadingBuilder: buildCategoryIcon,
+  onTreeChanged: saveTree,
 );
 ```
 
-Editable mode provides:
+Editable mode supports:
 
 - Inline rename.
-- Add root, child, sibling before, or sibling after.
+- Add root, child, sibling before, and sibling after.
 - Delete a node and its subtree.
 - Drag-and-drop before, inside, or after another node.
-- A contextual menu through right-click, long-press, or the row menu button.
+- Context-menu editing actions.
 
-Programmatic editing APIs:
+Programmatic editing APIs include `beginRename`, `commitRename`,
+`cancelRename`, `addRoot`, `addChild`, `addSiblingBefore`, `addSiblingAfter`,
+`deleteNode`, `moveNode`, and `canDrop`.
 
-```dart
-controller.beginRename(code);
-controller.commitRename(code, 'New name', ar: 'اسم جديد');
-controller.cancelRename();
-controller.addRoot();
-controller.addChild(parentCode);
-controller.addSiblingBefore(code);
-controller.addSiblingAfter(code);
-controller.deleteNode(code);
-controller.moveNode(dragCode, targetCode, DropPosition.inside);
-controller.canDrop(dragCode, targetCode);
-```
+Structural editing is intentionally unavailable while a search projection is
+active. Clear the query before restructuring the hierarchy.
 
-Structural changes are emitted through `onTreeChanged`. Persist the returned
-roots in the application repository or state-management layer.
+## Custom row content
 
-Drag-and-drop and row editing are paused while search is active. Clear the query
-before restructuring the tree.
-
-## Custom cells and layout slots
-
-`SuperTree<T>` requires a leading-cell builder and accepts an optional trailing
-builder. Both receive `TreeRowInfo`:
+`leadingBuilder` is required. `trailingBuilder` is optional. Both receive a
+`TreeRowInfo` describing the rendered row:
 
 ```dart
-leadingBuilder: (context, node, info) {
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(info.hasChildren ? Icons.folder : Icons.description),
-      const SizedBox(width: 8),
-      Text(node.code),
-    ],
-  );
-},
-trailingBuilder: (context, node, info) {
-  return Text(node.value?.statusLabel ?? '');
-},
-```
-
-`TreeRowInfo` exposes:
-
-| Property | Description |
-| --- | --- |
-| `depth` | Zero-based depth of the node. |
-| `open` | Whether the branch is currently rendered expanded. |
-| `hasChildren` | Whether the node is a branch. |
-
-Use `above` for content above the search toolbar and `toolbarExtra` for an
-additional row beneath it:
-
-```dart
-SuperTree<Project>(
+SuperTree<MyItem>(
   controller: controller,
-  leadingBuilder: buildLeading,
-  above: const ProjectSummary(),
-  toolbarExtra: const ProjectFilters(),
-);
-```
-
-## `SuperTree` configuration
-
-| Parameter | Purpose |
-| --- | --- |
-| `controller` | Required state controller. |
-| `leadingBuilder` | Required leading-cell builder. |
-| `trailingBuilder` | Optional trailing-cell builder. |
-| `accent` | Overrides the theme accent for tree interactions. |
-| `title` | Tree-card title. |
-| `subtitle` | Optional descriptive subtitle. |
-| `titleIcon` | Optional title icon. |
-| `nameColumnLabel` | Main-column heading. |
-| `trailingColumnLabel` | Trailing-column heading. |
-| `placeholder` | Search-field hint. |
-| `samples` | Search suggestion chips. |
-| `unit` | Noun used in leaf-count summaries. |
-| `showArabic` | Shows or hides `TreeNode.ar`. |
-| `showLeafCount` | Shows or hides branch leaf counts. |
-| `selectionLabel` | Label used in the selected/opened summary. |
-| `enableEditing` | Displays built-in editing controls. |
-| `above` | Widget rendered above the toolbar. |
-| `toolbarExtra` | Additional toolbar content. |
-
-## Keyboard navigation
-
-Focus the tree, then use:
-
-| Key | Action |
-| --- | --- |
-| `Arrow Up` / `Arrow Down` | Move between visible rows. |
-| `Arrow Right` | Expand or move toward children in LTR. Mirrored in RTL. |
-| `Arrow Left` | Collapse or move toward the parent in LTR. Mirrored in RTL. |
-| `Home` / `End` | Move to the first or last visible row. |
-| `Enter` | Open a leaf or toggle a branch. |
-| `Space` | Toggle the focused checkbox when selection is enabled; otherwise activate the row. |
-| `/` | Focus the search field. |
-| `Escape` | Clear the query while the search field is focused. |
-| `*` | Expand all branches. |
-| `\` | Collapse all branches. |
-| `?` | Open the keyboard-shortcuts dialog. |
-| Right-click / long-press | Open the node context menu. |
-
-The horizontal arrow behavior is resolved through `Directionality`, so tree
-navigation remains visually correct in RTL layouts.
-
-## Chart of accounts
-
-`AccountTree` is a specialized `SuperTree<AccountData>` implementation:
-
-```dart
-AccountTree(
-  roots: myAccounts,
-  onOpenAccount: (account) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => AccountLedgerPage(accountCode: account.code),
-      ),
-    );
+  leadingBuilder: (context, node, info) {
+    return Icon(info.hasChildren ? Icons.folder : Icons.description);
+  },
+  trailingBuilder: (context, node, info) {
+    return Text(node.value?.statusLabel ?? '');
   },
 );
 ```
 
-Omit `roots` to use `AccountTreeData.tree`:
+`TreeRowInfo` exposes `depth`, `open`, and `hasChildren`.
+
+## Scrolling
+
+There are two different controller roles:
+
+- `controller` is the required `SuperTreeController<T>` for hierarchy state.
+- `scrollController` is an optional Flutter `ScrollController` for the tree's
+  internal vertical `ListView`.
+
+### Let the tree own scrolling
+
+Give the tree bounded height through `Expanded`, `Flexible`, or `SizedBox`:
 
 ```dart
-const AccountTree();
-```
-
-The built-in account tree includes:
-
-- Five account types: asset, liability, equity, income, and expense.
-- Debit and credit account nature.
-- English and Arabic account names.
-- Leaf balances and recursive group roll-ups.
-- Total assets, liabilities, equity, and net-income KPI cards.
-- An assets-versus-liabilities-plus-equity balance indicator.
-- Account-type filters.
-- A balance share bar for each node.
-- Read and edit modes.
-
-`AccountTree` labels monetary values as SAR. Build a custom
-`SuperTree<AccountData>` when the product requires another currency, formatter,
-column layout, or persistence workflow.
-
-A ready-to-route page is also exported:
-
-```dart
-Navigator.of(context).push(
-  MaterialPageRoute<void>(
-    builder: (_) => const AccountTreeDemo(),
-  ),
-);
-```
-
-### Account domain types
-
-```dart
-const account = AccountData(
-  type: AccountType.asset,
-  balance: 125000,
-);
-
-final nature = AccountType.asset.nature; // AccountNature.debit
-final code = nature.code;                // DR
-```
-
-`AccountType.ordered` returns the stable display order used by the built-in
-filters and KPI layout.
-
-## Tree algorithms
-
-`TreeLogic` contains stateless hierarchy operations and can be used without the
-`SuperTree` widget:
-
-```dart
-final leafCount = TreeLogic.leafCount(root);
-final leafCodes = TreeLogic.leafCodes(root);
-final total = TreeLogic.rollup(root, (node) => node.value?.amount ?? 0);
-final groups = TreeLogic.groupCodes(roots, maxDepth: 2);
-final filtered = TreeLogic.filter(roots, 'sales', searchText);
-final matches = TreeLogic.countMatches(roots, 'sales', searchText);
-final visible = TreeLogic.flattenVisible(roots, expandedCodes, false);
-final parent = TreeLogic.parentOf(roots, nodeCode);
-```
-
-Immutable edit operations:
-
-```dart
-final renamed = TreeLogic.mapNode(
-  roots,
-  nodeCode,
-  (node) => node.renamed('Updated'),
-);
-
-final withoutNode = TreeLogic.removeNode(roots, nodeCode);
-final withChild = TreeLogic.insertChild(roots, parentCode, child);
-final withSibling = TreeLogic.insertSibling(
-  roots,
-  targetCode,
-  sibling,
-  after: true,
-);
-final moved = TreeLogic.moveNode(
-  roots,
-  dragCode,
-  targetCode,
-  DropPosition.inside,
-);
-```
-
-These operations return new tree lists rather than mutating the supplied
-hierarchy.
-
-## RTL and bilingual labels
-
-Place the tree below a `Directionality` or a localized `MaterialApp`:
-
-```dart
-Directionality(
-  textDirection: TextDirection.rtl,
+Expanded(
   child: SuperTree<MyItem>(
     controller: controller,
-    showArabic: true,
+    scrollController: scrollController,
+    physics: const BouncingScrollPhysics(),
+    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+    restorationId: 'project-tree',
     leadingBuilder: buildLeading,
   ),
 );
 ```
 
-`TreeNode.ar` is a secondary Arabic label. Setting `showArabic: false` hides it.
-The package mirrors directional indentation and horizontal keyboard navigation,
-but its built-in toolbar and action labels are English strings. Application-wide
-localization of those labels requires a custom wrapper or package-level string
-customization.
+The host owns and disposes an explicitly created `ScrollController`.
 
-## Responsive usage
+### Let a parent own scrolling
 
-The toolbar uses wrapping layouts and the account KPI cards adjust their column
-count based on available width. For predictable component density, generate the
-`super_core` theme with the matching `SuperDeviceMode`:
+When `SuperTree` is inside another vertical scroll view, make ownership
+explicit:
 
 ```dart
-final mode = SuperDeviceMode.forWidth(width);
-
-final textTheme = SuperTextTheme(
-  isDesktop: mode == SuperDeviceMode.desktop,
-);
-
-final lightTheme = SuperMaterialThemeData.light(
-  palette: SuperPalette.purplePalette,
-  mode: mode,
-  textTheme: textTheme,
-  primaryTextTheme: textTheme,
+SingleChildScrollView(
+  child: SuperTree<MyItem>(
+    controller: controller,
+    shrinkWrap: true,
+    primary: false,
+    physics: const NeverScrollableScrollPhysics(),
+    leadingBuilder: buildLeading,
+  ),
 );
 ```
 
-For narrow screens, place the tree in a vertically scrollable page and provide
-sufficient horizontal space for custom trailing columns. Keep custom cells
-compact and prefer `TextOverflow.ellipsis` for unbounded labels.
+`SuperTree` also falls back to shrink-wrapping when it receives unbounded
+vertical constraints.
 
-## Public API overview
+The 1.0.0 scroll pass-through API is:
 
-### Domain
-
-| API | Purpose |
+| Parameter | Default |
 | --- | --- |
-| `TreeNode<T>` | Generic immutable hierarchy node. |
-| `AccountData` | Account payload containing type and balance. |
-| `AccountType` | Asset, liability, equity, income, and expense metadata. |
-| `AccountNature` | Debit or credit nature. |
-| `DropPosition` | Before, inside, or after drag-and-drop position. |
-| `SearchText<T>` | Search-text callback type. |
-| `LeafValue<T>` | Numeric leaf-value callback type. |
-| `TreeLogic` | Pure hierarchy query and edit operations. |
+| `reverse` | `false` |
+| `scrollController` | `null` |
+| `primary` | `null` |
+| `physics` | `null` |
+| `shrinkWrap` | `false` |
+| `cacheExtent` | `null` |
+| `semanticChildCount` | `null` |
+| `dragStartBehavior` | `DragStartBehavior.start` |
+| `keyboardDismissBehavior` | `null` → `ScrollViewKeyboardDismissBehavior.manual` |
+| `restorationId` | `null` |
+| `clipBehavior` | `Clip.hardEdge` |
+| `hitTestBehavior` | `HitTestBehavior.opaque` |
 
-### State
+Do not combine `primary: true` with an explicit `scrollController`.
 
-| API | Purpose |
+## Keyboard shortcuts
+
+The tree must have focus before tree-navigation shortcuts are handled.
+
+| Shortcut | Action |
 | --- | --- |
-| `SuperTreeController<T>` | Expansion, focus, search, selection, and editing state. |
-| `SuperTreeMode` | Readable or editable interaction mode. |
-| `SuperTreeSelectionMode` | None, single, or multi-selection. |
-| `TreeCheckState` | Unchecked, partial, or checked state. |
+| `↑` / `↓` | Move between visible rows. |
+| `←` / `→` | Collapse or step out / expand or step in. Direction is RTL-aware. |
+| `Home` / `End` | Jump to the first or last visible row. |
+| `Enter` | Open a leaf or toggle a group. |
+| `Space` | Toggle the focused checkbox in selection mode; otherwise activate the row. |
+| `/` | Calls `onSearchRequested` when provided. |
+| `*` | Expand all groups. |
+| `\` | Collapse all groups. |
+| `?` | Calls `onShortcutsRequested` when provided. |
+| Right-click / long-press | Open the node context menu. |
 
-### Widgets and helpers
+When `SuperTreeControls` owns the search field, `Esc` clears the active search
+while that field has focus.
 
-| API | Purpose |
-| --- | --- |
-| `SuperTree<T>` | Generic tree shell and interaction view. |
-| `TreeRow<T>` | Low-level recursive node-row widget. |
-| `TreeRowInfo` | Row depth, expansion, and branch metadata. |
-| `TreeSlotBuilder<T>` | Leading-cell builder type. |
-| `TreeTrailingBuilder<T>` | Trailing-cell builder type. |
-| `TreeCheckbox` | Themed tristate checkbox. |
-| `HighlightText` | Highlights a matching search substring. |
-| `showTreeContextMenu<T>` | Opens the mode-aware node context menu. |
-| `showShortcutsHelp` | Opens the keyboard-shortcuts dialog. |
-| `AccountTree` | Ready-made chart-of-accounts tree. |
-| `AccountTreeDemo` | Scaffolded chart-of-accounts page. |
-| `KpiCard` | Financial summary card used by `AccountTree`. |
-| `NaturePill` | Debit/credit indicator. |
-| `AccountTreeData` | Bundled sample account hierarchy. |
+## Tree algorithms
 
-Most applications should compose `SuperTree<T>` instead of constructing
-`TreeRow<T>` directly.
+`TreeLogic` contains pure, widget-free hierarchy operations. Useful methods
+include:
 
-## Flutter usage guidelines
+- `filter` and `countMatches` for search.
+- `flattenVisible` and `parentOf` for navigation.
+- `leafCount`, `leafCodes`, and `groupCodes` for derived state.
+- `rollup` for generic numeric aggregation over leaves.
+- `findNode`, `mapNode`, `removeNode`, `insertChild`, and `insertSibling` for
+  immutable edits.
+- `moveNode` and `isWithin` for safe drag-and-drop transforms.
 
-- Create long-lived controllers in `initState`, not inside `build`.
-- Dispose every controller created by the host widget.
-- Keep every `TreeNode.code` unique and stable across rebuilds and persistence.
-- Treat `TreeNode` values and root lists as immutable application state.
-- Persist `onTreeChanged` output instead of reading private widget state.
-- Include codes, translated labels, and domain keywords in `searchText`.
-- Keep expensive calculations outside cell builders when the tree is large.
-- Use `const` constructors for static nodes and widgets where possible.
-- Keep leading and trailing builders small to reduce rebuild cost.
-- Test keyboard focus, RTL navigation, selection cascades, and edit persistence.
-- Provide meaningful tooltips or semantics for custom icon-only controls.
+## Examples
 
-## Testing
+The runnable `example/` application demonstrates different payloads and
+interaction models without adding those domains to the package API:
 
-A widget test can create a controller, pump `SuperTree`, then interact with
-labels or controller methods:
+- `file_tree_demo.dart` — editable file hierarchy.
+- `org_tree_demo.dart` — organization hierarchy.
+- `permission_tree_demo.dart` — single and multi checkbox selection.
+- `product_tree_demo.dart` — bilingual product/catalog hierarchy.
+- `scroll_tree_demo.dart` — bounded scrolling and `ScrollController` usage.
 
-```dart
-testWidgets('filters nodes through the controller', (tester) async {
-  final controller = SuperTreeController<FileItem>(
-    roots: files,
-    searchText: (node) => node.name,
-  );
-  addTearDown(controller.dispose);
+Run the gallery from the package root:
 
-  final textTheme = SuperTextTheme();
-
-  await tester.pumpWidget(
-    MaterialApp(
-      theme: SuperMaterialThemeData.light(
-        textTheme: textTheme,
-        primaryTextTheme: textTheme,
-      ),
-      home: Scaffold(
-        body: SuperTree<FileItem>(
-          controller: controller,
-          showArabic: false,
-          leadingBuilder: (context, node, info) {
-            return const Icon(Icons.description_outlined);
-          },
-        ),
-      ),
-    ),
-  );
-
-  controller.setQuery('README');
-  await tester.pump();
-
-  expect(find.text('README.md'), findsOneWidget);
-  expect(find.text('main.dart'), findsNothing);
-});
+```bash
+cd example
+flutter pub get
+flutter run
 ```
 
-Prefer domain tests for `TreeLogic` and widget tests for focus, keyboard,
-selection, editing controls, and rendered labels.
+## Additional information
 
-## License
+### Architecture
 
-See [LICENSE](LICENSE).
+The package keeps the reusable hierarchy engine under
+`lib/src/features/super_tree/`:
+
+```text
+domain/
+  entities/tree_node.dart
+  usecases/tree_logic.dart
+presentation/
+  controllers/super_tree_controller.dart
+  widgets/...
+```
+
+Domain-specific payloads, datasets, summaries, filters, and composed pages
+belong in the consuming application or `example/lib/`.
+
+### Public API documentation
+
+Public APIs use Dart documentation comments and the package enables the
+`public_member_api_docs` lint. New exported classes, constructors, fields,
+methods, typedefs, and top-level functions should be documented before release.
+
+### Issues and changes
+
+- Repository: <https://github.com/GeniusSystems24/super_tree_field>
+- Issues: <https://github.com/GeniusSystems24/super_tree_field/issues>
+- Release history: [CHANGELOG.md](CHANGELOG.md)
+
+### License
+
+This package is distributed under the terms in [LICENSE](LICENSE).

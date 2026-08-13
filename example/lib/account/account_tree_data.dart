@@ -1,5 +1,5 @@
 // ============================================================
-// features/super_tree/data/datasources/account_tree_data.dart
+// example/lib/account_tree_data.dart
 // ------------------------------------------------------------
 // The flagship dataset: a five-level bilingual chart of accounts. Only leaves
 // carry a `balance`; every group total rolls up from its children (see
@@ -9,10 +9,11 @@
 // — replace `AccountTreeData.tree` with your own `List<TreeNode<AccountData>>`.
 // ============================================================
 
-import '../../domain/entities/account_data.dart';
-import '../../domain/entities/tree_node.dart';
+import 'package:super_tree_field/super_tree.dart' show TreeNode;
 
-/// Static sample chart-of-accounts data for the flagship `AccountTree`.
+import 'account_data.dart';
+
+/// Static sample chart-of-accounts data for the example `AccountTree`.
 abstract final class AccountTreeData {
   /// Group node (no balance — rolls up its children).
   static TreeNode<AccountData> _g(

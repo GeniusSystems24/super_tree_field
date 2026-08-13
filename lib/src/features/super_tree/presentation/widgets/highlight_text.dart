@@ -12,6 +12,7 @@ import '../../../../core/core.dart';
 
 /// Text with the matched search substring highlighted.
 class HighlightText extends StatelessWidget {
+  /// Creates text that highlights the first match of [query] in [text].
   const HighlightText({
     super.key,
     required this.text,
@@ -20,9 +21,16 @@ class HighlightText extends StatelessWidget {
     this.overflow,
   });
 
+  /// Text displayed by the widget.
   final String text;
+
+  /// Case-insensitive search query to highlight within [text].
   final String query;
+
+  /// Base style applied to the complete text.
   final TextStyle style;
+
+  /// Overflow behavior used when the single line exceeds its constraints.
   final TextOverflow? overflow;
 
   @override

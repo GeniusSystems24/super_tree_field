@@ -1,17 +1,18 @@
 // ============================================================
-// features/super_tree_field/presentation/widgets/kpi_card.dart
+// example/lib/kpi_card.dart
 // ------------------------------------------------------------
 // A financial-summary KPI card: an uppercase English label + Arabic gloss, a
 // large monospace value, an optional sub-line, and a 3px accent edge bar.
-// Mirrors the React `<KpiCard>` atom. Used in the AccountTree summary grid.
+// Example-only presentation helper used by the chart-of-accounts demo.
 // ============================================================
 
 import 'package:flutter/widgets.dart';
 
-import '../../../../core/core.dart';
+import 'package:super_core/super_core.dart';
 
-/// One KPI summary card (Total Assets, Net Income, …).
+/// A KPI summary card used by the chart-of-accounts example.
 class KpiCard extends StatelessWidget {
+  /// Creates a KPI card with bilingual labels and an [accent] edge.
   const KpiCard({
     super.key,
     required this.label,
@@ -21,10 +22,19 @@ class KpiCard extends StatelessWidget {
     this.sub,
   });
 
+  /// Primary KPI label.
   final String label;
+
+  /// Arabic KPI label displayed beside [label].
   final String ar;
+
+  /// Formatted KPI value.
   final String value;
+
+  /// Accent color used by the leading edge.
   final Color accent;
+
+  /// Optional supporting text shown below [value].
   final String? sub;
 
   @override

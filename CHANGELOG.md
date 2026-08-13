@@ -1,7 +1,86 @@
 # Changelog
 
-All notable changes to **super_tree_field** are documented here. Format follows
-[Keep a Changelog](https://keepachangelog.com/); versioning is [SemVer](https://semver.org/).
+All notable changes to **super_tree_field** are documented in this file. The
+format follows [Keep a Changelog](https://keepachangelog.com/), and the package
+uses [Semantic Versioning](https://semver.org/).
+
+Earlier entries describe the API as it existed in those releases.
+
+## [1.0.0] — 2026-08-13
+
+### Added
+
+- Added configurable internal scrolling to `SuperTree<T>` with
+  `reverse`, `scrollController`, `primary`, `physics`, `shrinkWrap`,
+  `cacheExtent`, `semanticChildCount`, `dragStartBehavior`,
+  `keyboardDismissBehavior`, `restorationId`, `clipBehavior`, and
+  `hitTestBehavior`.
+- Added `onSearchRequested` and `onShortcutsRequested` so `/` and `?` can
+  delegate to UI composed outside the tree.
+- Added the public `SuperTreeControls<T>` and `SuperTreeControlsController` as
+  an optional responsive toolbar for search, quick queries, editing actions,
+  keyboard help, and expand/collapse actions.
+- Added a Product Tree example with bilingual categories and product metadata.
+- Added a Scroll Configuration example covering bounded scrolling, an external
+  `ScrollController`, restoration, keyboard dismissal, and scroll actions.
+- Added a shared responsive example layout and applied responsive control
+  wrapping across the example application.
+- Added Flutter-style public API documentation coverage and enabled the
+  `public_member_api_docs` lint.
+
+### Changed
+
+- Promoted `SuperTreeControls<T>` and `SuperTreeControlsController` from
+  `example/lib/` into the package's public widget API as an optional
+  responsive control bar composed outside `SuperTree`.
+
+- **Breaking:** restored `controller` as the required
+  `SuperTreeController<T>` parameter and renamed the Flutter scroll controller
+  parameter to `scrollController`.
+- **Breaking:** `SuperTree` now renders the hierarchy card only. Search,
+  quick-query chips, Add node, Read/Edit, keyboard help, Expand all, Collapse,
+  filters, and other toolbar content are composed outside the tree.
+- Moved the standard external toolbar into the package as
+  `SuperTreeControls<T>` while keeping it independent from the `SuperTree`
+  widget tree.
+- Migrated tree search and inline rename input to the real
+  `super_form_field` 1.8.2 APIs: `SuperTextFormField` and
+  `SuperTextFieldController`.
+- Made `SuperTreeControls` responsive: the search field becomes full width on
+  compact layouts, while chips and actions retain intrinsic width and wrap as
+  needed.
+- Updated all example screens to use responsive layouts and wrapping controls
+  rather than dedicating a full row to each action.
+- `SuperTree` now falls back to shrink-wrapping its internal row list when it
+  receives unbounded vertical constraints, preserving nested-scroll usage.
+- Standardized package, README, example, and agent-skill terminology around a
+  generic hierarchy engine rather than a domain-specific tree.
+- Updated README and SKILL documentation to match the final 1.0.0 API,
+  controller lifecycle, scroll ownership, external controls, and architecture.
+
+### Removed
+
+- **Breaking:** removed the old built-in toolbar configuration from
+  `SuperTree`, including `placeholder`, `samples`, `enableEditing`, `above`,
+  and `toolbarExtra`.
+- Removed the `scrollBehavior` and `paintOrder` scroll pass-through properties.
+- Removed domain-specific hierarchy code from the package API. The specialized
+  example composition, payload, dataset, page, KPI helper, and indicator helper
+  now live entirely under `example/lib/`.
+
+### Fixed
+
+- Fixed invalid `SuperFormField` references introduced during migration by
+  using the exported `SuperTextFormField` widget and its
+  `SuperTextFieldController` contract.
+- Fixed inline rename overflow by removing the hard-coded 26 px wrapper,
+  allowing the compact form field to own its design-system height, and reducing
+  row padding while editing.
+- Fixed duplicate borders around the inline rename field.
+- Fixed quick-query chips stretching to full-row width inside responsive
+  `Wrap` layouts.
+
+---
 
 ## [0.5.2] — 2026-08-10
 
@@ -39,6 +118,7 @@ All notable changes to **super_tree_field** are documented here. Format follows
     darkTheme: SuperMaterialThemeData.dark(mode: SuperDeviceMode.desktop),
   );
   ```
+
 - Minimum raised to `dart >=3.8.0`, `flutter >=3.32.0`.
 
 ---
@@ -69,6 +149,7 @@ All notable changes to **super_tree_field** are documented here. Format follows
 ## [0.3.0] — 2026-06-18
 
 ### Added
+
 - **Checkbox selection modes** — opt in with `SuperTreeController(selectionMode: …)`:
   - **`SuperTreeSelectionMode.single`** — radio-like: at most one checkbox on at
     a time (any node), still rendered as a checkbox.
@@ -99,6 +180,7 @@ All notable changes to **super_tree_field** are documented here. Format follows
 ## [0.2.0] — 2026-06-17
 
 ### Added
+
 - **Editable mode** (`SuperTreeMode.editable`) — opt in with
   `SuperTree(enableEditing: true)`, which adds a Read / Edit segmented toggle and
   an "Add node" action to the toolbar. In edit mode every row gains:
@@ -133,6 +215,7 @@ All notable changes to **super_tree_field** are documented here. Format follows
 ## [0.1.0] — 2026-06-16
 
 ### Added
+
 - Initial release, extracted as a focused package from `super_toolkit` and
   ported from the React `super-tree` tool.
 - **`SuperTree<T>`** — a recursive, generic, keyboard-first hierarchy view.

@@ -4,7 +4,7 @@
 // The generic hierarchy node — a faithful port of the React tool's tree model.
 // Every node carries a stable [code] (unique id + keyboard cursor key), an
 // English [name], an optional Arabic [ar] label rendered RTL beneath it, an
-// optional typed [value] payload (AccountData / FileMeta / Person …), and
+// optional typed [value] payload (FileMeta / Person / ProductData …), and
 // optional [children]. A node with no children is a leaf. Pure data — no
 // Flutter widgets here.
 // ============================================================
@@ -18,15 +18,15 @@ const Object _unset = Object();
 /// One node in a [TreeNode] hierarchy, generic over a domain payload [T].
 ///
 /// ```dart
-/// const TreeNode<AccountData>(
-///   code: '1111-01',
-///   name: 'Al Rajhi Bank — Main',
-///   ar: 'مصرف الراجحي — الرئيسي',
-///   value: AccountData(type: AccountType.asset, balance: 186420),
+/// const TreeNode<String>(
+///   code: 'docs',
+///   name: 'Documentation',
+///   value: 'folder',
 /// );
 /// ```
 @immutable
 class TreeNode<T> {
+  /// Creates a tree node identified by [code] and displayed with [name].
   const TreeNode({
     required this.code,
     required this.name,

@@ -1,25 +1,24 @@
 // ============================================================
 // features/super_tree_field/presentation/widgets/super_tree.dart
 // ------------------------------------------------------------
-// The generic SuperTree View: a search toolbar (live filter · match count ·
-// sample chips · expand-all / collapse · keyboard help) over a bordered tree
-// card (heading + column header + recursive rows + empty state + selection
-// footer), with the full keyboard model wired through a focusable body. Drive
-// it from a `SuperTreeController<T>` and supply leading / trailing cell
-// builders. The flagship `AccountTree` composes this; so do the file / org
-// examples. A faithful port of the React `MiniTree` shell.
+// The generic SuperTree View: a focused hierarchy card with recursive rows,
+// selection, editing, keyboard navigation and configurable scrolling. Search,
+// mode toggles, add actions, help and expansion controls are composed by the
+// host through `SuperTreeController<T>` rather than rendered by this widget.
 // ============================================================
 
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:super_tree_field/src/features/super_tree/domain/entities/tree_node.dart';
 
-import '../../../../core/core.dart';
+import '../../../../core/core.dart' hide FieldDensity;
 import '../controllers/super_tree_controller.dart';
-import 'shortcuts_help.dart';
 import 'tree_row.dart';
 
 /// A themed, keyboard-first hierarchy view over a [SuperTreeController].
 class SuperTree<T> extends StatefulWidget {
+  /// Creates a generic hierarchy view driven by [controller].
   const SuperTree({
     super.key,
     required this.controller,
@@ -31,100 +30,179 @@ class SuperTree<T> extends StatefulWidget {
     this.titleIcon,
     this.nameColumnLabel = 'Name',
     this.trailingColumnLabel = '',
-    this.placeholder = 'Search…   ( / )',
-    this.samples = const [],
     this.unit = 'items',
     this.showArabic = true,
     this.showLeafCount = true,
     this.selectionLabel = 'Selected',
-    this.enableEditing = false,
-    this.above,
-    this.toolbarExtra,
+    this.onSearchRequested,
+    this.onShortcutsRequested,
+    this.reverse = false,
+    this.scrollController,
+    this.primary,
+    this.physics,
+    this.shrinkWrap = false,
+    this.cacheExtent,
+    this.semanticChildCount,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.keyboardDismissBehavior,
+    this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
+    this.hitTestBehavior = HitTestBehavior.opaque,
   });
 
+  /// Controller for hierarchy, search, focus, selection, and editing state.
   final SuperTreeController<T> controller;
-  final TreeSlotBuilder<T> leadingBuilder;
-  final TreeTrailingBuilder<T>? trailingBuilder;
-  final Color? accent;
-  final String title;
-  final String? subtitle;
-  final IconData? titleIcon;
-  final String nameColumnLabel;
-  final String trailingColumnLabel;
-  final String placeholder;
-  final List<String> samples;
 
-  /// Plural noun in the count badge ("12 accounts", "8 items").
+  /// Builds the leading cell for each rendered node.
+  final TreeSlotBuilder<T> leadingBuilder;
+
+  /// Builds the optional trailing cell for each rendered node.
+  final TreeTrailingBuilder<T>? trailingBuilder;
+
+  /// Overrides the theme accent used by tree interactions.
+  final Color? accent;
+
+  /// Title displayed in the tree card header.
+  final String title;
+
+  /// Optional subtitle displayed below [title].
+  final String? subtitle;
+
+  /// Optional icon displayed beside [title].
+  final IconData? titleIcon;
+
+  /// Label for the primary name column.
+  final String nameColumnLabel;
+
+  /// Label for the optional trailing column.
+  final String trailingColumnLabel;
+
+
+  /// Plural noun used in count labels, such as "items" or "records".
   final String unit;
+
+  /// Whether [TreeNode.ar] labels are displayed when available.
   final bool showArabic;
+
+  /// Whether group rows display their descendant leaf count.
   final bool showLeafCount;
 
-  /// Verb in the selection footer ("Selected", "Opened ledger for").
+  /// Label used in the selected-leaf footer, such as "Selected".
   final String selectionLabel;
 
-  /// When true, the toolbar shows a Read / Edit mode toggle and an "Add node"
-  /// action; in edit mode rows gain drag handles, inline rename, a row menu and
-  /// drop targets. The controller's [SuperTreeController.mode] is the source of
-  /// truth — this only surfaces the toggle UI.
-  final bool enableEditing;
+  /// Called when the focused tree receives the `/` shortcut.
+  ///
+  /// Use this to focus a search field composed outside [SuperTree]. If
+  /// null, `/` is ignored by the tree.
+  final VoidCallback? onSearchRequested;
 
-  /// Optional content rendered above the toolbar (e.g. a KPI grid).
-  final Widget? above;
+  /// Called when the focused tree receives the `?` shortcut.
+  ///
+  /// Use this to show help UI composed by the host. If null, `?` is
+  /// ignored by the tree.
+  final VoidCallback? onShortcutsRequested;
 
-  /// Optional extra toolbar row beneath search (e.g. filter chips + a badge).
-  final Widget? toolbarExtra;
+
+  /// Whether the tree's scroll view scrolls in the reverse direction.
+  ///
+  /// This follows [ScrollView.reverse]. With the vertical tree axis, false uses
+  /// the normal downward direction and true reverses it.
+  final bool reverse;
+
+  /// Controls the scroll position of the tree rows.
+  ///
+  /// This has the same role as [ScrollView.controller]. When [primary] is true,
+  /// leave this null so Flutter can use the nearest [PrimaryScrollController].
+  final ScrollController? scrollController;
+
+  /// Whether this is the primary scroll view associated with the parent.
+  ///
+  /// This follows [ScrollView.primary]. A primary scroll view can inherit a
+  /// [PrimaryScrollController] from its context.
+  final bool? primary;
+
+  /// Defines how the tree responds to user scrolling.
+  ///
+  /// See [ScrollView.physics] and [ScrollPhysics]. When null, Flutter derives
+  /// the effective physics from the ambient [ScrollBehavior].
+  final ScrollPhysics? physics;
+
+  /// Whether the scroll view's extent is determined by its contents.
+  ///
+  /// This follows [ScrollView.shrinkWrap]. Shrink-wrapping is more expensive
+  /// because the scroll view can need to recompute its size while scrolling.
+  /// If [SuperTree] receives unbounded vertical constraints, it safely falls
+  /// back to shrink-wrapping so it can remain embedded in another scroll view.
+  final bool shrinkWrap;
+
+  /// The number of logical pixels before and after the visible viewport to
+  /// cache.
+  ///
+  /// See [ScrollView.cacheExtent]. A null value lets Flutter use its default
+  /// viewport cache extent.
+  final double? cacheExtent;
+
+  /// The number of children that contribute semantic information.
+  ///
+  /// See [ScrollView.semanticChildCount]. Leave null to use [ListView]'s
+  /// normal semantic child-count behavior.
+  final int? semanticChildCount;
+
+  /// Determines how a drag gesture's initial position is reported.
+  ///
+  /// This follows [ScrollView.dragStartBehavior].
+  final DragStartBehavior dragStartBehavior;
+
+  /// Defines how the on-screen keyboard is dismissed while the tree scrolls.
+  ///
+  /// A null value uses [ScrollViewKeyboardDismissBehavior.manual], matching the
+  /// default behavior of Flutter scroll views.
+  final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
+
+  /// Restoration ID used to save and restore the tree's scroll offset.
+  ///
+  /// See [ScrollView.restorationId]. A null value disables restoration for this
+  /// scroll view.
+  final String? restorationId;
+
+  /// The clipping behavior applied to the tree's scrollable viewport.
+  ///
+  /// This follows [ScrollView.clipBehavior].
+  final Clip clipBehavior;
+
+  /// How the tree's scrollable viewport behaves during hit testing.
+  ///
+  /// This follows [ScrollView.hitTestBehavior].
+  final HitTestBehavior hitTestBehavior;
+
 
   @override
   State<SuperTree<T>> createState() => _SuperTreeState<T>();
 }
 
 class _SuperTreeState<T> extends State<SuperTree<T>> {
-  final TextEditingController _searchCtl = TextEditingController();
-  final FocusNode _searchFocus = FocusNode();
   final FocusNode _treeFocus = FocusNode();
-  bool _searchActive = false;
 
   SuperTreeController<T> get _c => widget.controller;
 
   @override
-  void initState() {
-    super.initState();
-    _searchCtl.text = _c.query;
-    _c.addListener(_syncSearch);
-    _searchFocus.addListener(
-      () => setState(() => _searchActive = _searchFocus.hasFocus),
-    );
-  }
-
-  void _syncSearch() {
-    if (_searchCtl.text != _c.query) _searchCtl.text = _c.query;
-  }
-
-  @override
   void dispose() {
-    _c.removeListener(_syncSearch);
-    _searchCtl.dispose();
-    _searchFocus.dispose();
     _treeFocus.dispose();
     super.dispose();
   }
 
-  void _runQuery(String q) {
-    _c.setQuery(q);
-    _searchFocus.requestFocus();
-  }
 
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
     final ch = event.character;
-    if (ch == '/') {
-      _searchFocus.requestFocus();
+    if (ch == '/' && widget.onSearchRequested != null) {
+      widget.onSearchRequested!();
       return KeyEventResult.handled;
     }
-    if (ch == '?') {
-      showShortcutsHelp(context);
+    if (ch == '?' && widget.onShortcutsRequested != null) {
+      widget.onShortcutsRequested!();
       return KeyEventResult.handled;
     }
     if (ch == '*') {
@@ -174,324 +252,50 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
     return AnimatedBuilder(
       animation: _c,
       builder: (context, _) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (widget.above != null) ...[
-              widget.above!,
-              SizedBox(height: context.superTheme.spacing.space4),
-            ],
-            _toolbar(context),
-            SizedBox(height: context.superTheme.spacing.space4),
-            _treeCard(context),
-          ],
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            // A normal (non-shrink-wrapped) ListView needs a finite viewport.
+            // Preserve SuperTree's ability to live inside another scroll view
+            // by falling back to shrink-wrap when height is unbounded.
+            final boundedViewport =
+                !widget.shrinkWrap && constraints.hasBoundedHeight;
+            final treeCard = _treeCard(
+              context,
+              boundedViewport: boundedViewport,
+            );
+
+            return treeCard;
+          },
         );
       },
     );
   }
 
-  // ── toolbar: search + sample chips + expand controls + extra row ──
-  Widget _toolbar(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Wrap(
-          spacing: context.superTheme.spacing.space3,
-          runSpacing: context.superTheme.spacing.space3,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            _searchField(context),
-            for (final q in widget.samples) _sampleChip(context, q),
-            if (widget.enableEditing) ...[
-              if (_c.isEditable)
-                _toolAction(
-                  context,
-                  icon: Icons.add,
-                  label: 'Add node',
-                  onTap: _c.addRoot,
-                ),
-              _modeToggle(context),
-            ],
-            SuperIconButton(
-              icon: Icons.keyboard_outlined,
-              tooltip: 'Keyboard shortcuts  ·  ?',
-              onPressed: () => showShortcutsHelp(context),
-            ),
-            _toolBtn(
-              context,
-              label: 'Expand all',
-              up: false,
-              onTap: _c.expandAll,
-            ),
-            _toolBtn(
-              context,
-              label: 'Collapse',
-              up: true,
-              onTap: _c.collapseAll,
-            ),
-          ],
-        ),
-        if (widget.toolbarExtra != null) ...[
-          SizedBox(height: context.superTheme.spacing.space3),
-          widget.toolbarExtra!,
-        ],
-      ],
-    );
-  }
-
-  // The Read / Edit segmented control.
-  Widget _modeToggle(BuildContext context) {
-    final t = context.superTheme;
-    final accent = (widget.accent ?? SuperThemeData.of(context).tokens.accent);
-    Widget seg(String label, IconData icon, bool active, VoidCallback onTap) {
-      return GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: SuperThemeData.of(context).tokens.durFast,
-          padding: const EdgeInsets.symmetric(horizontal: 11),
-          height: context.superTheme.spacing.controlHeight - 6,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: active
-                ? Color.alphaBlend(accent.withValues(alpha: 0.20), t.surface)
-                : const Color(0x00000000),
-            borderRadius: BorderRadius.circular(
-              context.superTheme.spacing.radiusControl - 2,
-            ),
-            border: Border.all(
-              color: active ? accent : const Color(0x00000000),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 14, color: active ? accent : t.fg3),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: context.superTextTheme.body.copyWith(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: active ? accent : t.fg3,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      height: context.superTheme.spacing.controlHeight,
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: t.inputBg,
-        borderRadius: BorderRadius.circular(
-          context.superTheme.spacing.radiusControl,
-        ),
-        border: Border.all(color: t.borderStrong),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          seg(
-            'Read',
-            Icons.visibility_outlined,
-            !_c.isEditable,
-            () => _c.setMode(SuperTreeMode.readable),
-          ),
-          const SizedBox(width: 3),
-          seg(
-            'Edit',
-            Icons.edit_outlined,
-            _c.isEditable,
-            () => _c.setMode(SuperTreeMode.editable),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _toolAction(
+  Widget _treeCard(
     BuildContext context, {
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
+    required bool boundedViewport,
   }) {
-    final t = context.superTheme;
-    final accent = (widget.accent ?? SuperThemeData.of(context).tokens.accent);
-    return _HoverButton(
-      onTap: onTap,
-      builder: (hover) => Container(
-        height: context.superTheme.spacing.controlHeight,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: hover
-              ? Color.alphaBlend(accent.withValues(alpha: 0.16), t.surface)
-              : Color.alphaBlend(accent.withValues(alpha: 0.10), t.surface),
-          borderRadius: BorderRadius.circular(
-            context.superTheme.spacing.radiusControl,
-          ),
-          border: Border.all(color: accent.withValues(alpha: 0.5)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16, color: accent),
-            const SizedBox(width: 7),
-            Text(
-              label,
-              style: context.superTextTheme.body.copyWith(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: accent,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _searchField(BuildContext context) {
-    final t = context.superTheme;
-    final accent = (widget.accent ?? SuperThemeData.of(context).tokens.accent);
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 240, maxWidth: 380),
-      child: Container(
-        height: context.superTheme.spacing.controlHeight,
-        padding: EdgeInsets.symmetric(horizontal: _searchActive ? 13 : 14),
-        decoration: BoxDecoration(
-          color: t.inputBg,
-          borderRadius: BorderRadius.circular(
-            context.superTheme.spacing.radiusControl,
-          ),
-          border: Border.all(
-            color: _searchActive ? accent : t.borderStrong,
-            width: _searchActive ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.search, size: 15, color: t.fg3),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Focus(
-                onKeyEvent: (node, event) {
-                  if (event is KeyDownEvent &&
-                      event.logicalKey == LogicalKeyboardKey.escape) {
-                    _runQuery('');
-                    return KeyEventResult.handled;
-                  }
-                  return KeyEventResult.ignored;
-                },
-                child: TextField(
-                  controller: _searchCtl,
-                  focusNode: _searchFocus,
-                  onChanged: _c.setQuery,
-                  cursorColor: accent,
-                  style: context.superTextTheme.body.copyWith(fontSize: 13.5, color: t.fg1),
-                  decoration: InputDecoration(
-                    isCollapsed: true,
-                    border: InputBorder.none,
-                    hintText: widget.placeholder,
-                    hintStyle: context.superTextTheme.body.copyWith(
-                      fontSize: 13.5,
-                      color: t.fg4,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            if (_c.searching)
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: 6),
-                child: Text(
-                  '${_c.matchCount}',
-                  style: context.superTextTheme.mono.copyWith(fontSize: 11, color: t.fg3),
-                ),
-              ),
-            if (_c.query.isNotEmpty)
-              GestureDetector(
-                onTap: () => _runQuery(''),
-                child: Icon(Icons.close, size: 14, color: t.fg3),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _sampleChip(BuildContext context, String q) {
-    final t = context.superTheme;
-    final accent = (widget.accent ?? SuperThemeData.of(context).tokens.accent);
-    final on = _c.query == q;
-    return GestureDetector(
-      onTap: () => _runQuery(q),
-      child: Container(
-        height: 26,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: on
-              ? Color.alphaBlend(accent.withValues(alpha: 0.18), t.surface)
-              : t.inputBg,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: on ? accent : t.border),
-        ),
-        child: Text(
-          q,
-          style: context.superTextTheme.mono.copyWith(
-            fontSize: 11.5,
-            color: on ? accent : t.fg2,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _toolBtn(
-    BuildContext context, {
-    required String label,
-    required bool up,
-    required VoidCallback onTap,
-  }) {
-    final t = context.superTheme;
-    return _HoverButton(
-      onTap: onTap,
-      builder: (hover) => Container(
-        height: context.superTheme.spacing.controlHeight,
-        padding: const EdgeInsets.symmetric(horizontal: 13),
-        decoration: BoxDecoration(
-          color: hover ? t.hover : const Color(0x00000000),
-          borderRadius: BorderRadius.circular(
-            context.superTheme.spacing.radiusControl,
-          ),
-          border: Border.all(color: t.borderStrong),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Transform.rotate(
-              angle: up ? 3.14159 : 0,
-              child: Icon(Icons.keyboard_arrow_down, size: 16, color: t.fg2),
-            ),
-            const SizedBox(width: 7),
-            Text(
-              label,
-              style: context.superTextTheme.body.copyWith(fontSize: 13, color: t.fg1),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── the tree card ──
-  Widget _treeCard(BuildContext context) {
     final t = context.superTheme;
     final accent = (widget.accent ?? SuperThemeData.of(context).tokens.accent);
     final visible = _c.visible;
+
+    Widget body;
+    if (visible.isEmpty) {
+      body = Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+        child: _emptyState(context),
+      );
+      if (boundedViewport) body = Expanded(child: body);
+    } else {
+      body = _treeRows(
+        context,
+        visible,
+        accent,
+        shrinkWrap: !boundedViewport,
+      );
+      if (boundedViewport) body = Expanded(child: body);
+    }
+
     return Focus(
       focusNode: _treeFocus,
       onKeyEvent: _onKey,
@@ -509,38 +313,58 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           clipBehavior: Clip.antiAlias,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize:
+                boundedViewport ? MainAxisSize.max : MainAxisSize.min,
             children: [
               _cardHeader(context),
               _columnHeader(context),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-                child: visible.isEmpty
-                    ? _emptyState(context)
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          for (final n in visible)
-                            TreeRow<T>(
-                              key: ValueKey(n.code),
-                              node: n,
-                              depth: 0,
-                              controller: _c,
-                              accent: accent,
-                              leadingBuilder: widget.leadingBuilder,
-                              trailingBuilder: widget.trailingBuilder,
-                              showArabic: widget.showArabic,
-                              showLeafCount: widget.showLeafCount,
-                              onFocusRequest: _treeFocus.requestFocus,
-                            ),
-                        ],
-                      ),
-              ),
+              body,
               if (_c.selected != null) _selectionFooter(context),
               if (_c.selectable && _c.checkedCount > 0) _checkedFooter(context),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _treeRows(
+    BuildContext context,
+    List<TreeNode<T>> visible,
+    Color accent, {
+    required bool shrinkWrap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+      child: ListView(
+        reverse: widget.reverse,
+        controller: widget.scrollController,
+        primary: widget.primary,
+        physics: widget.physics,
+        shrinkWrap: shrinkWrap,
+        cacheExtent: widget.cacheExtent,
+        semanticChildCount: widget.semanticChildCount,
+        dragStartBehavior: widget.dragStartBehavior,
+        keyboardDismissBehavior: widget.keyboardDismissBehavior ??
+            ScrollViewKeyboardDismissBehavior.manual,
+        restorationId: widget.restorationId,
+        clipBehavior: widget.clipBehavior,
+        hitTestBehavior: widget.hitTestBehavior,
+        children: [
+          for (final n in visible)
+            TreeRow<T>(
+              key: ValueKey(n.code),
+              node: n,
+              depth: 0,
+              controller: _c,
+              accent: accent,
+              leadingBuilder: widget.leadingBuilder,
+              trailingBuilder: widget.trailingBuilder,
+              showArabic: widget.showArabic,
+              showLeafCount: widget.showLeafCount,
+              onFocusRequest: _treeFocus.requestFocus,
+            ),
+        ],
       ),
     );
   }
@@ -662,13 +486,12 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
 
   Widget _emptyState(BuildContext context) {
     final t = context.superTheme;
-    // Editable + empty (not searching): invite the first node.
-    if (widget.enableEditing && _c.isEditable && !_c.searching) {
+    if (!_c.searching) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 44, horizontal: 16),
         child: Column(
           children: [
-            Icon(Icons.account_tree_outlined, size: 26, color: t.fg4),
+            Icon(Icons.schema_outlined, size: 26, color: t.fg4),
             const SizedBox(height: 12),
             Text(
               'This tree is empty',
@@ -676,18 +499,6 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
                 fontWeight: FontWeight.w600,
                 color: t.fg2,
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Add a node to get started.',
-              style: context.superTextTheme.caption.copyWith(color: t.fg3),
-            ),
-            const SizedBox(height: 16),
-            _toolAction(
-              context,
-              icon: Icons.add,
-              label: 'Add node',
-              onTap: _c.addRoot,
             ),
           ],
         ),
@@ -822,28 +633,3 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
   }
 }
 
-/// A tiny hover-state wrapper used by toolbar buttons.
-class _HoverButton extends StatefulWidget {
-  const _HoverButton({required this.builder, required this.onTap});
-  final Widget Function(bool hover) builder;
-  final VoidCallback onTap;
-
-  @override
-  State<_HoverButton> createState() => _HoverButtonState();
-}
-
-class _HoverButtonState extends State<_HoverButton> {
-  bool _hover = false;
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: widget.builder(_hover),
-      ),
-    );
-  }
-}

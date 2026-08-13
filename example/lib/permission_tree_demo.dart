@@ -10,14 +10,22 @@
 
 import 'package:flutter/material.dart';
 import 'package:super_tree_field/super_tree.dart';
+import 'responsive_example_layout.dart';
 
 /// A permission's payload: an access [level] (scope pill) and a [danger] flag
 /// for destructive grants. Group (module) nodes carry only an [icon].
 class Permission {
+  /// Creates permission metadata.
   const Permission({this.level, this.danger = false, this.icon});
-  final String? level; // View · Write · Admin
+
+  /// Access level, such as `View`, `Write`, or `Admin`.
+  final String? level;
+
+  /// Whether granting this permission is destructive or high risk.
   final bool danger;
-  final IconData? icon; // module icon (group rows)
+
+  /// Optional icon used by module group rows.
+  final IconData? icon;
 }
 
 Color _levelColor(BuildContext context, Permission p) {
@@ -94,7 +102,9 @@ const _multiSeed = {
 };
 const _singleSeed = {'acc.view'};
 
+/// Demonstrates single and multi-selection with [SuperTree].
 class PermissionTreeDemo extends StatefulWidget {
+  /// Creates the permission-tree demonstration page.
   const PermissionTreeDemo({super.key});
 
   @override
@@ -102,6 +112,7 @@ class PermissionTreeDemo extends StatefulWidget {
 }
 
 class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
+  final SuperTreeControlsController _controls = SuperTreeControlsController();
   static Color _accent(BuildContext context) =>
       SuperMaterialThemeData.of(context).colorScheme.primary;
 
@@ -132,6 +143,7 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
 
   @override
   void dispose() {
+    _controls.dispose();
     for (final c in _controllers.values) {
       c.dispose();
     }
@@ -152,49 +164,59 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
         title: Text('Permission Settings',
             style: context.superTextTheme.heading.copyWith(color: t.fg1)),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 820),
-              child: Column(
+      body: ResponsiveExampleLayout(
+        maxWidth: 820,
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('ADMINISTRATION • ROLES & PERMISSIONS',
+                  style:
+                      context.superTextTheme.eyebrow.copyWith(color: _accent(context))),
+              SizedBox(height: context.superTheme.spacing.space2),
+              Text('Permission Settings صلاحيات',
+                  style: context.superTextTheme.h1.copyWith(color: t.fg1)),
+              SizedBox(height: context.superTheme.spacing.space6),
+              _ModeToggle(
+                mode: _mode,
+                onChanged: (m) => setState(() => _mode = m),
+              ),
+              SizedBox(height: context.superTheme.spacing.space6),
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('ADMINISTRATION • ROLES & PERMISSIONS',
-                      style:
-                          context.superTextTheme.eyebrow.copyWith(color: _accent(context))),
-                  SizedBox(height: context.superTheme.spacing.space2),
-                  Text('Permission Settings صلاحيات',
-                      style: context.superTextTheme.h1.copyWith(color: t.fg1)),
-                  SizedBox(height: context.superTheme.spacing.space6),
-                  _ModeToggle(
-                    mode: _mode,
-                    onChanged: (m) => setState(() => _mode = m),
-                  ),
-                  SizedBox(height: context.superTheme.spacing.space6),
-                  SuperTree<Permission>(
-                    key: ValueKey(_mode),
-                    controller: _controller,
-                    accent: _accent(context),
-                    title: 'Role: Senior Accountant',
-                    subtitle: multi
-                        ? 'Check the permissions granted to this role · a module checks all its actions'
-                        : 'Single selection · one default action only (radio-like)',
-                    titleIcon: Icons.shield_outlined,
-                    nameColumnLabel: 'Permission · الصلاحية',
-                    trailingColumnLabel: 'Scope',
-                    placeholder: 'Search permissions…   ( / )',
-                    samples: const ['View', 'Write', 'Admin', 'inventory'],
-                    unit: 'permissions',
-                    leadingBuilder: _leading,
-                    trailingBuilder: _trailing,
-                  ),
+                SuperTreeControls<Permission>(
+                                controller: _controller,
+                                controlsController: _controls,
+                                placeholder: 'Search permissions…   ( / )',
+                                samples: const ['View', 'Write', 'Admin', 'inventory'],
+                                accent: _accent(context),
+                              ),
+                SizedBox(height: context.superTheme.spacing.space4),
+                SuperTree<Permission>(
+                                                key: ValueKey(_mode),
+                                                controller: _controller,
+                                  onSearchRequested: _controls.requestSearchFocus,
+                                  onShortcutsRequested: () => showShortcutsHelp(context),
+                                                shrinkWrap: true,
+                                                primary: false,
+                                                physics: const NeverScrollableScrollPhysics(),
+                                                accent: _accent(context),
+                                                title: 'Role: Senior Accountant',
+                                                subtitle: multi
+                                                    ? 'Check the permissions granted to this role · a module checks all its actions'
+                                                    : 'Single selection · one default action only (radio-like)',
+                                                titleIcon: Icons.shield_outlined,
+                                                nameColumnLabel: 'Permission · الصلاحية',
+                                                trailingColumnLabel: 'Scope',
+                                                unit: 'permissions',
+                                                leadingBuilder: _leading,
+                                                trailingBuilder: _trailing,
+                                              ),
                 ],
               ),
-            ),
+            ],
           ),
-        ),
       ),
     );
   }
@@ -293,12 +315,15 @@ class _ModeToggle extends StatelessWidget {
       );
     }
 
-    return Row(
+    return Wrap(
+      alignment: WrapAlignment.start,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: context.superTheme.spacing.space3,
+      runSpacing: context.superTheme.spacing.space2,
       children: [
         Text('SELECTION MODE',
             style: context.superTextTheme.label
                 .copyWith(fontSize: 10, letterSpacing: 0.6, color: t.fg3)),
-        SizedBox(width: context.superTheme.spacing.space3),
         Container(
           height: context.superTheme.spacing.controlHeight,
           padding: const EdgeInsets.all(3),

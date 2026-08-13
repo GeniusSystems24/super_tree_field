@@ -16,8 +16,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:super_form_field/super_form_field.dart';
 
-import '../../../../core/core.dart';
+import '../../../../core/core.dart' hide FieldDensity;
 import '../../domain/entities/tree_node.dart';
 import '../../domain/usecases/tree_logic.dart';
 import '../controllers/super_tree_controller.dart';
@@ -26,13 +27,19 @@ import 'tree_context_menu.dart';
 
 /// Per-row context handed to the leading / trailing builders.
 class TreeRowInfo {
+  /// Creates row context for a tree-cell builder.
   const TreeRowInfo({
     required this.depth,
     required this.open,
     required this.hasChildren,
   });
+  /// Zero-based depth of the row in the hierarchy.
   final int depth;
+
+  /// Whether the row is currently expanded for rendering.
   final bool open;
+
+  /// Whether the node has at least one child.
   final bool hasChildren;
 }
 
@@ -40,12 +47,13 @@ class TreeRowInfo {
 typedef TreeSlotBuilder<T> =
     Widget Function(BuildContext context, TreeNode<T> node, TreeRowInfo info);
 
-/// Builds the optional trailing cell(s) for a node (balance, size, role).
+/// Builds optional trailing content for a node (metadata, status, actions).
 typedef TreeTrailingBuilder<T> =
     Widget? Function(BuildContext context, TreeNode<T> node, TreeRowInfo info);
 
 /// A single recursive tree row + (when open) its children.
 class TreeRow<T> extends StatefulWidget {
+  /// Creates a recursive row for [node].
   const TreeRow({
     super.key,
     required this.node,
@@ -59,13 +67,28 @@ class TreeRow<T> extends StatefulWidget {
     this.onFocusRequest,
   });
 
+  /// Node rendered by this row.
   final TreeNode<T> node;
+
+  /// Zero-based hierarchy depth used for indentation.
   final int depth;
+
+  /// Controller that provides row interaction state.
   final SuperTreeController<T> controller;
+
+  /// Accent color used by focus, selection, and editing affordances.
   final Color accent;
+
+  /// Builder for the node's leading cell.
   final TreeSlotBuilder<T> leadingBuilder;
+
+  /// Optional builder for the node's trailing cell.
   final TreeTrailingBuilder<T>? trailingBuilder;
+
+  /// Whether the node's Arabic label is shown when available.
   final bool showArabic;
+
+  /// Whether group rows display their descendant leaf count.
   final bool showLeafCount;
 
   /// Called on row tap (before activation) so the host can focus the tree body
@@ -130,6 +153,7 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
 
     final trailing = widget.trailingBuilder?.call(context, node, info);
     final dropInside = _dropPos == DropPosition.inside;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
 
     final bg = dropInside
         ? Color.alphaBlend(widget.accent.withValues(alpha: 0.14), t.surface)
@@ -160,8 +184,8 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
       padding: EdgeInsetsDirectional.only(
         start: indent,
         end: 12,
-        top: 9,
-        bottom: 9,
+        top: editing ? 5 : 9,
+        bottom: editing ? 5 : 9,
       ),
       decoration: BoxDecoration(
         color: bg,
@@ -189,7 +213,7 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
             width: 14,
             child: hasKids
                 ? AnimatedRotation(
-                    turns: open ? 0 : -0.25,
+                    turns: open ? 0 : (isRTL ? 0.25 : -0.25),
                     duration: SuperThemeData.of(context).tokens.durBase,
                     curve: SuperThemeData.of(context).tokens.curveStandard,
                     child: Icon(
@@ -429,28 +453,29 @@ class _RenameField extends StatefulWidget {
 }
 
 class _RenameFieldState extends State<_RenameField> {
-  late final TextEditingController _ctl =
-      TextEditingController(text: widget.initial)
-        ..selection = TextSelection(
-          baseOffset: 0,
-          extentOffset: widget.initial.length,
-        );
-  final FocusNode _focus = FocusNode();
+  late final SuperTextFieldController _ctl;
   bool _done = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _focus.requestFocus());
-    _focus.addListener(() {
-      if (!_focus.hasFocus) _commit();
+    _ctl = SuperTextFieldController(initialValue: widget.initial);
+    _ctl.text.selection = TextSelection(
+      baseOffset: 0,
+      extentOffset: widget.initial.length,
+    );
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _ctl.focusNode.requestFocus(),
+    );
+    _ctl.focusNode.addListener(() {
+      if (!_ctl.focusNode.hasFocus) _commit();
     });
   }
 
   void _commit() {
     if (_done) return;
     _done = true;
-    widget.onCommit(_ctl.text);
+    widget.onCommit(_ctl.value);
   }
 
   void _cancel() {
@@ -462,7 +487,6 @@ class _RenameFieldState extends State<_RenameField> {
   @override
   void dispose() {
     _ctl.dispose();
-    _focus.dispose();
     super.dispose();
   }
 
@@ -478,32 +502,16 @@ class _RenameFieldState extends State<_RenameField> {
         }
         return KeyEventResult.ignored;
       },
-      child: Container(
-        height: 26,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
-          color: t.inputBg,
-          borderRadius: BorderRadius.circular(
-            context.superTheme.spacing.radiusControl,
-          ),
-          border: Border.all(color: widget.accent, width: 1.5),
-        ),
-        alignment: Alignment.centerLeft,
-        child: TextField(
-          controller: _ctl,
-          focusNode: _focus,
-          cursorColor: widget.accent,
-          textInputAction: TextInputAction.done,
-          onSubmitted: (_) => _commit(),
-          style: context.superTextTheme.body.copyWith(
-            fontSize: 13,
-            height: 1.1,
-            color: t.fg1,
-          ),
-          decoration: const InputDecoration(
-            isCollapsed: true,
-            border: InputBorder.none,
-          ),
+      child: SuperTextFormField(
+        controller: _ctl,
+        density: FieldDensity.compact,
+        cursorColor: widget.accent,
+        textInputAction: TextInputAction.done,
+        onFieldSubmitted: (_) => _commit(),
+        style: context.superTextTheme.body.copyWith(
+          fontSize: 13,
+          height: 1.1,
+          color: t.fg1,
         ),
       ),
     );
@@ -612,6 +620,7 @@ class _MenuButton extends StatelessWidget {
 /// partial) when on. Owns its own tap so the row beneath does not activate.
 /// Also reused by [SuperTree]'s header "select all" control.
 class TreeCheckbox extends StatelessWidget {
+  /// Creates a tristate checkbox for [state].
   const TreeCheckbox({
     super.key,
     required this.state,
@@ -619,8 +628,13 @@ class TreeCheckbox extends StatelessWidget {
     required this.onTap,
   });
 
+  /// Current tristate selection value.
   final TreeCheckState state;
+
+  /// Accent color used for checked and partial states.
   final Color accent;
+
+  /// Called when the checkbox is tapped.
   final VoidCallback onTap;
 
   @override

@@ -1,5 +1,5 @@
 // ============================================================
-// features/super_tree_field/presentation/widgets/account_tree.dart
+// example/lib/account_tree.dart
 // ------------------------------------------------------------
 // The flagship instance of SuperTree: a five-level bilingual chart of accounts
 // with roll-up balances, a financial-summary KPI grid, a live A = L + E balance
@@ -9,21 +9,16 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
+import 'package:super_tree_field/super_tree.dart';
 
-import '../../../../core/core.dart';
-import '../../data/datasources/account_tree_data.dart';
-import '../../domain/entities/account_data.dart';
-import '../../domain/entities/tree_node.dart';
-import '../../domain/usecases/tree_logic.dart';
-import '../controllers/super_tree_controller.dart';
+import 'account_data.dart';
+import 'account_tree_data.dart';
 import 'kpi_card.dart';
 import 'nature_pill.dart';
-import 'super_tree.dart';
-import 'tree_row.dart';
-
 /// The interactive chart-of-accounts tree. Pass your own [roots] or use the
 /// built-in [AccountTreeData.tree] sample.
 class AccountTree extends StatefulWidget {
+  /// Creates an account tree using [roots] or [AccountTreeData.tree].
   const AccountTree({super.key, this.roots, this.onOpenAccount});
 
   /// The account hierarchy. Defaults to the bundled sample chart of accounts.
@@ -37,6 +32,7 @@ class AccountTree extends StatefulWidget {
 }
 
 class _AccountTreeState extends State<AccountTree> {
+  final SuperTreeControlsController _controls = SuperTreeControlsController();
   static const _samples = ['1111', 'Bank', 'البنك', 'Cash', 'Loan', '5512'];
 
   late List<TreeNode<AccountData>> _all;
@@ -115,6 +111,7 @@ class _AccountTreeState extends State<AccountTree> {
 
   @override
   void dispose() {
+    _controls.dispose();
     _controller.removeListener(_onControllerTick);
     _controller.dispose();
     super.dispose();
@@ -142,25 +139,43 @@ class _AccountTreeState extends State<AccountTree> {
     final income = _typeTotal(AccountType.income);
     final expense = _typeTotal(AccountType.expense);
 
-    return SuperTree<AccountData>(
-      controller: _controller,
-      accent: SuperMaterialThemeData.of(context).colorScheme.primary,
-      title: 'Chart of Accounts Hierarchy',
-      subtitle:
-          '5 levels · click or use ↑↓ ← → · Enter opens a leaf · right-click to edit',
-      nameColumnLabel: 'Account · الحساب',
-      trailingColumnLabel: 'Nature · Balance (SAR)',
-      placeholder: 'Search by code, English or Arabic name…   ( / )',
-      samples: _samples,
-      unit: 'accounts',
-      selectionLabel: 'Opened ledger for account',
-      enableEditing: true,
-      above: _kpiGrid(assets, liabilities, equity, income, expense),
-      toolbarExtra: _controller.isEditable
-          ? _editHint(context)
-          : _filterRow(assets, liabilities, equity),
-      leadingBuilder: _leading,
-      trailingBuilder: _trailing,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+      _kpiGrid(assets, liabilities, equity, income, expense),
+      SizedBox(height: context.superTheme.spacing.space4),
+      SuperTreeControls<AccountData>(
+            controller: _controller,
+            controlsController: _controls,
+            placeholder: 'Search by code, English or Arabic name…   ( / )',
+            samples: _samples,
+            accent: SuperMaterialThemeData.of(context).colorScheme.primary,
+            enableEditing: true,
+            extra: _controller.isEditable
+              ? _editHint(context)
+              : _filterRow(assets, liabilities, equity),
+          ),
+      SizedBox(height: context.superTheme.spacing.space4),
+      SuperTree<AccountData>(
+                  controller: _controller,
+              onSearchRequested: _controls.requestSearchFocus,
+              onShortcutsRequested: () => showShortcutsHelp(context),
+                  accent: SuperMaterialThemeData.of(context).colorScheme.primary,
+                  shrinkWrap: true,
+                  primary: false,
+                  physics: const NeverScrollableScrollPhysics(),
+                  title: 'Chart of Accounts Hierarchy',
+                  subtitle:
+                      '5 levels · click or use ↑↓ ← → · Enter opens a leaf · right-click to edit',
+                  nameColumnLabel: 'Account · الحساب',
+                  trailingColumnLabel: 'Nature · Balance (SAR)',
+                  unit: 'accounts',
+                  selectionLabel: 'Opened ledger for account',
+                  leadingBuilder: _leading,
+                  trailingBuilder: _trailing,
+                ),
+      ],
     );
   }
 
@@ -174,7 +189,10 @@ class _AccountTreeState extends State<AccountTree> {
         Expanded(
           child: Text(
             'Drag the handle to move · right-click (or ⋮) to rename, add or delete · type filter is paused while editing',
-            style: context.superTextTheme.caption.copyWith(fontSize: 12, color: t.fg3),
+            style: context.superTextTheme.caption.copyWith(
+              fontSize: 12,
+              color: t.fg3,
+            ),
           ),
         ),
       ],
@@ -257,16 +275,13 @@ class _AccountTreeState extends State<AccountTree> {
           onTap: () => _applyFilter(type),
         ),
     ];
-    return Row(
+
+    return Wrap(
+      spacing: context.superTheme.spacing.space2,
+      runSpacing: context.superTheme.spacing.space2,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Expanded(
-          child: Wrap(
-            spacing: context.superTheme.spacing.space2,
-            runSpacing: context.superTheme.spacing.space2,
-            children: chips,
-          ),
-        ),
-        SizedBox(width: context.superTheme.spacing.space3),
+        ...chips,
         _BalanceBadge(balanced: balanced),
       ],
     );
@@ -290,7 +305,12 @@ class _AccountTreeState extends State<AccountTree> {
             color: color,
             shape: BoxShape.circle,
             boxShadow: info.depth == 0
-                ? [BoxShadow(color: color.withValues(alpha: 0.13), spreadRadius: 3)]
+                ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.13),
+                      spreadRadius: 3,
+                    ),
+                  ]
                 : null,
           ),
         ),
@@ -322,7 +342,10 @@ class _AccountTreeState extends State<AccountTree> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        NaturePill(type.nature),
+        NaturePill(
+          type.nature.code,
+          debit: type.nature == AccountNature.debit,
+        ),
         const SizedBox(width: 12),
         SizedBox(
           width: 150,
@@ -352,7 +375,9 @@ class _AccountTreeState extends State<AccountTree> {
                     child: FractionallySizedBox(
                       widthFactor: (share).clamp(0.015, 1.0),
                       child: Container(
-                        color: type.color.withValues(alpha: info.depth == 0 ? 0.9 : 0.55),
+                        color: type.color.withValues(
+                          alpha: info.depth == 0 ? 0.9 : 0.55,
+                        ),
                       ),
                     ),
                   ),

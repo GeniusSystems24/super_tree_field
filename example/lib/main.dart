@@ -4,22 +4,34 @@
 // Gallery launcher for super_tree_field. Uses SuperMaterialThemeData with the
 // explicit SuperTextTheme required by super_core 3.3.0, and exposes a global
 // Light/Dark + LTR/RTL
-// toggle, and lists the three demos that share ONE engine:
-//   • Account Tree   — the flagship: SuperTree<AccountData> (KPIs · balance · DR/CR)
-//   • File Explorer  — SuperTree<FileMeta>
-//   • Org Chart      — SuperTree<Person>
+// toggle, and lists demos that share ONE engine:
+//   • Account Tree          — flagship SuperTree<AccountData> composition
+//   • File Explorer         — SuperTree<FileMeta>
+//   • Org Chart             — SuperTree<Person>
+//   • Permission Settings   — SuperTree<Permission> selection
+//   • Product Tree          — SuperTree<ProductData> catalog hierarchy
+//   • Scroll Configuration  — ScrollController + ScrollView pass-through API
 // ============================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:super_form_field/localization/generated/l10n.dart';
 import 'package:super_tree_field/super_tree.dart';
 
 import 'file_tree_demo.dart';
 import 'org_tree_demo.dart';
 import 'permission_tree_demo.dart';
+import 'product_tree_demo.dart';
+import 'scroll_tree_demo.dart';
+import 'account/super_tree_demo.dart';
+import 'responsive_example_layout.dart';
 
+/// Runs the Super Tree example gallery.
 void main() => runApp(const ExampleApp());
 
+/// Root widget for the Super Tree example gallery.
 class ExampleApp extends StatefulWidget {
+  /// Creates the example gallery application.
   const ExampleApp({super.key});
 
   @override
@@ -31,18 +43,21 @@ class _ExampleAppState extends State<ExampleApp> {
   TextDirection _dir = TextDirection.ltr;
 
   void _toggleTheme() => setState(
-      () => _mode = _mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark);
-  void _toggleDir() => setState(() =>
-      _dir = _dir == TextDirection.ltr ? TextDirection.rtl : TextDirection.ltr);
+    () => _mode = _mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark,
+  );
+  void _toggleDir() => setState(
+    () => _dir = _dir == TextDirection.ltr
+        ? TextDirection.rtl
+        : TextDirection.ltr,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = SuperTextTheme(
-      isArabic: _dir == TextDirection.rtl,
-    );
+    final textTheme = SuperTextTheme(isArabic: _dir == TextDirection.rtl);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      restorationScopeId: 'super-tree-example',
       title: 'Super Tree',
       themeMode: _mode,
       theme: SuperMaterialThemeData.light(
@@ -53,6 +68,13 @@ class _ExampleAppState extends State<ExampleApp> {
         textTheme: textTheme,
         primaryTextTheme: textTheme,
       ),
+      supportedLocales: const [Locale('en'), Locale('ar')],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        SuperFormTranslation.delegate,
+      ],
       builder: (context, child) =>
           Directionality(textDirection: _dir, child: child!),
       home: _Launcher(
@@ -88,22 +110,41 @@ class _Launcher extends StatelessWidget {
 
   static final List<_Demo> _demos = [
     _Demo(
-        'Account Tree',
-        'Chart of accounts · KPIs · A = L + E · DR/CR · roll-up balances',
-        Icons.account_tree_outlined,
-        (_) => const AccountTreeDemo()),
+      'Account Tree',
+      'Chart of accounts · KPIs · A = L + E · DR/CR · roll-up balances',
+      Icons.account_tree_outlined,
+      (_) => const AccountTreeDemo(),
+    ),
     _Demo(
-        'File Explorer',
-        'SuperTree<FileMeta> · folders + files · size / modified',
-        Icons.folder_open_outlined,
-        (_) => const FileTreeDemo()),
-    _Demo('Org Chart', 'SuperTree<Person> · headcount roll-up · role + dept',
-        Icons.people_outline, (_) => const OrgTreeDemo()),
+      'File Explorer',
+      'SuperTree<FileMeta> · folders + files · size / modified',
+      Icons.folder_open_outlined,
+      (_) => const FileTreeDemo(),
+    ),
     _Demo(
-        'Permission Settings',
-        'SuperTree<Permission> · single + multi checkbox selection',
-        Icons.shield_outlined,
-        (_) => const PermissionTreeDemo()),
+      'Org Chart',
+      'SuperTree<Person> · headcount roll-up · role + dept',
+      Icons.people_outline,
+      (_) => const OrgTreeDemo(),
+    ),
+    _Demo(
+      'Permission Settings',
+      'SuperTree<Permission> · single + multi checkbox selection',
+      Icons.shield_outlined,
+      (_) => const PermissionTreeDemo(),
+    ),
+    _Demo(
+      'Product Tree',
+      'SuperTree<ProductData> · categories · SKU · price · stock',
+      Icons.inventory_2_outlined,
+      (_) => const ProductTreeDemo(),
+    ),
+    _Demo(
+      'Scroll Configuration',
+      'ScrollController · physics · restoration · bounded viewport',
+      Icons.swap_vert_circle_outlined,
+      (_) => const ScrollTreeDemo(),
+    ),
   ];
 
   @override
@@ -111,54 +152,47 @@ class _Launcher extends StatelessWidget {
     final t = context.superTheme;
     return Scaffold(
       backgroundColor: t.bg,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(context.superTheme.spacing.space10),
-            child: ConstrainedBox(
-              constraints:
-                  BoxConstraints(maxWidth: context.superTheme.sizing.contentColumn),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('SUPER TREE \u2022 GALLERY',
-                      style: context.superTextTheme.eyebrow.copyWith(
-                          color: SuperMaterialThemeData.of(context)
-                              .colorScheme
-                              .primary)),
-                  SizedBox(height: context.superTheme.spacing.space2),
-                  Text('Component Demos مكتبة المكونات',
-                      style: context.superTextTheme.h1.copyWith(color: t.fg1)),
-                  SizedBox(height: context.superTheme.spacing.space8),
-                  for (final d in _demos) ...[
-                    _DemoCard(demo: d),
-                    SizedBox(height: context.superTheme.spacing.space3),
-                  ],
-                  SizedBox(height: context.superTheme.spacing.space6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SuperButton(
-                        label: mode == ThemeMode.dark
-                            ? 'Light Theme'
-                            : 'Dark Theme',
-                        variant: SuperButtonVariant.secondary,
-                        onPressed: onToggleTheme,
-                      ),
-                      SizedBox(width: context.superTheme.spacing.space3),
-                      SuperButton(
-                        label: dir == TextDirection.ltr
-                            ? 'العربية (RTL)'
-                            : 'English (LTR)',
-                        variant: SuperButtonVariant.secondary,
-                        onPressed: onToggleDir,
-                      ),
-                    ],
-                  ),
-                ],
+      body: ResponsiveExampleLayout(
+        maxWidth: context.superTheme.sizing.contentColumn,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'SUPER TREE \u2022 GALLERY',
+              style: context.superTextTheme.eyebrow.copyWith(
+                color: SuperMaterialThemeData.of(context).colorScheme.primary,
               ),
             ),
-          ),
+            SizedBox(height: context.superTheme.spacing.space2),
+            Text(
+              'Component Demos مكتبة المكونات',
+              style: context.superTextTheme.h1.copyWith(color: t.fg1),
+            ),
+            SizedBox(height: context.superTheme.spacing.space8),
+            for (final d in _demos) ...[
+              _DemoCard(demo: d),
+              SizedBox(height: context.superTheme.spacing.space3),
+            ],
+            SizedBox(height: context.superTheme.spacing.space6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SuperButton(
+                  label: mode == ThemeMode.dark ? 'Light Theme' : 'Dark Theme',
+                  variant: SuperButtonVariant.secondary,
+                  onPressed: onToggleTheme,
+                ),
+                SizedBox(width: context.superTheme.spacing.space3),
+                SuperButton(
+                  label: dir == TextDirection.ltr
+                      ? 'العربية (RTL)'
+                      : 'English (LTR)',
+                  variant: SuperButtonVariant.secondary,
+                  onPressed: onToggleDir,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -175,14 +209,19 @@ class _DemoCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(context.superTheme.spacing.radiusCard),
-        onTap: () => Navigator.of(context)
-            .push(MaterialPageRoute<void>(builder: demo.builder)),
+        borderRadius: BorderRadius.circular(
+          context.superTheme.spacing.radiusCard,
+        ),
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: demo.builder)),
         child: Container(
           padding: EdgeInsets.all(context.superTheme.spacing.space4),
           decoration: BoxDecoration(
             color: t.surface,
-            borderRadius: BorderRadius.circular(context.superTheme.spacing.radiusCard),
+            borderRadius: BorderRadius.circular(
+              context.superTheme.spacing.radiusCard,
+            ),
             border: Border.all(color: t.border),
             boxShadow: t.cardShadow,
           ),
@@ -194,29 +233,39 @@ class _DemoCard extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: Color.alphaBlend(
-                      SuperMaterialThemeData.of(context)
-                          .colorScheme
-                          .primary
-                          .withValues(alpha: 0.14),
-                      t.surface),
-                  borderRadius:
-                      BorderRadius.circular(context.superTheme.spacing.radiusControl),
+                    SuperMaterialThemeData.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.14),
+                    t.surface,
+                  ),
+                  borderRadius: BorderRadius.circular(
+                    context.superTheme.spacing.radiusControl,
+                  ),
                 ),
-                child: Icon(demo.icon,
-                    size: 22,
-                    color:
-                        SuperMaterialThemeData.of(context).colorScheme.primary),
+                child: Icon(
+                  demo.icon,
+                  size: 22,
+                  color: SuperMaterialThemeData.of(context).colorScheme.primary,
+                ),
               ),
               SizedBox(width: context.superTheme.spacing.space4),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(demo.title,
-                        style: context.superTextTheme.heading.copyWith(color: t.fg1)),
+                    Text(
+                      demo.title,
+                      style: context.superTextTheme.heading.copyWith(
+                        color: t.fg1,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text(demo.subtitle,
-                        style: context.superTextTheme.caption.copyWith(color: t.fg3)),
+                    Text(
+                      demo.subtitle,
+                      style: context.superTextTheme.caption.copyWith(
+                        color: t.fg3,
+                      ),
+                    ),
                   ],
                 ),
               ),

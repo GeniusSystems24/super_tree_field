@@ -9,12 +9,20 @@
 
 import 'package:flutter/material.dart';
 import 'package:super_tree_field/super_tree.dart';
+import 'responsive_example_layout.dart';
 
 /// A file's metadata payload.
 class FileMeta {
+  /// Creates file metadata for [kind].
   const FileMeta(this.kind, {this.size, this.modified});
-  final String kind; // dir · code · img · doc
+
+  /// File kind, such as `dir`, `code`, `img`, or `doc`.
+  final String kind;
+
+  /// Optional formatted file size.
   final String? size;
+
+  /// Optional human-readable modification time.
   final String? modified;
 }
 
@@ -62,7 +70,9 @@ final List<TreeNode<FileMeta>> _fileTree = [
   _file('readme', 'README.md', 'doc', '18 KB', '1 h'),
 ];
 
+/// Demonstrates [SuperTree] as a file explorer.
 class FileTreeDemo extends StatefulWidget {
+  /// Creates the file-tree demonstration page.
   const FileTreeDemo({super.key});
 
   @override
@@ -70,6 +80,7 @@ class FileTreeDemo extends StatefulWidget {
 }
 
 class _FileTreeDemoState extends State<FileTreeDemo> {
+  final SuperTreeControlsController _controls = SuperTreeControlsController();
   late final SuperTreeController<FileMeta> _controller =
       SuperTreeController<FileMeta>(
     roots: _fileTree,
@@ -81,6 +92,7 @@ class _FileTreeDemoState extends State<FileTreeDemo> {
 
   @override
   void dispose() {
+    _controls.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -113,54 +125,64 @@ class _FileTreeDemoState extends State<FileTreeDemo> {
         title: Text('File Explorer',
             style: context.superTextTheme.heading.copyWith(color: t.fg1)),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 760),
-              child: SuperTree<FileMeta>(
-                controller: _controller,
-                accent: cs.primary,
-                title: 'Project files',
-                subtitle:
-                    'TreeNode<FileMeta> · folders roll up a child count, files show size + modified',
-                titleIcon: Icons.folder_open,
-                nameColumnLabel: 'Name',
-                trailingColumnLabel: 'Size · Modified',
-                placeholder: 'Search files…   ( / )',
-                samples: const ['tree', '.dart', 'docs', 'README'],
-                unit: 'files',
-                showArabic: false,
-                enableEditing: true,
-                leadingBuilder: (context, node, info) {
-                  final (icon, color) = _icon(context, node.value!, info.open);
-                  return Icon(icon, size: 15, color: color);
-                },
-                trailingBuilder: (context, node, info) {
-                  final m = node.value!;
-                  if (m.kind == 'dir') return null;
-                  final t = context.superTheme;
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(m.size ?? '',
-                          style: context.superTextTheme.mono
-                              .copyWith(fontSize: 11.5, color: t.fg2)),
-                      const SizedBox(width: 12),
-                      SizedBox(
-                        width: 46,
-                        child: Text(m.modified ?? '',
-                            textAlign: TextAlign.end,
-                            style: context.superTextTheme.caption
-                                .copyWith(fontSize: 11, color: t.fg4)),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ),
+      body: ResponsiveExampleLayout(
+        maxWidth: 760,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+          SuperTreeControls<FileMeta>(
+                    controller: _controller,
+                    controlsController: _controls,
+                    placeholder: 'Search files…   ( / )',
+                    samples: const ['tree', '.dart', 'docs', 'README'],
+                    accent: cs.primary,
+                    enableEditing: true,
+                  ),
+          SizedBox(height: context.superTheme.spacing.space4),
+          SuperTree<FileMeta>(
+                                controller: _controller,
+                      onSearchRequested: _controls.requestSearchFocus,
+                      onShortcutsRequested: () => showShortcutsHelp(context),
+                                shrinkWrap: true,
+                                primary: false,
+                                physics: const NeverScrollableScrollPhysics(),
+                                accent: cs.primary,
+                                title: 'Project files',
+                                subtitle:
+                                    'TreeNode<FileMeta> · folders roll up a child count, files show size + modified',
+                                titleIcon: Icons.folder_open,
+                                nameColumnLabel: 'Name',
+                                trailingColumnLabel: 'Size · Modified',
+                                unit: 'files',
+                                showArabic: false,
+                                leadingBuilder: (context, node, info) {
+                                  final (icon, color) = _icon(context, node.value!, info.open);
+                                  return Icon(icon, size: 15, color: color);
+                                },
+                                trailingBuilder: (context, node, info) {
+                                  final m = node.value!;
+                                  if (m.kind == 'dir') return null;
+                                  final t = context.superTheme;
+                                  return Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(m.size ?? '',
+                                          style: context.superTextTheme.mono
+                                              .copyWith(fontSize: 11.5, color: t.fg2)),
+                                      const SizedBox(width: 12),
+                                      SizedBox(
+                                        width: 46,
+                                        child: Text(m.modified ?? '',
+                                            textAlign: TextAlign.end,
+                                            style: context.superTextTheme.caption
+                                                .copyWith(fontSize: 11, color: t.fg4)),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+          ],
         ),
       ),
     );

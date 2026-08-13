@@ -21,15 +21,21 @@ import 'package:flutter/foundation.dart';
 import '../../domain/entities/tree_node.dart';
 import '../../domain/usecases/tree_logic.dart';
 
-/// Interaction mode for a [SuperTree].
+/// Interaction mode for a `SuperTree`.
 ///
 /// * [readable]  — navigate, search, expand/collapse, open leaves, right-click
 ///                 context menu. The tree is immutable.
 /// * [editable]  — everything above plus inline rename, add child / sibling,
 ///                 delete subtree and drag-and-drop reordering.
-enum SuperTreeMode { readable, editable }
+enum SuperTreeMode {
+  /// Enables navigation, search, expansion, and leaf activation only.
+  readable,
 
-/// How checkbox selection behaves in a [SuperTree].
+  /// Enables structural editing in addition to readable interactions.
+  editable,
+}
+
+/// How checkbox selection behaves in a `SuperTree`.
 ///
 /// * [none]   — no checkboxes; selection is disabled (the default).
 /// * [single] — at most one checkbox is on at a time (radio-like behaviour,
@@ -37,12 +43,40 @@ enum SuperTreeMode { readable, editable }
 /// * [multi]  — many checkboxes; checking a group cascades to every descendant
 ///              leaf, and each group row shows a tristate ([TreeCheckState])
 ///              derived from its leaves.
-enum SuperTreeSelectionMode { none, single, multi }
+enum SuperTreeSelectionMode {
+  /// Disables checkbox selection.
+  none,
+
+  /// Allows at most one checked node at a time.
+  single,
+
+  /// Allows multiple checked leaves with tristate group aggregation.
+  multi,
+}
 
 /// The tristate of a node's checkbox under [SuperTreeSelectionMode.multi].
-enum TreeCheckState { unchecked, partial, checked }
+enum TreeCheckState {
+  /// No descendant leaf is selected.
+  unchecked,
 
+  /// Some, but not all, descendant leaves are selected.
+  partial,
+
+  /// All descendant leaves are selected.
+  checked,
+}
+
+/// Controls hierarchy state and interactions for a `SuperTree`.
+///
+/// The controller owns expansion, search, keyboard focus, leaf activation,
+/// checkbox selection, and optional structural editing. It contains no widget
+/// code, so the same controller can drive different `SuperTree` presentations.
 class SuperTreeController<T> extends ChangeNotifier {
+  /// Creates a controller for [roots].
+  ///
+  /// [searchText] supplies searchable text for each node. [defaultExpandDepth]
+  /// controls initial group expansion, while [selectionMode] configures optional
+  /// checkbox selection.
   SuperTreeController({
     required List<TreeNode<T>> roots,
     required this.searchText,
@@ -70,7 +104,7 @@ class SuperTreeController<T> extends ChangeNotifier {
   final SearchText<T> searchText;
 
   /// Called when a leaf is opened (Enter / click / tap). Selection is tracked
-  /// regardless; this is the host's hook to open a ledger / file / profile.
+  /// regardless; this is the host's hook to open the node's detail view.
   final void Function(TreeNode<T> node)? onOpenLeaf;
 
   /// Called after every structural edit (rename / add / delete / move) with the
@@ -101,17 +135,23 @@ class SuperTreeController<T> extends ChangeNotifier {
   Set<String> _checked;
 
   // ── reads ──
+  /// Current root nodes owned by the controller.
   List<TreeNode<T>> get roots => _roots;
+  /// Current search query.
   String get query => _query;
+  /// Code of the node targeted by keyboard navigation, if any.
   String? get focusId => _focusId;
+  /// Code of the most recently opened leaf, if any.
   String? get selected => _selected;
 
   /// The current interaction mode.
   SuperTreeMode get mode => _mode;
+  /// Whether [mode] is [SuperTreeMode.editable].
   bool get isEditable => _mode == SuperTreeMode.editable;
 
   /// The node currently being inline-renamed, or null.
   String? get editingId => _editingId;
+  /// Whether the node identified by [code] is being renamed inline.
   bool isEditing(String code) => _editingId == code;
 
   /// True while a search query is narrowing the tree (forces every branch open).
@@ -149,6 +189,7 @@ class SuperTreeController<T> extends ChangeNotifier {
   }
 
   // ── mode ──
+  /// Changes the interaction [mode].
   void setMode(SuperTreeMode mode) {
     if (_mode == mode) return;
     _mode = mode;
@@ -156,6 +197,7 @@ class SuperTreeController<T> extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Toggles between readable and editable interaction modes.
   void toggleMode() => setMode(
     _mode == SuperTreeMode.editable
         ? SuperTreeMode.readable
@@ -163,6 +205,7 @@ class SuperTreeController<T> extends ChangeNotifier {
   );
 
   // ── expansion ──
+  /// Toggles the persisted expansion state of [code].
   void toggle(String code) {
     if (_expanded.contains(code)) {
       _expanded.remove(code);
@@ -172,11 +215,13 @@ class SuperTreeController<T> extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Expands every group in the current tree.
   void expandAll() {
     _expanded = TreeLogic.groupCodes(_roots).toSet();
     notifyListeners();
   }
 
+  /// Collapses every group in the current tree.
   void collapseAll() {
     _expanded = <String>{};
     notifyListeners();
@@ -192,21 +237,25 @@ class SuperTreeController<T> extends ChangeNotifier {
   }
 
   // ── search ──
+  /// Replaces the active search query with [q].
   void setQuery(String q) {
     if (_query == q) return;
     _query = q;
     notifyListeners();
   }
 
+  /// Clears the active search query.
   void clearQuery() => setQuery('');
 
   // ── focus / selection ──
+  /// Moves the keyboard focus cursor to [code], or clears it when null.
   void setFocus(String? code) {
     if (_focusId == code) return;
     _focusId = code;
     notifyListeners();
   }
 
+  /// Marks [node] as opened and invokes [onOpenLeaf].
   void openLeaf(TreeNode<T> node) {
     _selected = node.code;
     _focusId = node.code;
@@ -214,6 +263,7 @@ class SuperTreeController<T> extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Clears the most recently opened leaf selection.
   void clearSelection() {
     if (_selected == null) return;
     _selected = null;
@@ -363,6 +413,7 @@ class SuperTreeController<T> extends ChangeNotifier {
     return i >= 0 ? flat[i] : null;
   }
 
+  /// Moves keyboard focus to the next visible node.
   void moveDown() {
     final flat = _flat;
     if (flat.isEmpty) return;
@@ -371,6 +422,7 @@ class SuperTreeController<T> extends ChangeNotifier {
     setFocus(flat[next].code);
   }
 
+  /// Moves keyboard focus to the previous visible node.
   void moveUp() {
     final flat = _flat;
     if (flat.isEmpty) return;
@@ -379,11 +431,13 @@ class SuperTreeController<T> extends ChangeNotifier {
     setFocus(flat[next].code);
   }
 
+  /// Moves keyboard focus to the first visible node.
   void jumpFirst() {
     final flat = _flat;
     if (flat.isNotEmpty) setFocus(flat.first.code);
   }
 
+  /// Moves keyboard focus to the last visible node.
   void jumpLast() {
     final flat = _flat;
     if (flat.isNotEmpty) setFocus(flat.last.code);
@@ -442,6 +496,7 @@ class SuperTreeController<T> extends ChangeNotifier {
   }
 
   // — inline rename —
+  /// Starts inline renaming for [code] when editing is enabled.
   void beginRename(String code) {
     if (!isEditable) return;
     _editingId = code;
@@ -449,6 +504,7 @@ class SuperTreeController<T> extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Cancels the active inline rename, if any.
   void cancelRename() {
     if (_editingId == null) return;
     _editingId = null;

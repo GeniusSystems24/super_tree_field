@@ -12,12 +12,21 @@ import '../entities/tree_node.dart';
 /// Where a dragged node should land relative to a target during a move /
 /// insert. [before] / [after] make it a sibling; [inside] makes it the last
 /// child of the target group.
-enum DropPosition { before, inside, after }
+enum DropPosition {
+  /// Places the dragged node immediately before the target node.
+  before,
+
+  /// Places the dragged node as the last child of the target node.
+  inside,
+
+  /// Places the dragged node immediately after the target node.
+  after,
+}
 
 /// Derives the searchable haystack for a node (e.g. `'${n.code} ${n.name}'`).
 typedef SearchText<T> = String Function(TreeNode<T> node);
 
-/// Reads a leaf's numeric metric for a [rollup] (e.g. an account balance).
+/// Reads a leaf's numeric metric for [TreeLogic.rollup].
 typedef LeafValue<T> = double Function(TreeNode<T> node);
 
 /// Stateless tree algorithms. Never instantiated.

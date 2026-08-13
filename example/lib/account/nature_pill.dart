@@ -1,26 +1,29 @@
 // ============================================================
-// features/super_tree_field/presentation/widgets/nature_pill.dart
+// example/lib/nature_pill.dart
 // ------------------------------------------------------------
 // The DR / CR debit-credit pill — blue for debit, orange for credit — shown in
-// the account tree's "Nature" column. Mirrors the React `<NaturePill>` atom.
+// the chart-of-accounts example's "Nature" column.
 // ============================================================
 
 import 'package:flutter/widgets.dart';
 
-import '../../../../core/core.dart';
-import '../../domain/entities/account_data.dart';
+import 'package:super_core/super_core.dart';
 
-/// A small DR / CR pill colored by [nature].
+/// A small DR / CR indicator used by the chart-of-accounts example.
 class NaturePill extends StatelessWidget {
-  const NaturePill(this.nature, {super.key});
+  /// Creates an indicator with [code] and debit/credit color semantics.
+  const NaturePill(this.code, {super.key, required this.debit});
 
-  final AccountNature nature;
+  /// Short label rendered inside the pill, such as `DR` or `CR`.
+  final String code;
+
+  /// Whether to use the debit color; false uses the credit color.
+  final bool debit;
 
   @override
   Widget build(BuildContext context) {
     final t = context.superTheme;
-    final dr = nature == AccountNature.debit;
-    final c = dr
+    final c = debit
         ? SuperMaterialThemeData.of(context).colorScheme.primary
         : SuperThemeData.of(context).tokens.warning;
     return Container(
@@ -37,7 +40,7 @@ class NaturePill extends StatelessWidget {
         ),
       ),
       child: Text(
-        nature.code,
+        code,
         style: context.superTextTheme.mono.copyWith(
           fontSize: 10,
           height: 1,

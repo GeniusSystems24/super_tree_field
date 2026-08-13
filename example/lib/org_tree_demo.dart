@@ -9,12 +9,20 @@
 
 import 'package:flutter/material.dart';
 import 'package:super_tree_field/super_tree.dart';
+import 'responsive_example_layout.dart';
 
 /// A person's payload.
 class Person {
+  /// Creates an organization-tree person payload.
   const Person(this.role, this.dept, this.initials);
+
+  /// Person's job role.
   final String role;
+
+  /// Department used for grouping and visual treatment.
   final String dept;
+
+  /// Initials displayed by the leading avatar.
   final String initials;
 }
 
@@ -56,7 +64,9 @@ final List<TreeNode<Person>> _orgTree = [
   ]),
 ];
 
+/// Demonstrates [SuperTree] as an organization chart.
 class OrgTreeDemo extends StatefulWidget {
+  /// Creates the organization-tree demonstration page.
   const OrgTreeDemo({super.key});
 
   @override
@@ -64,6 +74,7 @@ class OrgTreeDemo extends StatefulWidget {
 }
 
 class _OrgTreeDemoState extends State<OrgTreeDemo> {
+  final SuperTreeControlsController _controls = SuperTreeControlsController();
   static const _accent = Color(0xFFA855F7);
 
   late final SuperTreeController<Person> _controller =
@@ -80,6 +91,7 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
 
   @override
   void dispose() {
+    _controls.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -97,76 +109,86 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
         title:
             Text('Org Chart', style: context.superTextTheme.heading.copyWith(color: t.fg1)),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 760),
-              child: SuperTree<Person>(
-                controller: _controller,
-                accent: _accent,
-                title: 'Org chart',
-                subtitle:
-                    'TreeNode<Person> · managers roll up a headcount, everyone shows role + dept',
-                titleIcon: Icons.people_outline,
-                nameColumnLabel: 'Name',
-                trailingColumnLabel: 'Role · Dept',
-                placeholder: 'Search people…   ( / )',
-                samples: const ['Lead', 'Eng', 'Sara', 'Finance'],
-                unit: 'people',
-                showArabic: false,
-                enableEditing: true,
-                leadingBuilder: (context, node, info) {
-                  final p = node.value!;
-                  final c = _deptColor(context)[p.dept] ?? context.superTheme.fg3;
-                  return Container(
-                    width: 24,
-                    height: 24,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: c.withValues(alpha: 0.16),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: c.withValues(alpha: 0.35)),
-                    ),
-                    child: Text(p.initials,
-                        style: context.superTextTheme.mono.copyWith(
-                            fontSize: 10,
-                            height: 1,
-                            fontWeight: FontWeight.w700,
-                            color: c)),
-                  );
-                },
-                trailingBuilder: (context, node, info) {
-                  final p = node.value!;
-                  final t = context.superTheme;
-                  final c = _deptColor(context)[p.dept] ?? t.fg3;
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(p.role,
-                          style: context.superTextTheme.body
-                              .copyWith(fontSize: 12, color: t.fg2)),
-                      const SizedBox(width: 10),
-                      Container(
-                        height: 19,
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: c.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: c.withValues(alpha: 0.35)),
-                        ),
-                        child: Text(p.dept,
-                            style: context.superTextTheme.pill
-                                .copyWith(fontSize: 10, color: c)),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ),
+      body: ResponsiveExampleLayout(
+        maxWidth: 760,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+          SuperTreeControls<Person>(
+                    controller: _controller,
+                    controlsController: _controls,
+                    placeholder: 'Search people…   ( / )',
+                    samples: const ['Lead', 'Eng', 'Sara', 'Finance'],
+                    accent: _accent,
+                    enableEditing: true,
+                  ),
+          SizedBox(height: context.superTheme.spacing.space4),
+          SuperTree<Person>(
+                                controller: _controller,
+                      onSearchRequested: _controls.requestSearchFocus,
+                      onShortcutsRequested: () => showShortcutsHelp(context),
+                                shrinkWrap: true,
+                                primary: false,
+                                physics: const NeverScrollableScrollPhysics(),
+                                accent: _accent,
+                                title: 'Org chart',
+                                subtitle:
+                                    'TreeNode<Person> · managers roll up a headcount, everyone shows role + dept',
+                                titleIcon: Icons.people_outline,
+                                nameColumnLabel: 'Name',
+                                trailingColumnLabel: 'Role · Dept',
+                                unit: 'people',
+                                showArabic: false,
+                                leadingBuilder: (context, node, info) {
+                                  final p = node.value!;
+                                  final c = _deptColor(context)[p.dept] ?? context.superTheme.fg3;
+                                  return Container(
+                                    width: 24,
+                                    height: 24,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: c.withValues(alpha: 0.16),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: c.withValues(alpha: 0.35)),
+                                    ),
+                                    child: Text(p.initials,
+                                        style: context.superTextTheme.mono.copyWith(
+                                            fontSize: 10,
+                                            height: 1,
+                                            fontWeight: FontWeight.w700,
+                                            color: c)),
+                                  );
+                                },
+                                trailingBuilder: (context, node, info) {
+                                  final p = node.value!;
+                                  final t = context.superTheme;
+                                  final c = _deptColor(context)[p.dept] ?? t.fg3;
+                                  return Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(p.role,
+                                          style: context.superTextTheme.body
+                                              .copyWith(fontSize: 12, color: t.fg2)),
+                                      const SizedBox(width: 10),
+                                      Container(
+                                        height: 19,
+                                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: c.withValues(alpha: 0.15),
+                                          borderRadius: BorderRadius.circular(999),
+                                          border: Border.all(color: c.withValues(alpha: 0.35)),
+                                        ),
+                                        child: Text(p.dept,
+                                            style: context.superTextTheme.pill
+                                                .copyWith(fontSize: 10, color: c)),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+          ],
         ),
       ),
     );

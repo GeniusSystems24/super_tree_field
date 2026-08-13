@@ -86,7 +86,7 @@ List<_MenuItem> _buildItems<T>(SuperTreeController<T> c, TreeNode<T> node) {
         ),
       if (hasKids)
         _MenuItem(
-          icon: Icons.account_tree_outlined,
+          icon: Icons.schema_outlined,
           label: 'Expand subtree',
           onTap: () => c.expandSubtree(node.code),
         ),

@@ -12,6 +12,7 @@ linter:
     - prefer_const_constructors
     - prefer_const_declarations
     - prefer_final_locals
+    - public_member_api_docs
     - always_declare_return_types
     - avoid_print
     - sort_child_properties_last
