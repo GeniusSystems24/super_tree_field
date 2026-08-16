@@ -24,7 +24,7 @@ class SuperTreeControlsController {
   final SuperTextFieldController searchController;
 
   /// Moves focus to the external search field.
-  void requestSearchFocus() => searchController.focusNode.requestFocus();
+  void requestSearchFocus() => searchController.focusNode?.requestFocus();
 
   /// Releases the search field controller.
   void dispose() => searchController.dispose();

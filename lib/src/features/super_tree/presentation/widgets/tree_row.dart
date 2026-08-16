@@ -18,7 +18,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:super_form_field/super_form_field.dart';
 
-import '../../../../core/core.dart' hide FieldDensity;
 import '../../domain/entities/tree_node.dart';
 import '../../domain/usecases/tree_logic.dart';
 import '../controllers/super_tree_controller.dart';
@@ -465,10 +464,10 @@ class _RenameFieldState extends State<_RenameField> {
       extentOffset: widget.initial.length,
     );
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _ctl.focusNode.requestFocus(),
+      (_) => _ctl.focusNode?.requestFocus(),
     );
-    _ctl.focusNode.addListener(() {
-      if (!_ctl.focusNode.hasFocus) _commit();
+    _ctl.focusNode?.addListener(() {
+      if (!(_ctl.focusNode?.hasFocus ?? false)) _commit();
     });
   }
 

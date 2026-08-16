@@ -6,6 +6,16 @@ uses [Semantic Versioning](https://semver.org/).
 
 Earlier entries describe the API as it existed in those releases.
 
+## [1.0.1] - 2026-08-16
+
+### Fixed
+
+- Updated search and inline rename focus handling for the nullable
+  `SuperTextFieldController.focusNode` contract resolved by newer
+  `super_form_field` releases.
+
+---
+
 ## [1.0.0] — 2026-08-13
 
 ### Added

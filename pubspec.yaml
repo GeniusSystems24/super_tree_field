@@ -6,7 +6,7 @@ description: >
   drag-and-drop, custom cells, scrolling, LTR/RTL, and light/dark themes.
 
 # package version
-version: 1.0.0
+version: 1.0.1
 
 # package homepage, repository and issue tracker
 homepage: https://geniussystems24.github.io/super_tree_field
