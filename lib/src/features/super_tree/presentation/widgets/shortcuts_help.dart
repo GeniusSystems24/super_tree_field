@@ -7,8 +7,8 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
+import 'package:super_core/super_core.dart';
 
-import '../../../../core/core.dart';
 
 const List<(String, String)> _shortcuts = [
   ('↑  ↓', 'Move between rows'),

@@ -9,10 +9,10 @@
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
+import 'package:super_core/super_core.dart';
 import 'package:flutter/services.dart';
 import 'package:super_tree_field/src/features/super_tree/domain/entities/tree_node.dart';
 
-import '../../../../core/core.dart' hide FieldDensity;
 import '../controllers/super_tree_controller.dart';
 import 'tree_row.dart';
 

@@ -7,8 +7,7 @@
 // ============================================================
 
 import 'package:flutter/widgets.dart';
-
-import '../../../../core/core.dart';
+import 'package:super_core/super_core.dart';
 
 /// Text with the matched search substring highlighted.
 class HighlightText extends StatelessWidget {

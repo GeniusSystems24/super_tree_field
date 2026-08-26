@@ -8,4 +8,3 @@
 // Features import from here, never from each other.
 // ============================================================
 
-export 'package:super_core/super_core.dart';

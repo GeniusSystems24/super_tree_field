@@ -7,9 +7,10 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
+import 'package:super_core/super_core.dart';
 import 'package:flutter/services.dart';
 import 'package:super_form_field/super_form_field.dart';
-import 'package:super_tree_field/super_tree.dart' hide FieldDensity;
+import 'package:super_tree_field/super_tree.dart';
 
 /// Owns the search input used by [SuperTreeControls].
 ///

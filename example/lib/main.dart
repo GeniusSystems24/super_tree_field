@@ -14,9 +14,9 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
+import 'package:super_core/super_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:super_form_field/localization/generated/l10n.dart';
-import 'package:super_tree_field/super_tree.dart';
 
 import 'file_tree_demo.dart';
 import 'org_tree_demo.dart';
@@ -69,7 +69,7 @@ class _ExampleAppState extends State<ExampleApp> {
         primaryTextTheme: textTheme,
       ),
       supportedLocales: const [Locale('en'), Locale('ar')],
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
