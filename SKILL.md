@@ -1,7 +1,7 @@
 ---
 name: super-tree
 description: >
-  Use super_tree_field 1.0.0 to build generic, typed Flutter hierarchy views
+  Use super_tree_field 2.0.0 to build generic, typed Flutter hierarchy views
   with recursive rendering, search, keyboard navigation, checkbox selection,
   inline editing, drag-and-drop, external responsive controls, configurable
   scrolling, LTR/RTL behavior, and GeniusLink design-system theming.
@@ -9,7 +9,7 @@ description: >
 
 # Super Tree — Agent Skill
 
-Use this skill for `super_tree_field` **1.0.0**.
+Use this skill for `super_tree_field` **2.0.0**.
 
 The package is a generic hierarchy engine. Keep business-domain models,
 datasets, summaries, filters, and specialized pages outside `lib/`; place them
@@ -28,6 +28,9 @@ Use these public types as the main integration surface:
   tree.
 - `SuperTreeControlsController` — owns the standard control bar's search field
   and search focus.
+- `TreeContextMenuItem`, `TreeContextMenuAction`,
+  `TreeContextMenuItemsBuilder<T>`, and `TreeContextMenuStyle` — reusable
+  recursive node/standalone menu customization primitives.
 
 Do not add domain-specific models or presentation widgets to
 `lib/src/features/super_tree/`.
@@ -36,15 +39,15 @@ Do not add domain-specific models or presentation widgets to
 
 ```yaml
 dependencies:
-  super_tree_field: ^1.0.0
+  super_tree_field: ^2.0.0
 ```
 
 ```dart
 import 'package:super_tree_field/super_tree.dart';
 ```
 
-The package requires Dart `>=3.8.0`, Flutter `>=3.32.0`, `super_core >=3.3.0`,
-and `super_form_field ^1.8.2`.
+The package requires Dart `>=3.8.0`, Flutter `>=3.32.0`,
+`super_core >=3.6.0 <4.0.0`, and `super_form_field >=1.11.1 <2.0.0`.
 
 ## Theme rules
 
@@ -70,6 +73,95 @@ MaterialApp(
 
 Inside widgets, read typography with `context.superTextTheme`. Do not generate
 `context.superTheme.textTheme` or `SuperThemeData.of(context).textTheme`.
+
+## Localization rules
+
+`super_tree_field` 2.0.0 owns English and Arabic UI strings under
+`lib/localization`. Host applications must register the package localization:
+
+```dart
+MaterialApp(
+  locale: locale,
+  localizationsDelegates: const [
+    SuperTreeLocalization.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    SuperFormTranslation.delegate,
+  ],
+  supportedLocales: SuperTreeLocalization.supportedLocales,
+);
+```
+
+Use `context.superTreeLocalization` for package-owned text in custom package UI.
+Do not add new hard-coded user-visible strings under `lib/src/`; add matching
+English and Arabic ARB entries instead.
+
+`SuperTreeControls.localizeDefaultText` controls localization of the optional
+external control bar's default labels. `SuperTree` has no presentation-label
+localization switch because titles, column labels, counters, and selection
+summaries are host-owned; tree-owned empty/search/editing/menu text follows the
+active package locale.
+
+## Context-menu customization
+
+Treat `tree_context_menu.dart` as a reusable recursive public menu surface.
+Prefer composition through these APIs instead of copying or forking the package
+menu implementation:
+
+- `TreeContextMenuItem` — a leaf when `onTap` is supplied, or a branch when
+  `children` is non-empty. Branches can contain branches recursively.
+- `TreeContextMenuAction` — stable IDs for built-in actions; use them when
+  filtering/reordering defaults instead of comparing localized labels.
+- `TreeContextMenuItemsBuilder<T>` — per-node customization hook exposed by
+  `SuperTree.contextMenuItemsBuilder`.
+- `TreeContextMenuStyle` — popup width, submenu gap, spacing, border, surface,
+  hover, danger, shadow, typography, and disabled-opacity overrides.
+- `buildDefaultTreeContextMenuItems<T>()` — localized default readable/editable
+  items. The editable defaults group create actions under a nested `Add` branch.
+- `showTreeContextMenu<T>()` — renders tree-aware generated items or explicit
+  standalone items, both with recursive submenu support.
+
+Nested-menu behavior should remain consistent with
+`SuperPopupMenuButton`: one branch is open per menu level, hovering a branch on
+desktop opens it, tapping/clicking a branch toggles it, enabled leaves execute
+their callback, and nested levels use overlay entries so they remain above the
+root dismiss barrier. Submenus must prefer the logical end side, flip when
+there is not enough room, and remain clamped to viewport edges.
+
+Example:
+
+```dart
+contextMenuItemsBuilder: (context, controller, node) => [
+  TreeContextMenuItem(
+    id: 'actions',
+    label: 'Actions',
+    children: [
+      TreeContextMenuItem(
+        id: 'inspect',
+        label: 'Inspect',
+        leading: const Icon(Icons.info_outline),
+        onTap: () => inspect(node),
+      ),
+      TreeContextMenuItem(
+        id: 'advanced',
+        label: 'Advanced',
+        children: [
+          TreeContextMenuItem(
+            id: 'audit',
+            label: 'Audit history',
+            onTap: () => openAudit(node),
+          ),
+        ],
+      ),
+    ],
+  ),
+],
+```
+
+Set `contextMenuEnabled: false` when the host application owns all node-menu
+interaction. Explicit custom labels belong to the host and must not be silently
+translated. Built-in labels must continue to use `SuperTreeLocalization`.
 
 ## Data-model rules
 
@@ -132,10 +224,6 @@ Never create a `SuperTreeController` or `ScrollController` inside `build()`.
 ```dart
 SuperTree<ProductMeta>(
   controller: _controller,
-  title: 'Catalog',
-  nameColumnLabel: 'Name',
-  trailingColumnLabel: 'Status',
-  unit: 'items',
   leadingBuilder: (context, node, info) {
     return Icon(info.hasChildren ? Icons.folder : Icons.inventory_2_outlined);
   },
@@ -148,10 +236,17 @@ SuperTree<ProductMeta>(
 
 `TreeRowInfo` provides `depth`, `open`, and `hasChildren`.
 
-## External controls are the 1.0.0 default
+Presentation around the hierarchy is a host responsibility. Wrap `SuperTree`
+in the host's own card/surface and compose titles, subtitles, column labels,
+totals, select-all affordances, and selection summaries outside the widget.
+Controller selection APIs remain available for that external UI.
 
-`SuperTree` must not contain search, quick-query chips, Add node, Read/Edit,
-help, Expand all, Collapse, filters, or other page-level controls.
+## External controls
+
+`SuperTree` must contain only recursive tree/node rendering and tree-owned
+interaction. Do not put search controls, quick-query chips, Add node, Read/Edit,
+help, Expand/Collapse controls, card chrome, title/subtitle, column headings,
+total counters, or selection-summary footers inside it.
 
 Use `SuperTreeControls<T>` when the standard responsive controls are suitable:
 

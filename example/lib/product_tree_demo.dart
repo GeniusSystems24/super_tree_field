@@ -11,6 +11,9 @@ import 'package:super_core/super_core.dart';
 import 'package:super_tree_field/super_tree.dart';
 import 'responsive_example_layout.dart';
 
+import 'localization/localizations.dart';
+import 'widgets/demo_kit.dart';
+import 'usage_sources.dart';
 /// Metadata attached to a product-catalog node.
 @immutable
 class ProductData {
@@ -234,18 +237,10 @@ class _ProductTreeDemoState extends State<ProductTreeDemo> {
     final theme = context.superTheme;
     final colorScheme = SuperMaterialThemeData.of(context).colorScheme;
 
-    return Scaffold(
-      backgroundColor: theme.bg,
-      appBar: AppBar(
-        backgroundColor: theme.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: theme.fg2),
-        title: Text(
-          'Product Tree',
-          style: context.superTextTheme.heading.copyWith(color: theme.fg1),
-        ),
-      ),
+    return DemoScaffold(
+      title: context.exampleLocalization.productTreeTitle,
+      subtitle: context.exampleLocalization.productTreeDemoSubtitle,
+      usageCode: ExampleUsageSources.productTree,
       body: ResponsiveExampleLayout(
         maxWidth: 900,
         child: Column(
@@ -255,7 +250,7 @@ class _ProductTreeDemoState extends State<ProductTreeDemo> {
           SuperTreeControls<ProductData>(
                     controller: _controller,
                     controlsController: _controls,
-                    placeholder: 'Search products, SKU, or Arabic name…   ( / )',
+                    placeholder: context.exampleLocalization.searchProducts,
                     samples: const ['MOB', 'paper', 'مستودع', 'ACC-1102'],
                     accent: colorScheme.primary,
                     enableEditing: true,
@@ -269,14 +264,7 @@ class _ProductTreeDemoState extends State<ProductTreeDemo> {
                                 primary: false,
                                 physics: const NeverScrollableScrollPhysics(),
                                 accent: colorScheme.primary,
-                                title: 'Products',
-                                subtitle:
-                                    'Categories · bilingual names · SKU · unit · price · stock',
-                                titleIcon: Icons.inventory_2_outlined,
-                                nameColumnLabel: 'Product',
-                                trailingColumnLabel: 'Price · Stock',
-                                unit: 'products',
-                                showArabic: true,
+                                showArabic: context.exampleLocalization.isArabic,
                                 showLeafCount: true,
                                 leadingBuilder: (context, node, info) {
                                   final product = node.value;
@@ -294,12 +282,10 @@ class _ProductTreeDemoState extends State<ProductTreeDemo> {
                                 trailingBuilder: (context, node, info) {
                                   final product = node.value;
                                   if (product == null || product.isCategory) return null;
-          
                                   final lowStock = product.stock <= 10;
                                   final stockColor = lowStock
                                       ? SuperThemeData.of(context).tokens.warning
                                       : SuperThemeData.of(context).tokens.success;
-          
                                   return Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [

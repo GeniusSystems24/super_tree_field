@@ -1,22 +1,28 @@
 // ============================================================
 // features/super_tree_field/presentation/widgets/super_tree.dart
 // ------------------------------------------------------------
-// The generic SuperTree View: a focused hierarchy card with recursive rows,
-// selection, editing, keyboard navigation and configurable scrolling. Search,
-// mode toggles, add actions, help and expansion controls are composed by the
-// host through `SuperTreeController<T>` rather than rendered by this widget.
+// The generic SuperTree view: a focused recursive hierarchy viewport.
+// It renders tree nodes and tree-owned interaction only. Titles, subtitles,
+// column headings, totals, selection summaries, cards, toolbars, and other
+// page chrome are composed by the host around this widget.
 // ============================================================
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:super_core/super_core.dart';
 import 'package:flutter/services.dart';
+import 'package:super_tree_field/localization/localizations.dart';
 import 'package:super_tree_field/src/features/super_tree/domain/entities/tree_node.dart';
 
 import '../controllers/super_tree_controller.dart';
+import 'tree_context_menu.dart';
 import 'tree_row.dart';
 
-/// A themed, keyboard-first hierarchy view over a [SuperTreeController].
+/// A keyboard-first recursive hierarchy view over a [SuperTreeController].
+///
+/// [SuperTree] owns tree/node rendering and interaction only. Compose titles,
+/// column labels, totals, selection summaries, and surface/card decoration in
+/// the host UI when they are required.
 class SuperTree<T> extends StatefulWidget {
   /// Creates a generic hierarchy view driven by [controller].
   const SuperTree({
@@ -25,15 +31,12 @@ class SuperTree<T> extends StatefulWidget {
     required this.leadingBuilder,
     this.trailingBuilder,
     this.accent,
-    this.title = 'Hierarchy',
-    this.subtitle,
-    this.titleIcon,
-    this.nameColumnLabel = 'Name',
-    this.trailingColumnLabel = '',
-    this.unit = 'items',
     this.showArabic = true,
     this.showLeafCount = true,
-    this.selectionLabel = 'Selected',
+    this.contextMenuEnabled = true,
+    this.contextMenuItemsBuilder,
+    this.contextMenuConfigBuilder,
+    this.contextMenuStyle = const TreeContextMenuStyle(),
     this.onSearchRequested,
     this.onShortcutsRequested,
     this.reverse = false,
@@ -62,33 +65,32 @@ class SuperTree<T> extends StatefulWidget {
   /// Overrides the theme accent used by tree interactions.
   final Color? accent;
 
-  /// Title displayed in the tree card header.
-  final String title;
-
-  /// Optional subtitle displayed below [title].
-  final String? subtitle;
-
-  /// Optional icon displayed beside [title].
-  final IconData? titleIcon;
-
-  /// Label for the primary name column.
-  final String nameColumnLabel;
-
-  /// Label for the optional trailing column.
-  final String trailingColumnLabel;
-
-
-  /// Plural noun used in count labels, such as "items" or "records".
-  final String unit;
-
   /// Whether [TreeNode.ar] labels are displayed when available.
   final bool showArabic;
 
   /// Whether group rows display their descendant leaf count.
   final bool showLeafCount;
 
-  /// Label used in the selected-leaf footer, such as "Selected".
-  final String selectionLabel;
+  /// Whether rows can open their context menu from pointer/touch gestures
+  /// and the editable row menu button.
+  final bool contextMenuEnabled;
+
+  /// Optional per-node context-menu builder.
+  ///
+  /// When null, [buildDefaultTreeContextMenuItems] supplies the localized
+  /// readable/editable actions. Use the default builder inside this callback
+  /// when the host needs to extend, filter, or reorder those actions.
+  final TreeContextMenuItemsBuilder<T>? contextMenuItemsBuilder;
+
+  /// Optional complete context-menu configuration for each node.
+  ///
+  /// Use this when different nodes need different items, styles, accents, or
+  /// enabled states. The older [contextMenuItemsBuilder] remains supported and
+  /// its output becomes [TreeContextMenuNodeContext.baseItems].
+  final TreeContextMenuConfigBuilder<T>? contextMenuConfigBuilder;
+
+  /// Visual configuration applied to every node context menu.
+  final TreeContextMenuStyle contextMenuStyle;
 
   /// Called when the focused tree receives the `/` shortcut.
   ///
@@ -254,77 +256,48 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
       builder: (context, _) {
         return LayoutBuilder(
           builder: (context, constraints) {
-            // A normal (non-shrink-wrapped) ListView needs a finite viewport.
-            // Preserve SuperTree's ability to live inside another scroll view
-            // by falling back to shrink-wrap when height is unbounded.
+            // The widget intentionally renders only the recursive tree viewport
+            // and its nodes. Titles, column headings, counts, card surfaces,
+            // and selection summaries belong to host composition.
             final boundedViewport =
                 !widget.shrinkWrap && constraints.hasBoundedHeight;
-            final treeCard = _treeCard(
-              context,
-              boundedViewport: boundedViewport,
-            );
+            final accent =
+                widget.accent ?? SuperThemeData.of(context).tokens.accent;
+            final visible = _c.visible;
 
-            return treeCard;
+            Widget body;
+            if (visible.isEmpty) {
+              body = _emptyState(context);
+            } else {
+              body = _treeRows(
+                context,
+                visible,
+                accent,
+                shrinkWrap: !boundedViewport,
+              );
+            }
+
+            if (boundedViewport) {
+              body = Expanded(child: body);
+            }
+
+            return Focus(
+              focusNode: _treeFocus,
+              onKeyEvent: _onKey,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _treeFocus.requestFocus,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize:
+                      boundedViewport ? MainAxisSize.max : MainAxisSize.min,
+                  children: [body],
+                ),
+              ),
+            );
           },
         );
       },
-    );
-  }
-
-  Widget _treeCard(
-    BuildContext context, {
-    required bool boundedViewport,
-  }) {
-    final t = context.superTheme;
-    final accent = (widget.accent ?? SuperThemeData.of(context).tokens.accent);
-    final visible = _c.visible;
-
-    Widget body;
-    if (visible.isEmpty) {
-      body = Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-        child: _emptyState(context),
-      );
-      if (boundedViewport) body = Expanded(child: body);
-    } else {
-      body = _treeRows(
-        context,
-        visible,
-        accent,
-        shrinkWrap: !boundedViewport,
-      );
-      if (boundedViewport) body = Expanded(child: body);
-    }
-
-    return Focus(
-      focusNode: _treeFocus,
-      onKeyEvent: _onKey,
-      child: GestureDetector(
-        onTap: () => _treeFocus.requestFocus(),
-        child: Container(
-          decoration: BoxDecoration(
-            color: t.surface,
-            borderRadius: BorderRadius.circular(
-              context.superTheme.spacing.radiusCard,
-            ),
-            border: Border.all(color: t.border),
-            boxShadow: t.cardShadow,
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize:
-                boundedViewport ? MainAxisSize.max : MainAxisSize.min,
-            children: [
-              _cardHeader(context),
-              _columnHeader(context),
-              body,
-              if (_c.selected != null) _selectionFooter(context),
-              if (_c.selectable && _c.checkedCount > 0) _checkedFooter(context),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -362,6 +335,10 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
               trailingBuilder: widget.trailingBuilder,
               showArabic: widget.showArabic,
               showLeafCount: widget.showLeafCount,
+              contextMenuEnabled: widget.contextMenuEnabled,
+              contextMenuItemsBuilder: widget.contextMenuItemsBuilder,
+              contextMenuConfigBuilder: widget.contextMenuConfigBuilder,
+              contextMenuStyle: widget.contextMenuStyle,
               onFocusRequest: _treeFocus.requestFocus,
             ),
         ],
@@ -369,123 +346,10 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
     );
   }
 
-  Widget _cardHeader(BuildContext context) {
-    final t = context.superTheme;
-    final accent = (widget.accent ?? SuperThemeData.of(context).tokens.accent);
-    final searching = _c.searching;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(22, 18, 22, 0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 4,
-            height: 18,
-            margin: const EdgeInsets.only(top: 2),
-            decoration: BoxDecoration(
-              color: accent,
-              borderRadius: BorderRadius.circular(
-                context.superTheme.spacing.radiusPill,
-              ),
-            ),
-          ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (widget.titleIcon != null) ...[
-                      Icon(widget.titleIcon, size: 15, color: widget.accent),
-                      const SizedBox(width: 8),
-                    ],
-                    Flexible(
-                      child: Text(
-                        widget.title,
-                        style: context.superTextTheme.heading.copyWith(
-                          fontSize: 15,
-                          color: t.fg1,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                if (widget.subtitle != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    widget.subtitle!,
-                    style: context.superTextTheme.caption.copyWith(
-                      fontSize: 12,
-                      color: t.fg3,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          SizedBox(width: context.superTheme.spacing.space3),
-          Text(
-            searching
-                ? '${_c.visibleLeaves} of ${_c.totalLeaves}'
-                : '${_c.totalLeaves} ${widget.unit}',
-            style: context.superTextTheme.label.copyWith(
-              fontSize: 10,
-              letterSpacing: 0.5,
-              color: t.fg3,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _columnHeader(BuildContext context) {
-    final t = context.superTheme;
-    final accent = (widget.accent ?? SuperThemeData.of(context).tokens.accent);
-    return Container(
-      margin: const EdgeInsets.fromLTRB(14, 12, 14, 0),
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: t.border)),
-      ),
-      child: Row(
-        children: [
-          if (_c.selectionMode == SuperTreeSelectionMode.multi) ...[
-            TreeCheckbox(
-              state: _c.rootCheckState,
-              accent: accent,
-              onTap: _c.toggleCheckAll,
-            ),
-            const SizedBox(width: 14),
-          ],
-          Expanded(
-            child: Text(
-              widget.nameColumnLabel.toUpperCase(),
-              style: context.superTextTheme.label.copyWith(
-                fontSize: 9.5,
-                letterSpacing: 0.76,
-                color: t.fg3,
-              ),
-            ),
-          ),
-          if (widget.trailingColumnLabel.isNotEmpty)
-            Text(
-              widget.trailingColumnLabel.toUpperCase(),
-              style: context.superTextTheme.label.copyWith(
-                fontSize: 9.5,
-                letterSpacing: 0.76,
-                color: t.fg3,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
 
   Widget _emptyState(BuildContext context) {
     final t = context.superTheme;
+    final l = context.superTreeLocalization;
     if (!_c.searching) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 44, horizontal: 16),
@@ -494,7 +358,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
             Icon(Icons.schema_outlined, size: 26, color: t.fg4),
             const SizedBox(height: 12),
             Text(
-              'This tree is empty',
+              l.treeEmpty,
               style: context.superTextTheme.body.copyWith(
                 fontWeight: FontWeight.w600,
                 color: t.fg2,
@@ -511,7 +375,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           Icon(Icons.search_off, size: 26, color: t.fg4),
           const SizedBox(height: 12),
           Text(
-            'No matches for “${_c.query}”',
+            l.noMatchesFor(_c.query),
             style: context.superTextTheme.body.copyWith(
               fontWeight: FontWeight.w600,
               color: t.fg2,
@@ -519,7 +383,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Try a different code or name, or clear the filters.',
+            l.tryDifferentCodeOrName,
             style: context.superTextTheme.caption.copyWith(color: t.fg3),
           ),
         ],
@@ -527,109 +391,7 @@ class _SuperTreeState<T> extends State<SuperTree<T>> {
     );
   }
 
-  Widget _selectionFooter(BuildContext context) {
-    final t = context.superTheme;
-    final accent = (widget.accent ?? SuperThemeData.of(context).tokens.accent);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-      decoration: BoxDecoration(
-        color: Color.alphaBlend(accent.withValues(alpha: 0.07), t.surface),
-        border: Border(top: BorderSide(color: t.border)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.description_outlined, size: 15, color: widget.accent),
-          const SizedBox(width: 10),
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: context.superTextTheme.body.copyWith(fontSize: 12.5, color: t.fg2),
-                children: [
-                  TextSpan(text: '${widget.selectionLabel} '),
-                  TextSpan(
-                    text: _c.selected,
-                    style: context.superTextTheme.mono.copyWith(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                      color: t.fg1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          GestureDetector(
-            onTap: _c.clearChecked,
-            child: Text(
-              'Clear',
-              style: context.superTextTheme.label.copyWith(
-                fontSize: 10.5,
-                letterSpacing: 0.5,
-                color: t.fg3,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   // The selection summary footer shown while one or more checkboxes are on.
-  Widget _checkedFooter(BuildContext context) {
-    final t = context.superTheme;
-    final accent = (widget.accent ?? SuperThemeData.of(context).tokens.accent);
-    final n = _c.checkedCount;
-    final single = _c.selectionMode == SuperTreeSelectionMode.single;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-      decoration: BoxDecoration(
-        color: Color.alphaBlend(accent.withValues(alpha: 0.07), t.surface),
-        border: Border(top: BorderSide(color: t.border)),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            single ? Icons.radio_button_checked : Icons.check_box_outlined,
-            size: 15,
-            color: accent,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: context.superTextTheme.body.copyWith(fontSize: 12.5, color: t.fg2),
-                children: [
-                  TextSpan(
-                    text: '$n',
-                    style: context.superTextTheme.mono.copyWith(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                      color: t.fg1,
-                    ),
-                  ),
-                  TextSpan(
-                    text: single
-                        ? ' selected'
-                        : ' ${n == 1 ? 'item' : 'items'} selected',
-                  ),
-                ],
-              ),
-            ),
-          ),
-          GestureDetector(
-            onTap: _c.clearChecked,
-            child: Text(
-              'Clear',
-              style: context.superTextTheme.label.copyWith(
-                fontSize: 10.5,
-                letterSpacing: 0.5,
-                color: t.fg3,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 

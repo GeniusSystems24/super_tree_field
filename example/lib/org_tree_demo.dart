@@ -12,6 +12,9 @@ import 'package:super_core/super_core.dart';
 import 'package:super_tree_field/super_tree.dart';
 import 'responsive_example_layout.dart';
 
+import 'localization/localizations.dart';
+import 'widgets/demo_kit.dart';
+import 'usage_sources.dart';
 /// A person's payload.
 class Person {
   /// Creates an organization-tree person payload.
@@ -99,17 +102,10 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.superTheme;
-    return Scaffold(
-      backgroundColor: t.bg,
-      appBar: AppBar(
-        backgroundColor: t.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: t.fg2),
-        title:
-            Text('Org Chart', style: context.superTextTheme.heading.copyWith(color: t.fg1)),
-      ),
+    return DemoScaffold(
+      title: context.exampleLocalization.orgChartTitle,
+      subtitle: context.exampleLocalization.orgChartDemoSubtitle,
+      usageCode: ExampleUsageSources.orgTree,
       body: ResponsiveExampleLayout(
         maxWidth: 760,
         child: Column(
@@ -119,7 +115,7 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
           SuperTreeControls<Person>(
                     controller: _controller,
                     controlsController: _controls,
-                    placeholder: 'Search people…   ( / )',
+                    placeholder: context.exampleLocalization.searchPeople,
                     samples: const ['Lead', 'Eng', 'Sara', 'Finance'],
                     accent: _accent,
                     enableEditing: true,
@@ -133,14 +129,7 @@ class _OrgTreeDemoState extends State<OrgTreeDemo> {
                                 primary: false,
                                 physics: const NeverScrollableScrollPhysics(),
                                 accent: _accent,
-                                title: 'Org chart',
-                                subtitle:
-                                    'TreeNode<Person> · managers roll up a headcount, everyone shows role + dept',
-                                titleIcon: Icons.people_outline,
-                                nameColumnLabel: 'Name',
-                                trailingColumnLabel: 'Role · Dept',
-                                unit: 'people',
-                                showArabic: false,
+                                showArabic: context.exampleLocalization.isArabic,
                                 leadingBuilder: (context, node, info) {
                                   final p = node.value!;
                                   final c = _deptColor(context)[p.dept] ?? context.superTheme.fg3;

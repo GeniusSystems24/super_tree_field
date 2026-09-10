@@ -1,0 +1,76 @@
+{
+  "@@locale": "ar",
+  "hierarchy": "التسلسل الهرمي",
+  "name": "الاسم",
+  "items": "عناصر",
+  "selected": "المحدد",
+  "visibleOfTotal": "{visible} من {total}",
+  "@visibleOfTotal": {
+    "placeholders": {
+      "visible": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "treeEmpty": "هذه الشجرة فارغة",
+  "noMatchesFor": "لا توجد نتائج لـ «{query}»",
+  "@noMatchesFor": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "tryDifferentCodeOrName": "جرّب رمزًا أو اسمًا مختلفًا، أو امسح عوامل التصفية.",
+  "clear": "مسح",
+  "selectedCount": "{count} محدد",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "itemsSelected": "{count, plural, =0{لا توجد عناصر محددة} =1{عنصر واحد محدد} =2{عنصران محددان} other{{count} عناصر محددة}}",
+  "@itemsSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchHint": "بحث…   ( / )",
+  "addNode": "إضافة عقدة",
+  "keyboardShortcutsTooltip": "اختصارات لوحة المفاتيح  ·  ؟",
+  "expandAll": "توسيع الكل",
+  "collapse": "طي",
+  "readMode": "قراءة",
+  "editMode": "تحرير",
+  "keyboardShortcuts": "اختصارات لوحة المفاتيح",
+  "close": "إغلاق",
+  "shortcutMoveBetweenRows": "التنقل بين الصفوف",
+  "shortcutCollapseExpand": "طي / انتقال للخارج · توسيع / انتقال للداخل",
+  "shortcutJumpFirstLast": "الانتقال إلى أول / آخر صف",
+  "shortcutOpenToggle": "فتح عنصر نهائي · تبديل حالة مجموعة",
+  "shortcutToggleCheckbox": "تبديل خانة الاختيار (في وضع التحديد)",
+  "shortcutFocusSearch": "نقل التركيز إلى حقل البحث",
+  "shortcutClearSearch": "مسح البحث",
+  "shortcutExpandCollapseAll": "توسيع الكل · طي الكل",
+  "shortcutRightClickKey": "النقر بزر الفأرة الأيمن",
+  "shortcutOpenNodeMenu": "فتح قائمة العقدة",
+  "shortcutCheatsheet": "عرض قائمة الاختصارات",
+  "dismissMenu": "إغلاق القائمة",
+  "expand": "توسيع",
+  "open": "فتح",
+  "expandSubtree": "توسيع الشجرة الفرعية",
+  "rename": "إعادة تسمية",
+  "add": "إضافة",
+  "addChild": "إضافة عنصر فرعي",
+  "addSiblingAbove": "إضافة عنصر مماثل بالأعلى",
+  "addSiblingBelow": "إضافة عنصر مماثل بالأسفل",
+  "delete": "حذف",
+  "newNode": "عقدة جديدة"
+}

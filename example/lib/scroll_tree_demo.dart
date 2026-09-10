@@ -12,6 +12,9 @@ import 'package:super_core/super_core.dart';
 import 'package:super_tree_field/super_tree.dart';
 import 'responsive_example_layout.dart';
 
+import 'localization/localizations.dart';
+import 'widgets/demo_kit.dart';
+import 'usage_sources.dart';
 /// Payload used by rows in the scrolling demonstration.
 class ScrollItem {
   /// Creates a scroll-demo item at [index].
@@ -99,18 +102,10 @@ class _ScrollTreeDemoState extends State<ScrollTreeDemo> {
     final t = context.superTheme;
     final accent = SuperMaterialThemeData.of(context).colorScheme.primary;
 
-    return Scaffold(
-      backgroundColor: t.bg,
-      appBar: AppBar(
-        backgroundColor: t.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: t.fg2),
-        title: Text(
-          'Scroll Configuration',
-          style: context.superTextTheme.heading.copyWith(color: t.fg1),
-        ),
-      ),
+    return DemoScaffold(
+      title: context.exampleLocalization.scrollConfigurationTitle,
+      subtitle: context.exampleLocalization.scrollConfigurationDemoSubtitle,
+      usageCode: ExampleUsageSources.scrollConfiguration,
       body: ResponsiveExampleLayout(
         maxWidth: 900,
         scrollable: false,
@@ -123,12 +118,12 @@ class _ScrollTreeDemoState extends State<ScrollTreeDemo> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   SuperButton(
-                    label: 'Jump to start',
+                    label: context.exampleLocalization.jumpToStart,
                     variant: SuperButtonVariant.secondary,
                     onPressed: _scrollToStart,
                   ),
                   SuperButton(
-                    label: 'Jump to end',
+                    label: context.exampleLocalization.jumpToEnd,
                     variant: SuperButtonVariant.secondary,
                     onPressed: _scrollToEnd,
                   ),
@@ -144,7 +139,7 @@ class _ScrollTreeDemoState extends State<ScrollTreeDemo> {
                       border: Border.all(color: t.borderStrong),
                     ),
                     child: Text(
-                      'offset ${_offset.toStringAsFixed(0)} px',
+                      context.exampleLocalization.scrollOffset(_offset.toStringAsFixed(0)),
                       style: context.superTextTheme.mono.copyWith(
                         fontSize: 11.5,
                         color: t.fg2,
@@ -155,7 +150,7 @@ class _ScrollTreeDemoState extends State<ScrollTreeDemo> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Reverse',
+                        context.exampleLocalization.reverse,
                         style: context.superTextTheme.body.copyWith(
                           fontSize: 12.5,
                           color: t.fg2,
@@ -178,7 +173,7 @@ class _ScrollTreeDemoState extends State<ScrollTreeDemo> {
                   SuperTreeControls<ScrollItem>(
                                     controller: _controller,
                                     controlsController: _controls,
-                                    placeholder: 'Search scrollable items…   ( / )',
+                                    placeholder: context.exampleLocalization.searchScrollableItems,
                                     samples: const ['item 10', 'item 30', 'item 60'],
                                     accent: accent,
                                   ),
@@ -203,14 +198,7 @@ class _ScrollTreeDemoState extends State<ScrollTreeDemo> {
                                                       clipBehavior: Clip.hardEdge,
                                                       hitTestBehavior: HitTestBehavior.opaque,
                                                       accent: accent,
-                                                      title: 'Bounded scrolling tree',
-                                                      subtitle:
-                                                          'controller owns hierarchy state · scrollController owns scroll position',
-                                                      titleIcon: Icons.swap_vert_circle_outlined,
-                                                      nameColumnLabel: 'Item',
-                                                      trailingColumnLabel: 'Index',
-                                                      unit: 'items',
-                                                      showArabic: false,
+                                                      showArabic: context.exampleLocalization.isArabic,
                                                       leadingBuilder: (context, node, info) => Icon(
                                                         Icons.view_list_outlined,
                                                         size: 16,

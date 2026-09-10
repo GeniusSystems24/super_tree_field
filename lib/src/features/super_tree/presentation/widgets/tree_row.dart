@@ -64,6 +64,10 @@ class TreeRow<T> extends StatefulWidget {
     this.trailingBuilder,
     this.showArabic = true,
     this.showLeafCount = true,
+    this.contextMenuEnabled = true,
+    this.contextMenuItemsBuilder,
+    this.contextMenuConfigBuilder,
+    this.contextMenuStyle = const TreeContextMenuStyle(),
     this.onFocusRequest,
   });
 
@@ -91,6 +95,26 @@ class TreeRow<T> extends StatefulWidget {
   /// Whether group rows display their descendant leaf count.
   final bool showLeafCount;
 
+  /// Whether right-click, long-press, and the editable row menu button
+  /// can open a context menu for this row.
+  final bool contextMenuEnabled;
+
+  /// Optional builder that replaces the package-default menu items.
+  ///
+  /// Call [buildDefaultTreeContextMenuItems] inside the builder to extend
+  /// or filter the defaults instead of replacing them completely.
+  final TreeContextMenuItemsBuilder<T>? contextMenuItemsBuilder;
+
+  /// Optional complete node-specific menu configuration.
+  ///
+  /// The builder receives [node] through [TreeContextMenuNodeContext] and can
+  /// independently replace its items, override style/accent, or disable only
+  /// this row's menu.
+  final TreeContextMenuConfigBuilder<T>? contextMenuConfigBuilder;
+
+  /// Visual configuration for the row context menu.
+  final TreeContextMenuStyle contextMenuStyle;
+
   /// Called on row tap (before activation) so the host can focus the tree body
   /// — keeps keyboard navigation working immediately after a pointer click.
   final VoidCallback? onFocusRequest;
@@ -101,19 +125,67 @@ class TreeRow<T> extends StatefulWidget {
 
 class _TreeRowState<T> extends State<TreeRow<T>> {
   final GlobalKey _rowKey = GlobalKey();
+  bool _ensureFocusedVisibleScheduled = false;
   bool _hover = false;
   DropPosition? _dropPos; // active drop indicator while a drag hovers
   bool _dragging = false;
 
   SuperTreeController<T> get _c => widget.controller;
 
+  /// Schedules a post-layout visibility check for the focused row.
+  ///
+  /// This deliberately runs after layout because recursive rows can move when
+  /// ancestors expand/collapse or when search results change.
+  void _scheduleEnsureFocusedVisible(bool isFocused) {
+    if (!isFocused || _ensureFocusedVisibleScheduled) return;
+
+    _ensureFocusedVisibleScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ensureFocusedVisibleScheduled = false;
+
+      if (!mounted || _c.focusId != widget.node.code) return;
+      _ensureFocusedRowVisible();
+    });
+  }
+
+  /// Keeps the focused row visible in every enclosing scroll viewport.
+  ///
+  /// [Scrollable.ensureVisible] walks all surrounding [Scrollable] widgets.
+  /// This is important when [SuperTree] is shrink-wrapped inside a scrollable
+  /// page: the nearest tree ListView can already contain its entire content,
+  /// while an outer page viewport is the one actually clipping this row.
+  void _ensureFocusedRowVisible() {
+    final rowContext = _rowKey.currentContext;
+    if (rowContext == null) return;
+
+    // First reveal a row clipped above a viewport. Rows that are already fully
+    // visible are not moved by this alignment policy.
+    Scrollable.ensureVisible(
+      rowContext,
+      duration: Duration.zero,
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+    );
+
+    // Then reveal a row clipped below a viewport. If the first pass already
+    // made the whole row visible, this pass is a no-op.
+    Scrollable.ensureVisible(
+      rowContext,
+      duration: Duration.zero,
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+    );
+  }
+
   void _openMenu(Offset globalPos) {
+    if (!widget.contextMenuEnabled) return;
     showTreeContextMenu<T>(
       context: context,
       globalPosition: globalPos,
       controller: _c,
       node: widget.node,
       accent: widget.accent,
+      itemsBuilder: widget.contextMenuItemsBuilder,
+      configBuilder: widget.contextMenuConfigBuilder,
+      style: widget.contextMenuStyle,
     );
   }
 
@@ -143,6 +215,7 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
     final indent = 14.0 + widget.depth * 22.0;
     final isSel = c.selected == node.code;
     final isFocus = c.focusId == node.code;
+    _scheduleEnsureFocusedVisible(isFocus);
     final editing = c.isEditing(node.code);
     final editable = c.isEditable && !c.searching;
     final info = TreeRowInfo(
@@ -187,11 +260,19 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
         top: editing ? 5 : 9,
         bottom: editing ? 5 : 9,
       ),
+      // Keep state borders out of layout. A border placed in `decoration`
+      // contributes implicit decoration padding, which makes selected/focused
+      // rows differ in size from rows without a border.
       decoration: BoxDecoration(
         color: bg,
-        border: boxBorder,
         borderRadius: BorderRadius.circular(5),
       ),
+      foregroundDecoration: boxBorder == null
+          ? null
+          : BoxDecoration(
+              border: boxBorder,
+              borderRadius: BorderRadius.circular(5),
+            ),
       child: Row(
         children: [
           // ── drag handle (editable) ──
@@ -289,7 +370,7 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
             const SizedBox(width: 12),
           ],
           // ── row menu (editable) / open affordance ──
-          if (editable && !editing)
+          if (editable && !editing && widget.contextMenuEnabled)
             _MenuButton(
               visible: _hover,
               color: t.fg3,
@@ -402,6 +483,9 @@ class _TreeRowState<T> extends State<TreeRow<T>> {
                     trailingBuilder: widget.trailingBuilder,
                     showArabic: widget.showArabic,
                     showLeafCount: widget.showLeafCount,
+                    contextMenuEnabled: widget.contextMenuEnabled,
+                    contextMenuItemsBuilder: widget.contextMenuItemsBuilder,
+                    contextMenuStyle: widget.contextMenuStyle,
                     onFocusRequest: widget.onFocusRequest,
                   ),
               ],

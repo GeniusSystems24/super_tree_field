@@ -1,0 +1,76 @@
+{
+  "@@locale": "en",
+  "hierarchy": "Hierarchy",
+  "name": "Name",
+  "items": "items",
+  "selected": "Selected",
+  "visibleOfTotal": "{visible} of {total}",
+  "@visibleOfTotal": {
+    "placeholders": {
+      "visible": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "treeEmpty": "This tree is empty",
+  "noMatchesFor": "No matches for “{query}”",
+  "@noMatchesFor": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "tryDifferentCodeOrName": "Try a different code or name, or clear the filters.",
+  "clear": "Clear",
+  "selectedCount": "{count} selected",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "itemsSelected": "{count, plural, =1{1 item selected} other{{count} items selected}}",
+  "@itemsSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchHint": "Search…   ( / )",
+  "addNode": "Add node",
+  "keyboardShortcutsTooltip": "Keyboard shortcuts  ·  ?",
+  "expandAll": "Expand all",
+  "collapse": "Collapse",
+  "readMode": "Read",
+  "editMode": "Edit",
+  "keyboardShortcuts": "Keyboard shortcuts",
+  "close": "Close",
+  "shortcutMoveBetweenRows": "Move between rows",
+  "shortcutCollapseExpand": "Collapse / step out · expand / step in",
+  "shortcutJumpFirstLast": "Jump to first / last row",
+  "shortcutOpenToggle": "Open a leaf · toggle a group",
+  "shortcutToggleCheckbox": "Toggle the checkbox (in selection mode)",
+  "shortcutFocusSearch": "Focus the search field",
+  "shortcutClearSearch": "Clear the search",
+  "shortcutExpandCollapseAll": "Expand all · collapse all",
+  "shortcutRightClickKey": "Right-click",
+  "shortcutOpenNodeMenu": "Open the node menu",
+  "shortcutCheatsheet": "This cheatsheet",
+  "dismissMenu": "Dismiss menu",
+  "expand": "Expand",
+  "open": "Open",
+  "expandSubtree": "Expand subtree",
+  "rename": "Rename",
+  "add": "Add",
+  "addChild": "Add child",
+  "addSiblingAbove": "Add sibling above",
+  "addSiblingBelow": "Add sibling below",
+  "delete": "Delete",
+  "newNode": "New node"
+}

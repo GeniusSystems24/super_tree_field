@@ -50,6 +50,7 @@ class SuperTreeControls<T> extends StatefulWidget {
     this.samples = const [],
     this.accent,
     this.enableEditing = false,
+    this.localizeDefaultText = true,
     this.extra,
   });
 
@@ -70,6 +71,10 @@ class SuperTreeControls<T> extends StatefulWidget {
 
   /// Whether to expose edit-mode and add-node controls.
   final bool enableEditing;
+
+  /// Whether package-provided default control text follows the active locale.
+  /// Explicit custom [placeholder] text is preserved.
+  final bool localizeDefaultText;
 
   /// Optional content shown below the main responsive control row.
   final Widget? extra;
@@ -121,6 +126,11 @@ class _SuperTreeControlsState<T> extends State<SuperTreeControls<T>> {
   @override
   Widget build(BuildContext context) {
     final gap = context.superTheme.spacing.space3;
+    final l = context.superTreeLocalization;
+    final placeholder =
+        widget.localizeDefaultText && widget.placeholder == 'Search…   ( / )'
+        ? l.searchHint
+        : widget.placeholder;
 
     return AnimatedBuilder(
       animation: _tree,
@@ -148,7 +158,7 @@ class _SuperTreeControlsState<T> extends State<SuperTreeControls<T>> {
                       child: _SearchField<T>(
                         controller: _tree,
                         searchController: _search,
-                        placeholder: widget.placeholder,
+                        placeholder: placeholder,
                         accent: widget.accent,
                       ),
                     ),
@@ -163,10 +173,10 @@ class _SuperTreeControlsState<T> extends State<SuperTreeControls<T>> {
                       if (_tree.isEditable)
                         _ToolbarButton(
                           icon: Icons.add,
-                          label: 'Add node',
+                          label: l.addNode,
                           accent: widget.accent,
                           emphasized: true,
-                          onTap: _tree.addRoot,
+                          onTap: () => _tree.addRoot(newNodeName: l.newNode),
                         ),
                       _ModeToggle<T>(
                         controller: _tree,
@@ -175,18 +185,18 @@ class _SuperTreeControlsState<T> extends State<SuperTreeControls<T>> {
                     ],
                     SuperIconButton(
                       icon: Icons.keyboard_outlined,
-                      tooltip: 'Keyboard shortcuts  ·  ?',
+                      tooltip: l.keyboardShortcutsTooltip,
                       onPressed: () => showShortcutsHelp(context),
                     ),
                     _ToolbarButton(
                       icon: Icons.expand_more,
-                      label: 'Expand all',
+                      label: l.expandAll,
                       accent: widget.accent,
                       onTap: _tree.expandAll,
                     ),
                     _ToolbarButton(
                       icon: Icons.expand_less,
-                      label: 'Collapse',
+                      label: l.collapse,
                       accent: widget.accent,
                       onTap: _tree.collapseAll,
                     ),
@@ -308,6 +318,7 @@ class _ModeToggle<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.superTheme;
+    final l = context.superTreeLocalization;
     final effectiveAccent =
         accent ?? SuperMaterialThemeData.of(context).colorScheme.primary;
 
@@ -376,9 +387,9 @@ class _ModeToggle<T> extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          segment('Read', Icons.visibility_outlined, SuperTreeMode.readable),
+          segment(l.readMode, Icons.visibility_outlined, SuperTreeMode.readable),
           const SizedBox(width: 3),
-          segment('Edit', Icons.edit_outlined, SuperTreeMode.editable),
+          segment(l.editMode, Icons.edit_outlined, SuperTreeMode.editable),
         ],
       ),
     );

@@ -8,19 +8,20 @@
 
 import 'package:flutter/material.dart';
 import 'package:super_core/super_core.dart';
+import 'package:super_tree_field/localization/localizations.dart';
 
 
-const List<(String, String)> _shortcuts = [
-  ('↑  ↓', 'Move between rows'),
-  ('←  →', 'Collapse / step out · expand / step in'),
-  ('Home  End', 'Jump to first / last row'),
-  ('Enter  Space', 'Open a leaf · toggle a group'),
-  ('Space', 'Toggle the checkbox (in selection mode)'),
-  ('/', 'Focus the search field'),
-  ('Esc', 'Clear the search'),
-  ('*  \\', 'Expand all · collapse all'),
-  ('Right-click', 'Open the node menu'),
-  ('?', 'This cheatsheet'),
+List<(String, String)> _shortcuts(SuperTreeLocalization l) => [
+  ('↑  ↓', l.shortcutMoveBetweenRows),
+  ('←  →', l.shortcutCollapseExpand),
+  ('Home  End', l.shortcutJumpFirstLast),
+  ('Enter  Space', l.shortcutOpenToggle),
+  ('Space', l.shortcutToggleCheckbox),
+  ('/', l.shortcutFocusSearch),
+  ('Esc', l.shortcutClearSearch),
+  ('*  \\', l.shortcutExpandCollapseAll),
+  (l.shortcutRightClickKey, l.shortcutOpenNodeMenu),
+  ('?', l.shortcutCheatsheet),
 ];
 
 /// Opens the keyboard cheatsheet as a centered dialog.
@@ -36,6 +37,7 @@ class _ShortcutsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.superTheme;
+    final l = context.superTreeLocalization;
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 440),
@@ -68,19 +70,19 @@ class _ShortcutsDialog extends StatelessWidget {
                     const SizedBox(width: 9),
                     Expanded(
                       child: Text(
-                        'Keyboard shortcuts',
+                        l.keyboardShortcuts,
                         style: context.superTextTheme.heading.copyWith(color: t.fg1),
                       ),
                     ),
                     SuperIconButton(
                       icon: Icons.close,
-                      tooltip: 'Close',
+                      tooltip: l.close,
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
                 ),
                 SizedBox(height: context.superTheme.spacing.space3),
-                for (final (k, d) in _shortcuts)
+                for (final (k, d) in _shortcuts(l))
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 5),
                     child: Row(

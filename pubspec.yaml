@@ -6,7 +6,7 @@ description: >
   drag-and-drop, custom cells, scrolling, LTR/RTL, and light/dark themes.
 
 # package version
-version: 1.0.2
+version: 2.0.0
 
 # package homepage, repository and issue tracker
 homepage: https://geniussystems24.github.io/super_tree_field
@@ -27,17 +27,23 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.0
   # Shared GeniusLink design-system foundation (theme, tokens, type, widgets).
   super_core: ">=3.6.0 <4.0.0"
   super_form_field: ">=1.11.1 <2.0.0"
 
 dev_dependencies:
+  intl_utils: ^2.8.14
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
+  # The following section is specific to Flutter.
+  generate: true # Add this line
   assets:
     - assets/logo-mark.png
     - assets/logo-mark-white.png
@@ -67,3 +73,6 @@ flutter:
   #   - family: NotoNaskhArabic
   #     fonts:
   #       - asset: assets/fonts/NotoNaskhArabic-Regular.ttf
+
+
+include: l10n.yaml

@@ -14,17 +14,20 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
-import 'package:super_core/super_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:super_core/super_core.dart';
 import 'package:super_form_field/localization/generated/l10n.dart';
+import 'package:super_tree_field/localization/localizations.dart';
 
 import 'file_tree_demo.dart';
 import 'org_tree_demo.dart';
 import 'permission_tree_demo.dart';
 import 'product_tree_demo.dart';
 import 'scroll_tree_demo.dart';
+import 'tree_context_menu_demo.dart';
 import 'account/super_tree_demo.dart';
-import 'responsive_example_layout.dart';
+import 'package:super_tree_field/super_tree.dart';
+import 'localization/localizations.dart';
 
 /// Runs the Super Tree example gallery.
 void main() => runApp(const ExampleApp());
@@ -40,25 +43,26 @@ class ExampleApp extends StatefulWidget {
 
 class _ExampleAppState extends State<ExampleApp> {
   ThemeMode _mode = ThemeMode.dark;
-  TextDirection _dir = TextDirection.ltr;
+  Locale _locale = const Locale('en');
 
   void _toggleTheme() => setState(
     () => _mode = _mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark,
   );
-  void _toggleDir() => setState(
-    () => _dir = _dir == TextDirection.ltr
-        ? TextDirection.rtl
-        : TextDirection.ltr,
+  void _toggleLocale() => setState(
+    () => _locale = _locale.languageCode == 'en'
+        ? const Locale('ar')
+        : const Locale('en'),
   );
 
-  @override
+@override
   Widget build(BuildContext context) {
-    final textTheme = SuperTextTheme(isArabic: _dir == TextDirection.rtl);
+    final isArabic = _locale.languageCode == 'ar';
+    final textTheme = SuperTextTheme(isArabic: isArabic);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       restorationScopeId: 'super-tree-example',
-      title: 'Super Tree',
+      title: ExampleLocalization(_locale).appTitle,
       themeMode: _mode,
       theme: SuperMaterialThemeData.light(
         textTheme: textTheme,
@@ -68,52 +72,62 @@ class _ExampleAppState extends State<ExampleApp> {
         textTheme: textTheme,
         primaryTextTheme: textTheme,
       ),
-      supportedLocales: const [Locale('en'), Locale('ar')],
+      locale: _locale,
+      supportedLocales: SuperTreeLocalization.supportedLocales,
       localizationsDelegates: const [
+        ExampleLocalization.delegate,
+        SuperTreeLocalization.delegate,
         GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
         SuperFormTranslation.delegate,
       ],
-      builder: (context, child) =>
-          Directionality(textDirection: _dir, child: child!),
       home: _Launcher(
         mode: _mode,
-        dir: _dir,
+        locale: _locale,
         onToggleTheme: _toggleTheme,
-        onToggleDir: _toggleDir,
+        onToggleLanguage: _toggleLocale,
       ),
     );
   }
 }
 
 class _Demo {
-  const _Demo(this.title, this.subtitle, this.icon, this.builder);
+  const _Demo(
+    this.title,
+    this.subtitle,
+    this.icon,
+    this.builder, {
+    this.featured = false,
+  });
+
   final String title;
   final String subtitle;
   final IconData icon;
   final WidgetBuilder builder;
+  final bool featured;
 }
 
 class _Launcher extends StatelessWidget {
   const _Launcher({
     required this.mode,
-    required this.dir,
+    required this.locale,
     required this.onToggleTheme,
-    required this.onToggleDir,
+    required this.onToggleLanguage,
   });
 
   final ThemeMode mode;
-  final TextDirection dir;
+  final Locale locale;
   final VoidCallback onToggleTheme;
-  final VoidCallback onToggleDir;
+  final VoidCallback onToggleLanguage;
 
-  static final List<_Demo> _demos = [
+  static final List<_Demo> _demos = <_Demo>[
     _Demo(
       'Account Tree',
       'Chart of accounts · KPIs · A = L + E · DR/CR · roll-up balances',
       Icons.account_tree_outlined,
       (_) => const AccountTreeDemo(),
+      featured: true,
     ),
     _Demo(
       'File Explorer',
@@ -145,52 +159,128 @@ class _Launcher extends StatelessWidget {
       Icons.swap_vert_circle_outlined,
       (_) => const ScrollTreeDemo(),
     ),
+    _Demo(
+      'Tree Context Menus',
+      'Reusable · nested · per-node context-menu customization',
+      Icons.menu_open_rounded,
+      (_) => const TreeContextMenuDemo(),
+      featured: true,
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final t = context.superTheme;
+    final spacing = SuperThemeData.of(context).spacing;
+    final l10n = context.exampleLocalization;
+
     return Scaffold(
       backgroundColor: t.bg,
-      body: ResponsiveExampleLayout(
-        maxWidth: context.superTheme.sizing.contentColumn,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'SUPER TREE \u2022 GALLERY',
-              style: context.superTextTheme.eyebrow.copyWith(
-                color: SuperMaterialThemeData.of(context).colorScheme.primary,
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  spacing.space6,
+                  spacing.space8,
+                  spacing.space6,
+                  spacing.space5,
+                ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final compact = constraints.maxWidth < 760;
+                    final identity = Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          l10n.galleryEyebrow,
+                          style: context.superTextTheme.eyebrow.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        SizedBox(height: spacing.space2),
+                        Text(
+                          l10n.galleryTitle,
+                          style: context.superTextTheme.h1.copyWith(
+                            color: t.fg1,
+                          ),
+                        ),
+                        SizedBox(height: spacing.space2),
+                        Text(
+                          locale.languageCode == 'ar'
+                              ? 'أمثلة متجاوبة لكل قدرات SuperTree مع كود الاستخدام.'
+                              : 'Responsive examples for the SuperTree API with live Dart usage code.',
+                          style: context.superTextTheme.body.copyWith(
+                            color: t.fg3,
+                          ),
+                        ),
+                      ],
+                    );
+                    final actions = Wrap(
+                      spacing: spacing.space2,
+                      runSpacing: spacing.space2,
+                      children: <Widget>[
+                        SuperButton(
+                          label: mode == ThemeMode.dark
+                              ? l10n.lightTheme
+                              : l10n.darkTheme,
+                          variant: SuperButtonVariant.secondary,
+                          onPressed: onToggleTheme,
+                        ),
+                        SuperButton(
+                          label: locale.languageCode == 'en'
+                              ? l10n.switchToArabic
+                              : l10n.switchToEnglish,
+                          variant: SuperButtonVariant.secondary,
+                          onPressed: onToggleLanguage,
+                        ),
+                      ],
+                    );
+
+                    if (compact) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          identity,
+                          SizedBox(height: spacing.space4),
+                          actions,
+                        ],
+                      );
+                    }
+
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        Expanded(child: identity),
+                        SizedBox(width: spacing.space6),
+                        actions,
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
-            SizedBox(height: context.superTheme.spacing.space2),
-            Text(
-              'Component Demos مكتبة المكونات',
-              style: context.superTextTheme.h1.copyWith(color: t.fg1),
-            ),
-            SizedBox(height: context.superTheme.spacing.space8),
-            for (final d in _demos) ...[
-              _DemoCard(demo: d),
-              SizedBox(height: context.superTheme.spacing.space3),
-            ],
-            SizedBox(height: context.superTheme.spacing.space6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SuperButton(
-                  label: mode == ThemeMode.dark ? 'Light Theme' : 'Dark Theme',
-                  variant: SuperButtonVariant.secondary,
-                  onPressed: onToggleTheme,
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                spacing.space6,
+                0,
+                spacing.space6,
+                spacing.space8,
+              ),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 440,
+                  mainAxisExtent: 176,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
                 ),
-                SizedBox(width: context.superTheme.spacing.space3),
-                SuperButton(
-                  label: dir == TextDirection.ltr
-                      ? 'العربية (RTL)'
-                      : 'English (LTR)',
-                  variant: SuperButtonVariant.secondary,
-                  onPressed: onToggleDir,
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => _DemoCard(demo: _demos[index]),
+                  childCount: _demos.length,
                 ),
-              ],
+              ),
             ),
           ],
         ),
@@ -201,75 +291,79 @@ class _Launcher extends StatelessWidget {
 
 class _DemoCard extends StatelessWidget {
   const _DemoCard({required this.demo});
+
   final _Demo demo;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final t = context.superTheme;
+    final spacing = SuperThemeData.of(context).spacing;
+    final l10n = context.exampleLocalization;
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(
-          context.superTheme.spacing.radiusCard,
+        borderRadius: BorderRadius.circular(spacing.radiusCard),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: demo.builder),
         ),
-        onTap: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute<void>(builder: demo.builder)),
         child: Container(
-          padding: EdgeInsets.all(context.superTheme.spacing.space4),
+          padding: EdgeInsets.all(spacing.space4),
           decoration: BoxDecoration(
-            color: t.surface,
-            borderRadius: BorderRadius.circular(
-              context.superTheme.spacing.radiusCard,
+            color: demo.featured
+                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.28)
+                : t.surface,
+            borderRadius: BorderRadius.circular(spacing.radiusCard),
+            border: Border.all(
+              color: demo.featured
+                  ? theme.colorScheme.primary.withValues(alpha: 0.34)
+                  : t.border,
             ),
-            border: Border.all(color: t.border),
             boxShadow: t.cardShadow,
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Color.alphaBlend(
-                    SuperMaterialThemeData.of(
-                      context,
-                    ).colorScheme.primary.withValues(alpha: 0.14),
-                    t.surface,
-                  ),
-                  borderRadius: BorderRadius.circular(
-                    context.superTheme.spacing.radiusControl,
-                  ),
-                ),
-                child: Icon(
-                  demo.icon,
-                  size: 22,
-                  color: SuperMaterialThemeData.of(context).colorScheme.primary,
-                ),
-              ),
-              SizedBox(width: context.superTheme.spacing.space4),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      demo.title,
-                      style: context.superTextTheme.heading.copyWith(
-                        color: t.fg1,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Container(
+                    width: 42,
+                    height: 42,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(
+                        spacing.radiusControl,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      demo.subtitle,
-                      style: context.superTextTheme.caption.copyWith(
-                        color: t.fg3,
-                      ),
+                    child: Icon(
+                      demo.icon,
+                      color: theme.colorScheme.onPrimaryContainer,
                     ),
-                  ],
-                ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    rtl
+                        ? Icons.arrow_back_rounded
+                        : Icons.arrow_forward_rounded,
+                    color: t.fg4,
+                  ),
+                ],
               ),
-              Icon(Icons.chevron_right, color: t.fg4),
+              const Spacer(),
+              Text(
+                l10n.translateSource(demo.title),
+                style: context.superTextTheme.heading.copyWith(color: t.fg1),
+              ),
+              SizedBox(height: spacing.space1),
+              Text(
+                l10n.translateSource(demo.subtitle),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: context.superTextTheme.caption.copyWith(color: t.fg3),
+              ),
             ],
           ),
         ),

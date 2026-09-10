@@ -12,6 +12,9 @@ import 'package:super_core/super_core.dart';
 import 'account_tree.dart';
 import '../responsive_example_layout.dart';
 
+import '../localization/localizations.dart';
+import '../widgets/demo_kit.dart';
+import '../usage_sources.dart';
 /// A scaffolded page hosting the interactive chart-of-accounts tree.
 class AccountTreeDemo extends StatelessWidget {
   /// Creates the chart-of-accounts demonstration page.
@@ -20,29 +23,17 @@ class AccountTreeDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.superTheme;
-    return Scaffold(
-      backgroundColor: t.bg,
-      appBar: AppBar(
-        backgroundColor: t.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: t.fg2),
-        title: Text(
-          'Account Tree',
-          style: context.superTextTheme.heading.copyWith(color: t.fg1),
-        ),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Hairline(),
-        ),
-      ),
+    return DemoScaffold(
+      title: context.exampleLocalization.accountTreeDemoTitle,
+      subtitle: context.exampleLocalization.accountTreeDemoSubtitle,
+      usageCode: ExampleUsageSources.accountTree,
       body: ResponsiveExampleLayout(
         maxWidth: 1040,
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'ACCOUNTING • CHART OF ACCOUNTS',
+                context.exampleLocalization.accountingEyebrow,
                 style: context.superTextTheme.eyebrow.copyWith(
                   color: SuperMaterialThemeData.of(
                     context,
@@ -51,7 +42,7 @@ class AccountTreeDemo extends StatelessWidget {
               ),
               SizedBox(height: context.superTheme.spacing.space2),
               Text(
-                'Account Tree قيد افتتاحي',
+                context.exampleLocalization.accountTreeHeading,
                 style: context.superTextTheme.h1.copyWith(color: t.fg1),
               ),
               SizedBox(height: context.superTheme.spacing.space8),

@@ -6,6 +6,55 @@ uses [Semantic Versioning](https://semver.org/).
 
 Earlier entries describe the API as it existed in those releases.
 
+## [2.0.0] - 2026-09-10
+
+### Added
+
+- Added reusable context-menu primitives: `TreeContextMenuItem`,
+  `TreeContextMenuAction`, `TreeContextMenuItemsBuilder<T>`,
+  `TreeContextMenuStyle`, and `buildDefaultTreeContextMenuItems<T>()`.
+- Added `SuperTree.contextMenuEnabled`, `contextMenuItemsBuilder`, and
+  `contextMenuStyle` so node menus can be disabled, replaced, extended,
+  filtered, reordered, and restyled without forking package widgets.
+- Added a Context Menu Scenarios example covering standalone, readable,
+  editable, replacement, extension, conditional filtering, styling,
+  disabled items, and disabled-menu use cases.
+- Added English and Arabic package localization through `lib/localization`,
+  including tree defaults, search/empty states, selection summaries, editing
+  controls, context-menu actions, and keyboard-shortcut help.
+- Added `localizeDefaultText` to `SuperTreeControls`; its explicit custom labels
+  remain unchanged while package-provided control defaults follow the locale.
+- Added localized fallback names for nodes created from the built-in editing UI
+  when no custom `newNodeBuilder` is supplied.
+
+### Changed
+
+- Refocused `SuperTree<T>` on the recursive hierarchy viewport and node-owned interaction only. Card/surface decoration and surrounding presentation are now host composition.
+- Context-menu items now support recursive `TreeContextMenuItem.children` hover/click branch opening, arbitrary nesting, RTL-aware cascading placement, viewport clamping, and overlay-based rendering.
+- Changed the default editable node menu so create commands are grouped under a localized nested `Add` branch.
+- Refactored `tree_context_menu.dart` so `showTreeContextMenu()` also
+  supports explicit standalone item lists while preserving the default
+  `SuperTreeController<T>` + `TreeNode<T>` integration.
+- Exported `SuperTreeLocalization` and the `BuildContext.superTreeLocalization`
+  extension from the package barrel.
+- Updated the example app to switch the actual `Locale` between English and
+  Arabic so package text, text direction, and typography update together.
+- Updated README and agent skill documentation with localization setup and
+  version 2.0.0 usage.
+
+### Removed
+
+- **Breaking:** removed `SuperTree.title`, `subtitle`, `titleIcon`,
+  `nameColumnLabel`, `trailingColumnLabel`, `selectionLabel`, and
+  `localizeDefaultText`.
+- **Breaking:** removed `SuperTree.unit` because it only served the removed
+  built-in header count.
+- Removed the built-in tree card/header, column-heading row, selected-node
+  footer, checked-selection summary footer, and header select-all control.
+  Hosts can compose equivalent UI from `SuperTreeController<T>` state.
+
+---
+
 ## [1.0.1] - 2026-08-16
 
 ### Fixed

@@ -1,57 +1,47 @@
 # super_tree_field
 
-[![pub package](https://img.shields.io/pub/v/super_tree_field.svg)](https://pub.dev/packages/super_tree_field)
-[![Flutter](https://img.shields.io/badge/Flutter-%E2%89%A53.32.0-02569B.svg)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-%E2%89%A53.8.0-0175C2.svg)](https://dart.dev)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+A recursive, generic, keyboard-first hierarchy component for Flutter with search, selection, editing, drag/drop, scrolling, localization, and reusable nested context menus.
 
-A generic, typed, keyboard-first tree widget for Flutter.
+Current version: **2.0.0**
 
-`super_tree_field` renders arbitrary hierarchical data through
-`TreeNode<T>`, manages interaction state with `SuperTreeController<T>`, and
-keeps domain-specific models and presentation outside the package API.
+`super_tree_field` provides a typed hierarchy model, pure tree algorithms,
+controller-owned interaction state, a recursive `SuperTree<T>` view, reusable
+rows and controls, selection, editing, drag/drop, localization, and nested
+context menus.
+
+`SuperTree<T>` is intentionally focused on the hierarchy and its nodes.
+Titles, subtitles, column headings, totals, cards, toolbars, and other
+screen-level presentation belong to the host application.
 
 ## Features
 
-- Generic `TreeNode<T>` payloads for any application domain.
-- Recursive hierarchies with unlimited practical depth.
-- Expand, collapse, expand-all, collapse-all, and subtree expansion.
-- Ancestor-preserving, case-insensitive search with inline highlighting.
-- Keyboard navigation with LTR- and RTL-aware horizontal behavior.
-- Single and multi checkbox selection with derived tristate groups.
+- Generic `TreeNode<T>` payloads.
+- Recursive hierarchy rendering.
+- Expand/collapse and subtree expansion.
+- Keyboard-first navigation and focus.
+- Automatic scrolling to keep the focused node visible.
+- Search filtering and matched-text highlighting.
+- None, single, and multi selection modes.
+- Tri-state group selection.
 - Readable and editable modes.
-- Inline rename, add, delete, and drag-and-drop tree mutations.
-- Custom leading and trailing row content.
-- Optional Arabic secondary labels.
-- Optional responsive `SuperTreeControls<T>` rendered outside the tree.
-- Configurable internal `ListView` scrolling and external `ScrollController`.
-- Light and dark design-system theming through `super_core`.
-- Text input integration through `super_form_field`.
+- Inline rename and node insertion/deletion.
+- Drag-and-drop reordering.
+- Optional external `SuperTreeControls<T>`.
+- Reusable standalone context menus.
+- Recursive nested context menus.
+- Per-node menu items, style, accent, and enabled state.
+- LTR/RTL-aware menu placement.
+- English and Arabic package localization.
+- Configurable Flutter scroll behavior.
+- `super_core` design-system integration.
 
 ## Getting started
 
-### Requirements
-
-| Requirement | Version |
-| --- | --- |
-| Dart | `>=3.8.0 <4.0.0` |
-| Flutter | `>=3.32.0` |
-| `super_core` | `>=3.3.0 <4.0.0` |
-| `super_form_field` | `^1.8.2` |
-
-### Install
-
-Add the package to `pubspec.yaml`:
+Add the package:
 
 ```yaml
 dependencies:
-  super_tree_field: ^1.0.0
-```
-
-Then run:
-
-```bash
-flutter pub get
+  super_tree_field: ^2.0.0
 ```
 
 Import the public barrel:
@@ -60,473 +50,1066 @@ Import the public barrel:
 import 'package:super_tree_field/super_tree.dart';
 ```
 
-The barrel also re-exports the `super_core` API used by the package.
-
-### Configure the theme
-
-`super_tree_field` reads colors, spacing, typography, radii, and motion from
-`SuperMaterialThemeData`. With `super_core >=3.3.0`, provide both
-`textTheme` and `primaryTextTheme` explicitly:
+## Quick start
 
 ```dart
-final textTheme = SuperTextTheme(isDesktop: true);
+class FileMeta {
+  const FileMeta({
+    required this.isDirectory,
+    this.size,
+  });
 
-MaterialApp(
-  theme: SuperMaterialThemeData.light(
-    mode: SuperDeviceMode.desktop,
-    textTheme: textTheme,
-    primaryTextTheme: textTheme,
+  final bool isDirectory;
+  final int? size;
+}
+
+final roots = <TreeNode<FileMeta>>[
+  TreeNode<FileMeta>(
+    code: 'lib',
+    name: 'lib',
+    value: const FileMeta(isDirectory: true),
+    children: const [
+      TreeNode<FileMeta>(
+        code: 'lib/main.dart',
+        name: 'main.dart',
+        value: FileMeta(
+          isDirectory: false,
+          size: 2048,
+        ),
+      ),
+    ],
   ),
-  darkTheme: SuperMaterialThemeData.dark(
-    mode: SuperDeviceMode.desktop,
-    textTheme: textTheme,
-    primaryTextTheme: textTheme,
-  ),
-  home: const ProjectTreePage(),
+];
+
+final controller = SuperTreeController<FileMeta>(
+  roots: roots,
+  searchText: (node) =>
+      '${node.code} ${node.name} ${node.ar ?? ''}',
+  defaultExpandDepth: 1,
+  onOpenLeaf: (node) {
+    // Open the selected item.
+  },
+);
+
+SuperTree<FileMeta>(
+  controller: controller,
+  leadingBuilder: (context, node, info) {
+    return Icon(
+      node.hasChildren
+          ? Icons.folder_outlined
+          : Icons.insert_drive_file_outlined,
+    );
+  },
+  trailingBuilder: (context, node, info) {
+    final size = node.value?.size;
+    return size == null ? null : Text('$size B');
+  },
 );
 ```
 
-For adaptive applications, resolve the device mode from the available width and
-rebuild the application theme when the active breakpoint changes:
+Dispose controllers owned by the host widget:
 
 ```dart
-final mode = SuperDeviceMode.forWidth(width);
+@override
+void dispose() {
+  controller.dispose();
+  super.dispose();
+}
 ```
 
-Use `context.superTextTheme` to read typography. Do not use the removed
-`SuperThemeData.textTheme` API from older `super_core` releases.
+## Public API
 
-## Usage
+| Component | Purpose |
+| --- | --- |
+| `TreeNode<T>` | Immutable generic hierarchy node. |
+| `TreeLogic` | Pure tree algorithms and immutable transforms. |
+| `DropPosition` | Before/inside/after drag target position. |
+| `SearchText<T>` | Node search-text extractor. |
+| `LeafValue<T>` | Numeric leaf extractor for rollups. |
+| `SuperTreeController<T>` | Expansion, search, focus, selection, and editing state. |
+| `SuperTreeMode` | Readable or editable mode. |
+| `SuperTreeSelectionMode` | None, single, or multi selection. |
+| `TreeCheckState` | Unchecked, partial, or checked state. |
+| `SuperTree<T>` | Main hierarchy viewport. |
+| `TreeRow<T>` | Reusable recursive row. |
+| `TreeRowInfo` | Depth/open/children metadata supplied to builders. |
+| `TreeSlotBuilder<T>` | Leading-cell builder. |
+| `TreeTrailingBuilder<T>` | Trailing-content builder. |
+| `TreeCheckbox` | Standalone tri-state tree checkbox. |
+| `HighlightText` | Search-match highlighting widget. |
+| `SuperTreeControlsController` | Search state for external controls. |
+| `SuperTreeControls<T>` | Optional search/edit/help/expand toolbar. |
+| `TreeContextMenuAction` | Stable IDs for built-in menu actions. |
+| `TreeContextMenuItem` | Reusable menu leaf or submenu branch. |
+| `TreeContextMenuItemsBuilder<T>` | Per-node menu-items builder. |
+| `TreeContextMenuStyle` | Menu geometry and visual configuration. |
+| `TreeContextMenuNodeContext<T>` | Full node context for menu policy. |
+| `TreeContextMenuConfig` | Per-node menu overrides. |
+| `TreeContextMenuConfigBuilder<T>` | Complete per-node menu configurator. |
+| `buildDefaultTreeContextMenuItems()` | Builds localized package-default actions. |
+| `showTreeContextMenu()` | Opens a tree-aware or standalone menu. |
+| `showShortcutsHelp()` | Opens the keyboard-shortcuts dialog. |
+| `SuperTreeLocalization` | Package localization API. |
+| `lookupSuperTreeLocalization()` | Resolves package localization for an explicit locale. |
+| `SuperTreeLocalizationBuildContext` | Localization convenience extension. |
 
-### 1. Define typed nodes
+## TreeNode<T>
 
-Every node has a stable `code`, a primary `name`, an optional Arabic label,
-an optional typed `value`, and optional children:
+`TreeNode<T>` is the immutable hierarchy entity. `code` must be unique across
+the tree.
 
 ```dart
-@immutable
-class FileInfo {
-  const FileInfo({required this.isDirectory, this.sizeLabel});
+const node = TreeNode<double>(
+  code: 'assets/cash',
+  name: 'Cash',
+  ar: 'النقدية',
+  value: 12500,
+);
 
-  final bool isDirectory;
-  final String? sizeLabel;
+final renamed = node.renamed(
+  'Cash and equivalents',
+  ar: 'النقد وما في حكمه',
+);
+
+final branch = TreeNode<String>(
+  code: 'settings',
+  name: 'Settings',
+  children: const [
+    TreeNode<String>(
+      code: 'settings/profile',
+      name: 'Profile',
+      value: 'profile',
+    ),
+  ],
+);
+
+print(branch.hasChildren);
+print(branch.isLeaf);
+```
+
+Use `copyWith()` and `withChildren()` for immutable transforms.
+
+## TreeLogic
+
+`TreeLogic` is widget-free and can be used independently.
+
+```dart
+final count = TreeLogic.leafCount(branch);
+final leafCodes = TreeLogic.leafCodes(branch);
+
+final groups = TreeLogic.groupCodes(
+  roots,
+  maxDepth: 2,
+);
+
+final filtered = TreeLogic.filter(
+  roots,
+  'main',
+  (node) => '${node.code} ${node.name}',
+);
+
+final visible = TreeLogic.flattenVisible(
+  roots,
+  {'lib', 'lib/src'},
+  false,
+);
+
+final parent = TreeLogic.parentOf(
+  roots,
+  'lib/main.dart',
+);
+
+final found = TreeLogic.findNode(
+  roots,
+  'lib/main.dart',
+);
+```
+
+Numeric rollup:
+
+```dart
+LeafValue<double> leafValue =
+    (node) => node.value ?? 0;
+
+final total = TreeLogic.rollup<double>(
+  accountRoot,
+  leafValue,
+);
+```
+
+Immutable editing:
+
+```dart
+final renamedRoots = TreeLogic.mapNode(
+  roots,
+  'lib/main.dart',
+  (node) => node.renamed('app.dart'),
+);
+
+final withoutNode = TreeLogic.removeNode(
+  roots,
+  'lib/old.dart',
+);
+
+final withChild = TreeLogic.insertChild(
+  roots,
+  'lib',
+  newNode,
+);
+
+final withSibling = TreeLogic.insertSibling(
+  roots,
+  'lib/main.dart',
+  newNode,
+  after: true,
+);
+
+final moved = TreeLogic.moveNode(
+  roots,
+  'lib/a.dart',
+  'lib/b.dart',
+  DropPosition.after,
+);
+```
+
+### DropPosition
+
+```dart
+const drop = DropPosition.inside;
+
+switch (drop) {
+  case DropPosition.before:
+    break;
+  case DropPosition.inside:
+    break;
+  case DropPosition.after:
+    break;
 }
+```
 
-const projectTree = <TreeNode<FileInfo>>[
-  TreeNode<FileInfo>(
-    code: 'lib',
-    name: 'lib',
-    value: FileInfo(isDirectory: true),
+### SearchText<T>
+
+```dart
+SearchText<FileMeta> searchText =
+    (node) => '${node.code} ${node.name}';
+```
+
+### LeafValue<T>
+
+```dart
+LeafValue<double> amount =
+    (node) => node.value ?? 0;
+```
+
+## SuperTreeController<T>
+
+```dart
+final controller = SuperTreeController<FileMeta>(
+  roots: roots,
+  searchText: (node) => '${node.code} ${node.name}',
+  mode: SuperTreeMode.editable,
+  selectionMode: SuperTreeSelectionMode.multi,
+  initialChecked: {'lib/main.dart'},
+  onOpenLeaf: (node) => openFile(node),
+  onTreeChanged: (newRoots) => saveTree(newRoots),
+  onSelectionChanged: (checked) {
+    debugPrint('$checked');
+  },
+  newNodeBuilder: (code) => TreeNode<FileMeta>(
+    code: code,
+    name: 'Untitled',
+    value: const FileMeta(isDirectory: false),
+  ),
+);
+```
+
+Expansion and search:
+
+```dart
+controller.toggle('lib');
+controller.expandSubtree('lib');
+controller.expandAll();
+controller.collapseAll();
+
+controller.setQuery('main');
+controller.clearQuery();
+
+print(controller.visible);
+print(controller.matchCount);
+print(controller.totalLeaves);
+print(controller.visibleLeaves);
+```
+
+Focus and activation:
+
+```dart
+controller.setFocus('lib/main.dart');
+controller.moveDown();
+controller.moveUp();
+controller.jumpFirst();
+controller.jumpLast();
+controller.stepInto();
+controller.stepOut();
+controller.activate();
+```
+
+Selection:
+
+```dart
+controller.toggleChecked(node);
+controller.toggleCheckedFocused();
+controller.checkAll();
+controller.clearChecked();
+controller.toggleCheckAll();
+
+controller.setChecked({
+  'lib/main.dart',
+  'lib/app.dart',
+});
+
+final checked = controller.checked;
+final nodes = controller.checkedNodes;
+final state = controller.checkState('lib');
+```
+
+Editing:
+
+```dart
+controller.setMode(SuperTreeMode.editable);
+
+controller.beginRename('lib/main.dart');
+controller.commitRename(
+  'lib/main.dart',
+  'app.dart',
+);
+
+controller.addChild('lib');
+controller.addSiblingBefore('lib/main.dart');
+controller.addSiblingAfter('lib/main.dart');
+controller.addRoot();
+
+controller.deleteNode('lib/old.dart');
+
+if (controller.canDrop(
+  'lib/a.dart',
+  'lib/b.dart',
+)) {
+  controller.moveNode(
+    'lib/a.dart',
+    'lib/b.dart',
+    DropPosition.after,
+  );
+}
+```
+
+## SuperTreeMode
+
+```dart
+controller.setMode(SuperTreeMode.readable);
+controller.setMode(SuperTreeMode.editable);
+controller.toggleMode();
+```
+
+## SuperTreeSelectionMode
+
+```dart
+final controller = SuperTreeController<String>(
+  roots: roots,
+  searchText: (node) => node.name,
+  selectionMode: SuperTreeSelectionMode.multi,
+);
+```
+
+Available values:
+
+```dart
+SuperTreeSelectionMode.none
+SuperTreeSelectionMode.single
+SuperTreeSelectionMode.multi
+```
+
+## TreeCheckState
+
+```dart
+final state = controller.checkState(node.code);
+
+final icon = switch (state) {
+  TreeCheckState.unchecked =>
+    Icons.check_box_outline_blank,
+  TreeCheckState.partial =>
+    Icons.indeterminate_check_box,
+  TreeCheckState.checked =>
+    Icons.check_box,
+};
+```
+
+## SuperTree<T>
+
+`SuperTree<T>` owns tree and node interaction only.
+
+```dart
+Card(
+  child: Padding(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Project files',
+          style: Theme.of(context)
+              .textTheme
+              .titleLarge,
+        ),
+        const SizedBox(height: 12),
+        Expanded(
+          child: SuperTree<FileMeta>(
+            controller: controller,
+            leadingBuilder: buildLeading,
+            trailingBuilder: buildTrailing,
+            showArabic: true,
+            showLeafCount: true,
+            onSearchRequested:
+                controls.requestSearchFocus,
+            onShortcutsRequested:
+                () => showShortcutsHelp(context),
+          ),
+        ),
+      ],
+    ),
+  ),
+);
+```
+
+### Scrolling
+
+The widget exposes Flutter scroll configuration directly:
+
+```dart
+final scrollController = ScrollController();
+
+SuperTree<FileMeta>(
+  controller: controller,
+  leadingBuilder: buildLeading,
+  scrollController: scrollController,
+  primary: false,
+  physics: const ClampingScrollPhysics(),
+  reverse: false,
+  shrinkWrap: false,
+  cacheExtent: 600,
+  restorationId: 'file-tree-scroll',
+  keyboardDismissBehavior:
+      ScrollViewKeyboardDismissBehavior.onDrag,
+);
+```
+
+The focused row is kept visible when focus changes, including when a
+shrink-wrapped tree is inside another scrollable.
+
+## TreeRowInfo
+
+```dart
+Widget buildLeading(
+  BuildContext context,
+  TreeNode<FileMeta> node,
+  TreeRowInfo info,
+) {
+  return Icon(
+    info.hasChildren
+        ? (info.open
+            ? Icons.folder_open_outlined
+            : Icons.folder_outlined)
+        : Icons.description_outlined,
+  );
+}
+```
+
+## TreeSlotBuilder<T>
+
+```dart
+TreeSlotBuilder<FileMeta> leadingBuilder =
+    (context, node, info) {
+  return Icon(
+    info.hasChildren
+        ? Icons.folder_outlined
+        : Icons.description_outlined,
+  );
+};
+```
+
+## TreeTrailingBuilder<T>
+
+```dart
+TreeTrailingBuilder<FileMeta> trailingBuilder =
+    (context, node, info) {
+  if (info.hasChildren) return null;
+  return Text('${node.value?.size ?? 0} B');
+};
+```
+
+## TreeRow<T>
+
+`TreeRow<T>` is available for advanced host compositions.
+
+```dart
+TreeRow<FileMeta>(
+  node: roots.first,
+  depth: 0,
+  controller: controller,
+  accent: Theme.of(context)
+      .colorScheme
+      .primary,
+  leadingBuilder: buildLeading,
+  trailingBuilder: buildTrailing,
+  showArabic: true,
+  showLeafCount: true,
+  onFocusRequest:
+      focusNode.requestFocus,
+);
+```
+
+Prefer `SuperTree<T>` for normal usage because it wires the full viewport,
+keyboard model, empty/search state, and root rows.
+
+## TreeCheckbox
+
+```dart
+TreeCheckbox(
+  state: controller.checkState(node.code),
+  accent: Theme.of(context)
+      .colorScheme
+      .primary,
+  onTap: () => controller.toggleChecked(node),
+);
+```
+
+## HighlightText
+
+```dart
+HighlightText(
+  text: node.name,
+  query: controller.query,
+  style: Theme.of(context)
+      .textTheme
+      .bodyMedium!,
+  overflow: TextOverflow.ellipsis,
+);
+```
+
+## SuperTreeControlsController
+
+```dart
+final controls = SuperTreeControlsController(
+  query: controller.query,
+);
+
+controls.requestSearchFocus();
+
+@override
+void dispose() {
+  controls.dispose();
+  controller.dispose();
+  super.dispose();
+}
+```
+
+## SuperTreeControls<T>
+
+The optional toolbar is composed outside `SuperTree`.
+
+```dart
+Column(
+  children: [
+    SuperTreeControls<FileMeta>(
+      controller: controller,
+      controlsController: controls,
+      placeholder: 'Search project files…',
+      samples: const [
+        'lib',
+        'test',
+        '.dart',
+      ],
+      enableEditing: true,
+      extra: Text(
+        '${controller.visibleLeaves} visible leaves',
+      ),
+    ),
+    const SizedBox(height: 12),
+    Expanded(
+      child: SuperTree<FileMeta>(
+        controller: controller,
+        leadingBuilder: buildLeading,
+        onSearchRequested:
+            controls.requestSearchFocus,
+        onShortcutsRequested:
+            () => showShortcutsHelp(context),
+      ),
+    ),
+  ],
+);
+```
+
+`localizeDefaultText: false` keeps fixed default control labels instead of
+resolving package defaults from the active locale.
+
+## Context menus
+
+### TreeContextMenuAction
+
+Filter built-in actions by stable ID, not by translated label:
+
+```dart
+final withoutDelete = defaults.where(
+  (item) =>
+      item.id != TreeContextMenuAction.delete,
+);
+```
+
+## TreeContextMenuItem
+
+```dart
+final items = <TreeContextMenuItem>[
+  TreeContextMenuItem(
+    id: 'open',
+    label: 'Open',
+    leading:
+        const Icon(Icons.open_in_new),
+    onTap: openCurrent,
+  ),
+  TreeContextMenuItem(
+    id: 'create',
+    label: 'Create',
+    leading: const Icon(Icons.add),
     children: [
-      TreeNode<FileInfo>(
-        code: 'lib/main.dart',
-        name: 'main.dart',
-        value: FileInfo(isDirectory: false, sizeLabel: '2.4 KB'),
+      TreeContextMenuItem(
+        id: 'file',
+        label: 'File',
+        onTap: createFile,
+      ),
+      TreeContextMenuItem(
+        id: 'folder',
+        label: 'Folder',
+        onTap: createFolder,
       ),
     ],
   ),
 ];
 ```
 
-`TreeNode.code` must be unique across the complete tree. Expansion, focus,
-selection, editing, and drag-and-drop identity all depend on it.
+`children` can recursively contain more branch items.
 
-Useful node APIs include `hasChildren`, `isLeaf`, `withChildren`, `copyWith`,
-and `renamed`.
-
-### 2. Create and dispose the controllers
-
-Create controllers once in `State`, not in `build()`, and dispose every
-controller that the host owns:
+## TreeContextMenuItemsBuilder<T>
 
 ```dart
-class ProjectTreePage extends StatefulWidget {
-  const ProjectTreePage({super.key});
+TreeContextMenuItemsBuilder<FileMeta>
+    menuItemsBuilder =
+    (context, controller, node) {
+  final defaults =
+      buildDefaultTreeContextMenuItems<FileMeta>(
+    context: context,
+    controller: controller,
+    node: node,
+  );
 
-  @override
-  State<ProjectTreePage> createState() => _ProjectTreePageState();
-}
-
-class _ProjectTreePageState extends State<ProjectTreePage> {
-  late final SuperTreeController<FileInfo> _treeController;
-  late final SuperTreeControlsController _controlsController;
-
-  @override
-  void initState() {
-    super.initState();
-    _treeController = SuperTreeController<FileInfo>(
-      roots: projectTree,
-      defaultExpandDepth: 0,
-      searchText: (node) => '${node.code} ${node.name}',
-      onOpenLeaf: (node) => debugPrint('Open ${node.code}'),
-    );
-    _controlsController = SuperTreeControlsController();
-  }
-
-  @override
-  void dispose() {
-    _controlsController.dispose();
-    _treeController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              SuperTreeControls<FileInfo>(
-                controller: _treeController,
-                controlsController: _controlsController,
-                placeholder: 'Search project files',
-                samples: const ['lib', 'main.dart'],
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: SuperTree<FileInfo>(
-                  controller: _treeController,
-                  title: 'Project files',
-                  nameColumnLabel: 'Name',
-                  trailingColumnLabel: 'Size',
-                  unit: 'files',
-                  showArabic: false,
-                  onSearchRequested:
-                      _controlsController.requestSearchFocus,
-                  onShortcutsRequested: () => showShortcutsHelp(context),
-                  leadingBuilder: (context, node, info) {
-                    final isDirectory =
-                        node.value?.isDirectory ?? node.hasChildren;
-                    return Icon(
-                      isDirectory
-                          ? (info.open ? Icons.folder_open : Icons.folder)
-                          : Icons.description_outlined,
-                      size: 18,
-                    );
-                  },
-                  trailingBuilder: (context, node, info) {
-                    final size = node.value?.sizeLabel;
-                    return size == null ? null : Text(size);
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+  return [
+    ...defaults.where(
+      (item) =>
+          item.id !=
+          TreeContextMenuAction.delete,
+    ),
+    TreeContextMenuItem(
+      id: 'properties',
+      label: 'Properties',
+      dividerAbove: true,
+      onTap: () => openProperties(node),
+    ),
+  ];
+};
 ```
 
-`SuperTree` renders the hierarchy only. `SuperTreeControls` is an optional,
-separate toolbar that provides responsive search, quick-query chips, editing
-controls, keyboard help, and expand/collapse actions.
-
-### Build custom controls
-
-You do not have to use `SuperTreeControls`. Any host UI can drive the public
-controller API directly:
+Use it directly on the tree:
 
 ```dart
-controller.setQuery(query);
-controller.clearQuery();
-controller.expandAll();
-controller.collapseAll();
-controller.setMode(SuperTreeMode.editable);
-controller.addRoot();
-```
-
-Connect host-owned search and help UI to keyboard shortcuts with
-`onSearchRequested` and `onShortcutsRequested`.
-
-## Controller state
-
-`SuperTreeController<T>` extends `ChangeNotifier` and owns the hierarchy's
-interaction state.
-
-Common reads:
-
-```dart
-controller.roots;
-controller.visible;
-controller.query;
-controller.matchCount;
-controller.focusId;
-controller.selected;
-controller.mode;
-controller.editingId;
-controller.checked;
-controller.checkedCount;
-```
-
-Common updates:
-
-```dart
-controller.setRoots(updatedRoots);
-controller.setQuery('settings');
-controller.clearQuery();
-controller.setMode(SuperTreeMode.editable);
-controller.toggleMode();
-controller.expandAll();
-controller.collapseAll();
-controller.expandSubtree('root.tools');
-```
-
-Supply `onTreeChanged` when structural edits must be persisted, and
-`onSelectionChanged` when checkbox selection must be synchronized with
-application state.
-
-## Search
-
-Search text is application-defined:
-
-```dart
-final controller = SuperTreeController<MyItem>(
-  roots: roots,
-  searchText: (node) => [
-    node.code,
-    node.name,
-    node.ar,
-    node.value?.searchLabel,
-  ].whereType<String>().join(' '),
-);
-```
-
-Search is case-insensitive and ancestor-preserving. A matching descendant keeps
-its path visible, and filtered branches render expanded for the duration of the
-query.
-
-## Selection
-
-Configure selection when the controller is created:
-
-```dart
-final controller = SuperTreeController<Permission>(
-  roots: permissions,
-  searchText: (node) => node.name,
-  selectionMode: SuperTreeSelectionMode.multi,
-  initialChecked: const {'permission.read'},
-  onSelectionChanged: persistSelection,
-);
-```
-
-| Mode | Behavior |
-| --- | --- |
-| `SuperTreeSelectionMode.none` | No checkboxes. This is the default. |
-| `SuperTreeSelectionMode.single` | At most one node code is checked. |
-| `SuperTreeSelectionMode.multi` | Groups derive checked, partial, or unchecked state from descendant leaves. |
-
-Useful APIs include `checkState`, `isChecked`, `rootCheckState`,
-`toggleChecked`, `toggleCheckedFocused`, `checkAll`, `clearChecked`,
-`toggleCheckAll`, and `setChecked`.
-
-## Editing
-
-Editing is controlled by `SuperTreeController.mode`; the tree does not render a
-built-in Read/Edit switch or Add button.
-
-Provide `newNodeBuilder` when newly created nodes require a non-null typed
-payload:
-
-```dart
-final controller = SuperTreeController<Category>(
-  roots: categories,
-  searchText: (node) => node.name,
-  newNodeBuilder: (code) => TreeNode<Category>(
-    code: code,
-    name: 'New category',
-    value: const Category(),
-  ),
-  onTreeChanged: saveTree,
-);
-```
-
-Editable mode supports:
-
-- Inline rename.
-- Add root, child, sibling before, and sibling after.
-- Delete a node and its subtree.
-- Drag-and-drop before, inside, or after another node.
-- Context-menu editing actions.
-
-Programmatic editing APIs include `beginRename`, `commitRename`,
-`cancelRename`, `addRoot`, `addChild`, `addSiblingBefore`, `addSiblingAfter`,
-`deleteNode`, `moveNode`, and `canDrop`.
-
-Structural editing is intentionally unavailable while a search projection is
-active. Clear the query before restructuring the hierarchy.
-
-## Custom row content
-
-`leadingBuilder` is required. `trailingBuilder` is optional. Both receive a
-`TreeRowInfo` describing the rendered row:
-
-```dart
-SuperTree<MyItem>(
+SuperTree<FileMeta>(
   controller: controller,
-  leadingBuilder: (context, node, info) {
-    return Icon(info.hasChildren ? Icons.folder : Icons.description);
-  },
-  trailingBuilder: (context, node, info) {
-    return Text(node.value?.statusLabel ?? '');
-  },
+  leadingBuilder: buildLeading,
+  contextMenuItemsBuilder:
+      menuItemsBuilder,
 );
 ```
 
-`TreeRowInfo` exposes `depth`, `open`, and `hasChildren`.
-
-## Scrolling
-
-There are two different controller roles:
-
-- `controller` is the required `SuperTreeController<T>` for hierarchy state.
-- `scrollController` is an optional Flutter `ScrollController` for the tree's
-  internal vertical `ListView`.
-
-### Let the tree own scrolling
-
-Give the tree bounded height through `Expanded`, `Flexible`, or `SizedBox`:
+## TreeContextMenuStyle
 
 ```dart
-Expanded(
-  child: SuperTree<MyItem>(
-    controller: controller,
-    scrollController: scrollController,
-    physics: const BouncingScrollPhysics(),
-    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-    restorationId: 'project-tree',
-    leadingBuilder: buildLeading,
+const menuStyle = TreeContextMenuStyle(
+  width: 280,
+  edgePadding: 12,
+  submenuGap: 6,
+  itemPadding: EdgeInsets.symmetric(
+    horizontal: 12,
+    vertical: 9,
   ),
+  borderWidth: 1,
+  disabledOpacity: 0.4,
 );
 ```
-
-The host owns and disposes an explicitly created `ScrollController`.
-
-### Let a parent own scrolling
-
-When `SuperTree` is inside another vertical scroll view, make ownership
-explicit:
 
 ```dart
-SingleChildScrollView(
-  child: SuperTree<MyItem>(
-    controller: controller,
-    shrinkWrap: true,
-    primary: false,
-    physics: const NeverScrollableScrollPhysics(),
-    leadingBuilder: buildLeading,
-  ),
+SuperTree<FileMeta>(
+  controller: controller,
+  leadingBuilder: buildLeading,
+  contextMenuStyle: menuStyle,
 );
 ```
 
-`SuperTree` also falls back to shrink-wrapping when it receives unbounded
-vertical constraints.
+## TreeContextMenuNodeContext<T>
 
-The 1.0.0 scroll pass-through API is:
+The per-node configuration builder receives the complete context:
 
-| Parameter | Default |
-| --- | --- |
-| `reverse` | `false` |
-| `scrollController` | `null` |
-| `primary` | `null` |
-| `physics` | `null` |
-| `shrinkWrap` | `false` |
-| `cacheExtent` | `null` |
-| `semanticChildCount` | `null` |
-| `dragStartBehavior` | `DragStartBehavior.start` |
-| `keyboardDismissBehavior` | `null` → `ScrollViewKeyboardDismissBehavior.manual` |
-| `restorationId` | `null` |
-| `clipBehavior` | `Clip.hardEdge` |
-| `hitTestBehavior` | `HitTestBehavior.opaque` |
+```dart
+TreeContextMenuConfigBuilder<FileMeta>
+    inspectMenu = (menu) {
+  final node = menu.node;
+  final defaults =
+      menu.packageDefaultItems;
+  final base = menu.baseItems;
 
-Do not combine `primary: true` with an explicit `scrollController`.
+  debugPrint(node.code);
+  debugPrint('${defaults.length}');
+  debugPrint('${base.length}');
+
+  return const TreeContextMenuConfig();
+};
+```
+
+It also provides `context`, `controller`, `defaultStyle`, and
+`defaultAccent`.
+
+## TreeContextMenuConfig
+
+```dart
+contextMenuConfigBuilder: (menu) {
+  if (menu.node.code == 'protected') {
+    return const TreeContextMenuConfig.disabled();
+  }
+
+  if (menu.node.hasChildren) {
+    return TreeContextMenuConfig(
+      style: const TreeContextMenuStyle(
+        width: 300,
+      ),
+      accent: Theme.of(menu.context)
+          .colorScheme
+          .secondary,
+      items: [
+        ...menu.baseItems,
+        TreeContextMenuItem(
+          id: 'folder-info',
+          label: 'Folder information',
+          onTap: () =>
+              showFolderInfo(menu.node),
+        ),
+      ],
+    );
+  }
+
+  return const TreeContextMenuConfig();
+},
+```
+
+## TreeContextMenuConfigBuilder<T>
+
+```dart
+TreeContextMenuConfigBuilder<FileMeta>
+    menuPolicy = (menu) {
+  if (menu.node.value?.isDirectory == true) {
+    return TreeContextMenuConfig(
+      items: [
+        ...menu.baseItems,
+        TreeContextMenuItem(
+          id: 'new-file',
+          label: 'New file here',
+          onTap: () =>
+              createFileIn(menu.node),
+        ),
+      ],
+    );
+  }
+
+  return const TreeContextMenuConfig();
+};
+```
+
+```dart
+SuperTree<FileMeta>(
+  controller: controller,
+  leadingBuilder: buildLeading,
+  contextMenuConfigBuilder: menuPolicy,
+);
+```
+
+## buildDefaultTreeContextMenuItems()
+
+```dart
+final defaults =
+    buildDefaultTreeContextMenuItems<FileMeta>(
+  context: context,
+  controller: controller,
+  node: node,
+);
+
+final safeItems = defaults
+    .where(
+      (item) =>
+          item.id !=
+          TreeContextMenuAction.delete,
+    )
+    .toList();
+```
+
+## showTreeContextMenu()
+
+Use the menu independently from `SuperTree`:
+
+```dart
+GestureDetector(
+  onSecondaryTapDown: (details) {
+    showTreeContextMenu<void>(
+      context: context,
+      globalPosition:
+          details.globalPosition,
+      items: [
+        TreeContextMenuItem(
+          label: 'Refresh',
+          leading:
+              const Icon(Icons.refresh),
+          onTap: refresh,
+        ),
+        TreeContextMenuItem(
+          label: 'More',
+          children: [
+            TreeContextMenuItem(
+              label: 'Details',
+              onTap: openDetails,
+            ),
+          ],
+        ),
+      ],
+    );
+  },
+  child: const Text('Right-click me'),
+);
+```
 
 ## Keyboard shortcuts
 
-The tree must have focus before tree-navigation shortcuts are handled.
-
-| Shortcut | Action |
+| Key | Action |
 | --- | --- |
 | `↑` / `↓` | Move between visible rows. |
-| `←` / `→` | Collapse or step out / expand or step in. Direction is RTL-aware. |
-| `Home` / `End` | Jump to the first or last visible row. |
-| `Enter` | Open a leaf or toggle a group. |
-| `Space` | Toggle the focused checkbox in selection mode; otherwise activate the row. |
-| `/` | Calls `onSearchRequested` when provided. |
-| `*` | Expand all groups. |
-| `\` | Collapse all groups. |
-| `?` | Calls `onShortcutsRequested` when provided. |
-| Right-click / long-press | Open the node context menu. |
+| `←` / `→` | Collapse or expand according to text direction. |
+| `Home` / `End` | Jump to first or last visible row. |
+| `Enter` / `Space` | Activate the focused node. |
+| `Space` | Toggle checkbox selection when applicable. |
+| `/` | Request focus for host search UI. |
+| `*` | Expand all. |
+| `\` | Collapse all. |
+| `?` | Request keyboard help. |
 
-When `SuperTreeControls` owns the search field, `Esc` clears the active search
-while that field has focus.
+## showShortcutsHelp()
 
-## Tree algorithms
-
-`TreeLogic` contains pure, widget-free hierarchy operations. Useful methods
-include:
-
-- `filter` and `countMatches` for search.
-- `flattenVisible` and `parentOf` for navigation.
-- `leafCount`, `leafCodes`, and `groupCodes` for derived state.
-- `rollup` for generic numeric aggregation over leaves.
-- `findNode`, `mapNode`, `removeNode`, `insertChild`, and `insertSibling` for
-  immutable edits.
-- `moveNode` and `isWithin` for safe drag-and-drop transforms.
-
-## Examples
-
-The runnable `example/` application demonstrates different payloads and
-interaction models without adding those domains to the package API:
-
-- `file_tree_demo.dart` — editable file hierarchy.
-- `org_tree_demo.dart` — organization hierarchy.
-- `permission_tree_demo.dart` — single and multi checkbox selection.
-- `product_tree_demo.dart` — bilingual product/catalog hierarchy.
-- `scroll_tree_demo.dart` — bounded scrolling and `ScrollController` usage.
-
-Run the gallery from the package root:
-
-```bash
-cd example
-flutter pub get
-flutter run
+```dart
+SuperTree<FileMeta>(
+  controller: controller,
+  leadingBuilder: buildLeading,
+  onShortcutsRequested:
+      () => showShortcutsHelp(context),
+);
 ```
+
+Or open it from host UI:
+
+```dart
+IconButton(
+  icon: const Icon(
+    Icons.keyboard_command_key,
+  ),
+  onPressed:
+      () => showShortcutsHelp(context),
+);
+```
+
+## SuperTreeLocalization
+
+Package-owned text is localized in English and Arabic.
+
+```dart
+MaterialApp(
+  locale: locale,
+  localizationsDelegates:
+      SuperTreeLocalization.localizationsDelegates,
+  supportedLocales:
+      SuperTreeLocalization.supportedLocales,
+  home: const MyHomePage(),
+);
+```
+
+If the host owns the full delegate list:
+
+```dart
+MaterialApp(
+  locale: locale,
+  localizationsDelegates: const [
+    SuperTreeLocalization.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales:
+      SuperTreeLocalization.supportedLocales,
+  home: const MyHomePage(),
+);
+```
+
+## lookupSuperTreeLocalization()
+
+Resolve package strings without a `BuildContext` when an explicit locale is
+already available:
+
+```dart
+final l10n = lookupSuperTreeLocalization(
+  const Locale('ar'),
+);
+
+print(l10n.treeEmpty);
+```
+
+
+### SuperTreeLocalizationBuildContext
+
+The exported extension provides direct access through `BuildContext`:
+
+```dart
+final l10n = context.superTreeLocalization;
+
+Text(l10n.keyboardShortcuts);
+```
+
+
+### superTreeEnglishLocalizationFallback
+
+Use the English fallback only when package localization is unavailable in the
+current context:
+
+```dart
+final emptyMessage =
+    superTreeEnglishLocalizationFallback.treeEmpty;
+```
+
+Application-specific titles, node labels, custom menu labels, and page text
+remain owned by the host application's localization layer.
+
+## Host composition
+
+Screen-level presentation stays outside the tree:
+
+```dart
+AnimatedBuilder(
+  animation: controller,
+  builder: (context, _) {
+    return Column(
+      crossAxisAlignment:
+          CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Files',
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall,
+        ),
+        Text(
+          '${controller.checkedCount} selected · '
+          '${controller.totalLeaves} leaves',
+        ),
+        const SizedBox(height: 12),
+        SuperTreeControls<FileMeta>(
+          controller: controller,
+          controlsController: controls,
+        ),
+        const SizedBox(height: 12),
+        Expanded(
+          child: SuperTree<FileMeta>(
+            controller: controller,
+            leadingBuilder: buildLeading,
+            trailingBuilder: buildTrailing,
+          ),
+        ),
+      ],
+    );
+  },
+);
+```
+
+This lets the same tree work inside cards, dialogs, settings pages, desktop
+panels, mobile screens, and domain-specific layouts.
+
+## Complete component coverage
+
+The README generator verifies the exports from `lib/super_tree.dart` before
+writing. The package-owned API documented here includes:
+
+```text
+TreeNode<T>
+TreeLogic
+DropPosition
+SearchText<T>
+LeafValue<T>
+
+SuperTreeController<T>
+SuperTreeMode
+SuperTreeSelectionMode
+TreeCheckState
+
+SuperTree<T>
+TreeRow<T>
+TreeRowInfo
+TreeSlotBuilder<T>
+TreeTrailingBuilder<T>
+TreeCheckbox
+HighlightText
+
+SuperTreeControlsController
+SuperTreeControls<T>
+
+TreeContextMenuAction
+TreeContextMenuItem
+TreeContextMenuItemsBuilder<T>
+TreeContextMenuStyle
+TreeContextMenuNodeContext<T>
+TreeContextMenuConfig
+TreeContextMenuConfigBuilder<T>
+buildDefaultTreeContextMenuItems()
+showTreeContextMenu()
+
+showShortcutsHelp()
+
+SuperTreeLocalization
+lookupSuperTreeLocalization()
+SuperTreeLocalizationBuildContext
+```
+
+## Example application
+
+The `example/` application demonstrates account, file, organization,
+permission, product, scrolling, and context-menu scenarios.
+
+Example screens can show the live widget and its Dart usage code together,
+making it easier to compare behavior with the integration code.
 
 ## Additional information
 
-### Architecture
+- Homepage: https://geniussystems24.github.io/super_tree_field
+- Repository: https://github.com/GeniusSystems24/super_tree_field
+- Issues: https://github.com/GeniusSystems24/super_tree_field/issues
 
-The package keeps the reusable hierarchy engine under
-`lib/src/features/super_tree/`:
-
-```text
-domain/
-  entities/tree_node.dart
-  usecases/tree_logic.dart
-presentation/
-  controllers/super_tree_controller.dart
-  widgets/...
-```
-
-Domain-specific payloads, datasets, summaries, filters, and composed pages
-belong in the consuming application or `example/lib/`.
-
-### Public API documentation
-
-Public APIs use Dart documentation comments and the package enables the
-`public_member_api_docs` lint. New exported classes, constructors, fields,
-methods, typedefs, and top-level functions should be documented before release.
-
-### Issues and changes
-
-- Repository: <https://github.com/GeniusSystems24/super_tree_field>
-- Issues: <https://github.com/GeniusSystems24/super_tree_field/issues>
-- Release history: [CHANGELOG.md](CHANGELOG.md)
-
-### License
-
-This package is distributed under the terms in [LICENSE](LICENSE).
+For bugs and feature requests, use the package issue tracker when available.
+Contributions should preserve the generic hierarchy boundary: domain-specific
+screen presentation should remain outside the core tree API.

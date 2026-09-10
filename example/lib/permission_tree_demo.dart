@@ -13,6 +13,9 @@ import 'package:super_core/super_core.dart';
 import 'package:super_tree_field/super_tree.dart';
 import 'responsive_example_layout.dart';
 
+import 'localization/localizations.dart';
+import 'widgets/demo_kit.dart';
+import 'usage_sources.dart';
 /// A permission's payload: an access [level] (scope pill) and a [danger] flag
 /// for destructive grants. Group (module) nodes carry only an [icon].
 class Permission {
@@ -154,27 +157,20 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
   @override
   Widget build(BuildContext context) {
     final t = context.superTheme;
-    final multi = _mode == SuperTreeSelectionMode.multi;
-    return Scaffold(
-      backgroundColor: t.bg,
-      appBar: AppBar(
-        backgroundColor: t.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: t.fg2),
-        title: Text('Permission Settings',
-            style: context.superTextTheme.heading.copyWith(color: t.fg1)),
-      ),
+    return DemoScaffold(
+      title: context.exampleLocalization.permissionSettingsTitle,
+      subtitle: context.exampleLocalization.permissionSettingsDemoSubtitle,
+      usageCode: ExampleUsageSources.permissionTree,
       body: ResponsiveExampleLayout(
         maxWidth: 820,
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('ADMINISTRATION • ROLES & PERMISSIONS',
+              Text(context.exampleLocalization.administrationPermissionsEyebrow,
                   style:
                       context.superTextTheme.eyebrow.copyWith(color: _accent(context))),
               SizedBox(height: context.superTheme.spacing.space2),
-              Text('Permission Settings صلاحيات',
+              Text(context.exampleLocalization.permissionSettingsHeading,
                   style: context.superTextTheme.h1.copyWith(color: t.fg1)),
               SizedBox(height: context.superTheme.spacing.space6),
               _ModeToggle(
@@ -189,7 +185,7 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
                 SuperTreeControls<Permission>(
                                 controller: _controller,
                                 controlsController: _controls,
-                                placeholder: 'Search permissions…   ( / )',
+                                placeholder: context.exampleLocalization.searchPermissions,
                                 samples: const ['View', 'Write', 'Admin', 'inventory'],
                                 accent: _accent(context),
                               ),
@@ -203,14 +199,6 @@ class _PermissionTreeDemoState extends State<PermissionTreeDemo> {
                                                 primary: false,
                                                 physics: const NeverScrollableScrollPhysics(),
                                                 accent: _accent(context),
-                                                title: 'Role: Senior Accountant',
-                                                subtitle: multi
-                                                    ? 'Check the permissions granted to this role · a module checks all its actions'
-                                                    : 'Single selection · one default action only (radio-like)',
-                                                titleIcon: Icons.shield_outlined,
-                                                nameColumnLabel: 'Permission · الصلاحية',
-                                                trailingColumnLabel: 'Scope',
-                                                unit: 'permissions',
                                                 leadingBuilder: _leading,
                                                 trailingBuilder: _trailing,
                                               ),
@@ -322,7 +310,7 @@ class _ModeToggle extends StatelessWidget {
       spacing: context.superTheme.spacing.space3,
       runSpacing: context.superTheme.spacing.space2,
       children: [
-        Text('SELECTION MODE',
+        Text(context.exampleLocalization.selectionMode,
             style: context.superTextTheme.label
                 .copyWith(fontSize: 10, letterSpacing: 0.6, color: t.fg3)),
         Container(
@@ -336,10 +324,10 @@ class _ModeToggle extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              seg('Multi', Icons.check_box_outlined,
+              seg(context.exampleLocalization.multi, Icons.check_box_outlined,
                   SuperTreeSelectionMode.multi),
               const SizedBox(width: 3),
-              seg('Single', Icons.radio_button_checked,
+              seg(context.exampleLocalization.single, Icons.radio_button_checked,
                   SuperTreeSelectionMode.single),
             ],
           ),

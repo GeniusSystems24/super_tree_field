@@ -16,6 +16,7 @@ import 'account_data.dart';
 import 'account_tree_data.dart';
 import 'kpi_card.dart';
 import 'nature_pill.dart';
+import '../localization/localizations.dart';
 /// The interactive chart-of-accounts tree. Pass your own [roots] or use the
 /// built-in [AccountTreeData.tree] sample.
 class AccountTree extends StatefulWidget {
@@ -96,7 +97,7 @@ class _AccountTreeState extends State<AccountTree> {
   }
 
   // Editing operates on the controller's roots, so a type filter (which swaps
-  // those roots for a subset) must be cleared before editing. Reset to "All"
+  // those roots for a subset) must be cleared before editing. Reset to context.exampleLocalization.all
   // whenever edit mode is entered, and rebuild so the toolbar swaps its row.
   void _onControllerTick() {
     if (_controller.isEditable == _lastEditable) return;
@@ -149,7 +150,7 @@ class _AccountTreeState extends State<AccountTree> {
       SuperTreeControls<AccountData>(
             controller: _controller,
             controlsController: _controls,
-            placeholder: 'Search by code, English or Arabic name…   ( / )',
+            placeholder: context.exampleLocalization.searchAccounts,
             samples: _samples,
             accent: SuperMaterialThemeData.of(context).colorScheme.primary,
             enableEditing: true,
@@ -166,13 +167,6 @@ class _AccountTreeState extends State<AccountTree> {
                   shrinkWrap: true,
                   primary: false,
                   physics: const NeverScrollableScrollPhysics(),
-                  title: 'Chart of Accounts Hierarchy',
-                  subtitle:
-                      '5 levels · click or use ↑↓ ← → · Enter opens a leaf · right-click to edit',
-                  nameColumnLabel: 'Account · الحساب',
-                  trailingColumnLabel: 'Nature · Balance (SAR)',
-                  unit: 'accounts',
-                  selectionLabel: 'Opened ledger for account',
                   leadingBuilder: _leading,
                   trailingBuilder: _trailing,
                 ),
@@ -189,7 +183,7 @@ class _AccountTreeState extends State<AccountTree> {
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            'Drag the handle to move · right-click (or ⋮) to rename, add or delete · type filter is paused while editing',
+            context.exampleLocalization.editTreeHint,
             style: context.superTextTheme.caption.copyWith(
               fontSize: 12,
               color: t.fg3,
@@ -204,32 +198,32 @@ class _AccountTreeState extends State<AccountTree> {
   Widget _kpiGrid(double a, double l, double e, double i, double x) {
     final cards = [
       KpiCard(
-        label: 'Total Assets',
+        label: context.exampleLocalization.totalAssets,
         ar: 'الأصول',
         value: SuperFormat.formatNumber(a),
         accent: AccountType.asset.color,
-        sub: 'SAR · debit balance',
+        sub: context.exampleLocalization.sarDebitBalance,
       ),
       KpiCard(
-        label: 'Total Liabilities',
+        label: context.exampleLocalization.totalLiabilities,
         ar: 'الخصوم',
         value: SuperFormat.formatNumber(l),
         accent: AccountType.liability.color,
-        sub: 'SAR · credit balance',
+        sub: context.exampleLocalization.sarCreditBalance,
       ),
       KpiCard(
-        label: 'Total Equity',
+        label: context.exampleLocalization.totalEquity,
         ar: 'حقوق الملكية',
         value: SuperFormat.formatNumber(e),
         accent: AccountType.equity.color,
-        sub: 'SAR · credit balance',
+        sub: context.exampleLocalization.sarCreditBalance,
       ),
       KpiCard(
-        label: 'Net Income',
+        label: context.exampleLocalization.netIncome,
         ar: 'صافي الدخل',
         value: SuperFormat.formatNumber(i - x),
         accent: AccountType.income.color,
-        sub: 'Income ${_short(i)} − Expense ${_short(x)} SAR',
+        sub: context.exampleLocalization.netIncomeSubtitle(_short(i), _short(x)),
       ),
     ];
     return LayoutBuilder(
@@ -263,7 +257,7 @@ class _AccountTreeState extends State<AccountTree> {
     final balanced = (assets - (liabilities + equity)).abs() < 0.01;
     final chips = <Widget>[
       _TypeChip(
-        label: 'All',
+        label: context.exampleLocalization.all,
         color: null,
         active: _typeFilter == null,
         onTap: () => _applyFilter(null),
@@ -489,7 +483,7 @@ class _BalanceBadge extends StatelessWidget {
           Icon(balanced ? Icons.check : Icons.info_outline, size: 13, color: c),
           const SizedBox(width: 8),
           Text(
-            balanced ? 'Balanced · A = L + E' : 'Out of balance',
+            balanced ? context.exampleLocalization.balanced : context.exampleLocalization.outOfBalance,
             style: context.superTextTheme.label.copyWith(
               fontSize: 11,
               letterSpacing: 0.44,

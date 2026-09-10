@@ -489,10 +489,10 @@ class SuperTreeController<T> extends ChangeNotifier {
     onTreeChanged?.call(next);
   }
 
-  TreeNode<T> _mint() {
+  TreeNode<T> _mint({String newNodeName = 'New node'}) {
     final code = 'node-${DateTime.now().millisecondsSinceEpoch}-${_seq++}';
     return _newNodeBuilder?.call(code) ??
-        TreeNode<T>(code: code, name: 'New node');
+        TreeNode<T>(code: code, name: newNodeName);
   }
 
   // — inline rename —
@@ -524,8 +524,10 @@ class SuperTreeController<T> extends ChangeNotifier {
 
   // — add —
   /// Append a fresh child under [parentCode], expand it, select + rename it.
-  TreeNode<T> addChild(String parentCode) {
-    final node = _mint();
+  ///
+  /// [newNodeName] is used only when no custom `newNodeBuilder` is supplied.
+  TreeNode<T> addChild(String parentCode, {String newNodeName = 'New node'}) {
+    final node = _mint(newNodeName: newNodeName);
     _expanded.add(parentCode);
     _commit(TreeLogic.insertChild(_roots, parentCode, node));
     _selectAndRename(node.code);
@@ -533,16 +535,20 @@ class SuperTreeController<T> extends ChangeNotifier {
   }
 
   /// Insert a fresh sibling before [code], then select + rename it.
-  TreeNode<T> addSiblingBefore(String code) {
-    final node = _mint();
+  ///
+  /// [newNodeName] is used only when no custom `newNodeBuilder` is supplied.
+  TreeNode<T> addSiblingBefore(String code, {String newNodeName = 'New node'}) {
+    final node = _mint(newNodeName: newNodeName);
     _commit(TreeLogic.insertSibling(_roots, code, node, after: false));
     _selectAndRename(node.code);
     return node;
   }
 
   /// Insert a fresh sibling after [code], then select + rename it.
-  TreeNode<T> addSiblingAfter(String code) {
-    final node = _mint();
+  ///
+  /// [newNodeName] is used only when no custom `newNodeBuilder` is supplied.
+  TreeNode<T> addSiblingAfter(String code, {String newNodeName = 'New node'}) {
+    final node = _mint(newNodeName: newNodeName);
     _commit(TreeLogic.insertSibling(_roots, code, node, after: true));
     _selectAndRename(node.code);
     return node;
@@ -555,8 +561,10 @@ class SuperTreeController<T> extends ChangeNotifier {
   }
 
   /// Append a fresh top-level node, then select + rename it.
-  TreeNode<T> addRoot() {
-    final node = _mint();
+  ///
+  /// [newNodeName] is used only when no custom `newNodeBuilder` is supplied.
+  TreeNode<T> addRoot({String newNodeName = 'New node'}) {
+    final node = _mint(newNodeName: newNodeName);
     _commit([..._roots, node]);
     _selectAndRename(node.code);
     return node;

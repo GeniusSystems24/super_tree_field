@@ -29,6 +29,9 @@
 ///   `import 'package:super_tree_field/super_tree.dart';`
 library super_tree_field;
 
+// Localization — English/Arabic package-owned UI text
+export 'localization/localizations.dart';
+
 // ── Core (theme tokens, shared widgets, utils) ──────────────────────────────
 export 'src/core/core.dart';
 

@@ -12,6 +12,9 @@ import 'package:super_core/super_core.dart';
 import 'package:super_tree_field/super_tree.dart';
 import 'responsive_example_layout.dart';
 
+import 'localization/localizations.dart';
+import 'widgets/demo_kit.dart';
+import 'usage_sources.dart';
 /// A file's metadata payload.
 class FileMeta {
   /// Creates file metadata for [kind].
@@ -114,18 +117,11 @@ class _FileTreeDemoState extends State<FileTreeDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.superTheme;
     final cs = SuperMaterialThemeData.of(context).colorScheme;
-    return Scaffold(
-      backgroundColor: t.bg,
-      appBar: AppBar(
-        backgroundColor: t.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: t.fg2),
-        title: Text('File Explorer',
-            style: context.superTextTheme.heading.copyWith(color: t.fg1)),
-      ),
+    return DemoScaffold(
+      title: context.exampleLocalization.fileExplorerTitle,
+      subtitle: context.exampleLocalization.fileExplorerDemoSubtitle,
+      usageCode: ExampleUsageSources.fileTree,
       body: ResponsiveExampleLayout(
         maxWidth: 760,
         child: Column(
@@ -135,7 +131,7 @@ class _FileTreeDemoState extends State<FileTreeDemo> {
           SuperTreeControls<FileMeta>(
                     controller: _controller,
                     controlsController: _controls,
-                    placeholder: 'Search files…   ( / )',
+                    placeholder: context.exampleLocalization.searchFiles,
                     samples: const ['tree', '.dart', 'docs', 'README'],
                     accent: cs.primary,
                     enableEditing: true,
@@ -149,14 +145,7 @@ class _FileTreeDemoState extends State<FileTreeDemo> {
                                 primary: false,
                                 physics: const NeverScrollableScrollPhysics(),
                                 accent: cs.primary,
-                                title: 'Project files',
-                                subtitle:
-                                    'TreeNode<FileMeta> · folders roll up a child count, files show size + modified',
-                                titleIcon: Icons.folder_open,
-                                nameColumnLabel: 'Name',
-                                trailingColumnLabel: 'Size · Modified',
-                                unit: 'files',
-                                showArabic: false,
+                                showArabic: context.exampleLocalization.isArabic,
                                 leadingBuilder: (context, node, info) {
                                   final (icon, color) = _icon(context, node.value!, info.open);
                                   return Icon(icon, size: 15, color: color);
